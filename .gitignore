@@ -31,7 +31,6 @@ data/raw/
 data/processed/
 models/
 results/
-experiments/
 .pytest_cache/
 .mypy_cache/
 .coverage
