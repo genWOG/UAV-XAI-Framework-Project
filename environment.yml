@@ -15,3 +15,13 @@ dependencies:
       - plotly
       - scikit-learn
       - jupyterlab
+      - torch
+      - torchvision
+      - pillow
+      - pyyaml
+      - pytest
+      - pytest-cov
+      - lime
+      - shap
+      - captum
+      - zennit

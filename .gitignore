@@ -35,3 +35,5 @@ results/
 .mypy_cache/
 .coverage
 htmlcov/
+# Python packaging
+*.egg-info/
