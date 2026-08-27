@@ -1,0 +1,444 @@
+{
+  "start_time": "2026-08-27T17:22:02.982931",
+  "logs": [
+    {
+      "time": "00:00",
+      "level": "OK",
+      "message": "✅ Используется Cosys-AirSim (UE5)",
+      "timestamp": "2026-08-27T17:22:03.190087"
+    },
+    {
+      "time": "00:00",
+      "level": "OK",
+      "message": "✅ Подключение к AirSim установлено!",
+      "timestamp": "2026-08-27T17:22:03.203112"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "✅ XAIEngine инициализирован",
+      "timestamp": "2026-08-27T17:22:03.203112"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "   Доступные методы: ['grad_cam']",
+      "timestamp": "2026-08-27T17:22:03.203112"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "Запуск системы...",
+      "timestamp": "2026-08-27T17:22:03.203112"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "Режим: РЕАЛЬНЫЙ",
+      "timestamp": "2026-08-27T17:22:03.203112"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "Дрон: X-1000, версия 3.2",
+      "timestamp": "2026-08-27T17:22:03.203112"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "Время старта: 17:22:03",
+      "timestamp": "2026-08-27T17:22:03.203112"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "XAI: АКТИВИРОВАН",
+      "timestamp": "2026-08-27T17:22:03.203112"
+    },
+    {
+      "time": "00:00",
+      "level": "ROUTE",
+      "message": "🗺️ Планирование маршрута: (0,0) → (50,100)",
+      "timestamp": "2026-08-27T17:22:03.204112"
+    },
+    {
+      "time": "00:00",
+      "level": "ROUTE",
+      "message": "🗺️ Высота: 1 м",
+      "timestamp": "2026-08-27T17:22:03.204112"
+    },
+    {
+      "time": "00:00",
+      "level": "OK",
+      "message": "Маршрут построен. Длина: 111.8 м",
+      "timestamp": "2026-08-27T17:22:03.204112"
+    },
+    {
+      "time": "00:00",
+      "level": "OK",
+      "message": "Разрешение на взлёт получено",
+      "timestamp": "2026-08-27T17:22:03.204112"
+    },
+    {
+      "time": "00:14",
+      "level": "OK",
+      "message": "✅ Взлёт выполнен!",
+      "timestamp": "2026-08-27T17:22:17.708504"
+    },
+    {
+      "time": "00:14",
+      "level": "DRONE",
+      "message": "🚁 Движение к цели: X=50 м, Y=100 м",
+      "timestamp": "2026-08-27T17:22:17.708504"
+    },
+    {
+      "time": "01:28",
+      "level": "OK",
+      "message": "✅ Перемещение выполнено!",
+      "timestamp": "2026-08-27T17:23:31.660498"
+    },
+    {
+      "time": "01:30",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:23:33.790724"
+    },
+    {
+      "time": "01:30",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:23:33.791725"
+    },
+    {
+      "time": "01:30",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:23:33.791725"
+    },
+    {
+      "time": "01:30",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:23:33.791725"
+    },
+    {
+      "time": "01:33",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:23:36.301586"
+    },
+    {
+      "time": "01:33",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:23:36.301586"
+    },
+    {
+      "time": "01:33",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:23:36.302583"
+    },
+    {
+      "time": "01:33",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:23:36.302583"
+    },
+    {
+      "time": "01:35",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:23:38.812072"
+    },
+    {
+      "time": "01:35",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:23:38.812072"
+    },
+    {
+      "time": "01:35",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:23:38.812072"
+    },
+    {
+      "time": "01:35",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:23:38.812072"
+    },
+    {
+      "time": "01:38",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:23:41.321662"
+    },
+    {
+      "time": "01:38",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:23:41.322658"
+    },
+    {
+      "time": "01:38",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:23:41.322658"
+    },
+    {
+      "time": "01:38",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:23:41.322658"
+    },
+    {
+      "time": "01:40",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:23:43.834157"
+    },
+    {
+      "time": "01:40",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:23:43.834157"
+    },
+    {
+      "time": "01:40",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:23:43.834157"
+    },
+    {
+      "time": "01:40",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:23:43.834157"
+    },
+    {
+      "time": "01:43",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:23:46.342661"
+    },
+    {
+      "time": "01:43",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:23:46.342661"
+    },
+    {
+      "time": "01:43",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:23:46.342661"
+    },
+    {
+      "time": "01:43",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:23:46.342661"
+    },
+    {
+      "time": "01:45",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:23:48.852582"
+    },
+    {
+      "time": "01:45",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:23:48.852582"
+    },
+    {
+      "time": "01:45",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:23:48.852582"
+    },
+    {
+      "time": "01:45",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:23:48.852582"
+    },
+    {
+      "time": "01:48",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:23:51.363795"
+    },
+    {
+      "time": "01:48",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:23:51.363795"
+    },
+    {
+      "time": "01:48",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:23:51.363795"
+    },
+    {
+      "time": "01:48",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:23:51.364825"
+    },
+    {
+      "time": "01:50",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:23:53.873617"
+    },
+    {
+      "time": "01:50",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:23:53.873617"
+    },
+    {
+      "time": "01:50",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:23:53.873617"
+    },
+    {
+      "time": "01:50",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:23:53.873617"
+    },
+    {
+      "time": "01:53",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:23:56.385394"
+    },
+    {
+      "time": "01:53",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:23:56.385903"
+    },
+    {
+      "time": "01:53",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:23:56.385903"
+    },
+    {
+      "time": "01:53",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:23:56.385903"
+    },
+    {
+      "time": "01:55",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:23:58.894517"
+    },
+    {
+      "time": "01:55",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:23:58.894517"
+    },
+    {
+      "time": "01:55",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:23:58.895532"
+    },
+    {
+      "time": "01:55",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:23:58.895532"
+    },
+    {
+      "time": "01:58",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:24:01.406372"
+    },
+    {
+      "time": "01:58",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:24:01.406881"
+    },
+    {
+      "time": "01:58",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:24:01.406881"
+    },
+    {
+      "time": "01:58",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:24:01.406881"
+    },
+    {
+      "time": "01:58",
+      "level": "DRONE",
+      "message": "🚁 Начинаем посадку...",
+      "timestamp": "2026-08-27T17:24:01.907556"
+    },
+    {
+      "time": "01:59",
+      "level": "OK",
+      "message": "✅ Посадка выполнена!",
+      "timestamp": "2026-08-27T17:24:02.118376"
+    },
+    {
+      "time": "01:59",
+      "level": "OK",
+      "message": "СТАТУС: ПОЛЁТ ЗАВЕРШЁН",
+      "timestamp": "2026-08-27T17:24:02.118376"
+    },
+    {
+      "time": "01:59",
+      "level": "INFO",
+      "message": "Длительность: 60 сек",
+      "timestamp": "2026-08-27T17:24:02.118376"
+    },
+    {
+      "time": "01:59",
+      "level": "INFO",
+      "message": "Препятствий: 0",
+      "timestamp": "2026-08-27T17:24:02.118376"
+    },
+    {
+      "time": "01:59",
+      "level": "INFO",
+      "message": "Всего объяснений: 0",
+      "timestamp": "2026-08-27T17:24:02.119386"
+    },
+    {
+      "time": "01:59",
+      "level": "INFO",
+      "message": "Аномалий: 0",
+      "timestamp": "2026-08-27T17:24:02.119386"
+    },
+    {
+      "time": "01:59",
+      "level": "INFO",
+      "message": "Доля: 0.0%",
+      "timestamp": "2026-08-27T17:24:02.119386"
+    },
+    {
+      "time": "01:59",
+      "level": "INFO",
+      "message": "XAI сохранены: data/logs/xai_20260827_172402.json",
+      "timestamp": "2026-08-27T17:24:02.120382"
+    }
+  ],
+  "total": 73
+}

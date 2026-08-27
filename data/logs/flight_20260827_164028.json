@@ -1,0 +1,2070 @@
+{
+  "start_time": "2026-08-27T16:38:22.167353",
+  "logs": [
+    {
+      "time": "00:00",
+      "level": "OK",
+      "message": "Подключение к AirSim установлено!",
+      "timestamp": "2026-08-27T16:38:22.181408"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "Запуск системы...",
+      "timestamp": "2026-08-27T16:38:22.181408"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "Режим: РЕАЛЬНЫЙ",
+      "timestamp": "2026-08-27T16:38:22.181408"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "Дрон: X-1000, версия 3.2",
+      "timestamp": "2026-08-27T16:38:22.181408"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "Время старта: 16:38:22",
+      "timestamp": "2026-08-27T16:38:22.181408"
+    },
+    {
+      "time": "00:00",
+      "level": "ROUTE",
+      "message": "🗺️ Планирование маршрута: (0,0) → (50,100)",
+      "timestamp": "2026-08-27T16:38:22.182411"
+    },
+    {
+      "time": "00:00",
+      "level": "ROUTE",
+      "message": "🗺️ Высота: 1 м",
+      "timestamp": "2026-08-27T16:38:22.182411"
+    },
+    {
+      "time": "00:00",
+      "level": "OK",
+      "message": "Маршрут построен. Длина: 111.8 м",
+      "timestamp": "2026-08-27T16:38:22.182411"
+    },
+    {
+      "time": "00:00",
+      "level": "OK",
+      "message": "Разрешение на взлёт получено",
+      "timestamp": "2026-08-27T16:38:22.182411"
+    },
+    {
+      "time": "00:14",
+      "level": "OK",
+      "message": "Взлёт выполнен!",
+      "timestamp": "2026-08-27T16:38:36.759868"
+    },
+    {
+      "time": "00:14",
+      "level": "DRONE",
+      "message": "🚁 Движение к цели: X=50 м, Y=100 м, высота=1 м",
+      "timestamp": "2026-08-27T16:38:36.759868"
+    },
+    {
+      "time": "01:36",
+      "level": "OK",
+      "message": "Перемещение выполнено!",
+      "timestamp": "2026-08-27T16:39:58.253808"
+    },
+    {
+      "time": "01:36",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:39:58.257990"
+    },
+    {
+      "time": "01:36",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:39:58.759947"
+    },
+    {
+      "time": "01:36",
+      "level": "WARN",
+      "message": "Датчик LiDAR: нестабильные показания",
+      "timestamp": "2026-08-27T16:39:58.759947"
+    },
+    {
+      "time": "01:37",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:39:59.261437"
+    },
+    {
+      "time": "01:37",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:39:59.764173"
+    },
+    {
+      "time": "01:38",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:00.265760"
+    },
+    {
+      "time": "01:38",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=17.8, Y=76.4, Z=-1.0",
+      "timestamp": "2026-08-27T16:40:00.266770"
+    },
+    {
+      "time": "01:38",
+      "level": "DRONE",
+      "message": "🚁 До цели: 40.0 м",
+      "timestamp": "2026-08-27T16:40:00.266770"
+    },
+    {
+      "time": "01:38",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:00.768412"
+    },
+    {
+      "time": "01:38",
+      "level": "OBSTACLE",
+      "message": "ℹ️ Препятствие на расстоянии 7.5 м",
+      "timestamp": "2026-08-27T16:40:00.768412"
+    },
+    {
+      "time": "01:39",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:01.270674"
+    },
+    {
+      "time": "01:39",
+      "level": "WARN",
+      "message": "Датчик LiDAR: нестабильные показания",
+      "timestamp": "2026-08-27T16:40:01.270674"
+    },
+    {
+      "time": "01:39",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:01.771129"
+    },
+    {
+      "time": "01:40",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:02.274309"
+    },
+    {
+      "time": "01:40",
+      "level": "ERROR",
+      "message": "Датчик Camera вышел из строя!",
+      "timestamp": "2026-08-27T16:40:02.274309"
+    },
+    {
+      "time": "01:40",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:02.274309"
+    },
+    {
+      "time": "01:40",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:02.775619"
+    },
+    {
+      "time": "01:40",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=1.1, Y=34.2, Z=-1.0",
+      "timestamp": "2026-08-27T16:40:02.776630"
+    },
+    {
+      "time": "01:40",
+      "level": "DRONE",
+      "message": "🚁 До цели: 82.0 м",
+      "timestamp": "2026-08-27T16:40:02.776630"
+    },
+    {
+      "time": "01:40",
+      "level": "ERROR",
+      "message": "Датчик GPS вышел из строя!",
+      "timestamp": "2026-08-27T16:40:02.776630"
+    },
+    {
+      "time": "01:40",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:02.776630"
+    },
+    {
+      "time": "01:40",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:02.776630"
+    },
+    {
+      "time": "01:41",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:03.278597"
+    },
+    {
+      "time": "01:41",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:03.278597"
+    },
+    {
+      "time": "01:41",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:03.279600"
+    },
+    {
+      "time": "01:41",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:03.796936"
+    },
+    {
+      "time": "01:41",
+      "level": "WARN",
+      "message": "Датчик GPS: нестабильные показания",
+      "timestamp": "2026-08-27T16:40:03.796936"
+    },
+    {
+      "time": "01:41",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:03.796936"
+    },
+    {
+      "time": "01:41",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:03.797943"
+    },
+    {
+      "time": "01:42",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:04.300508"
+    },
+    {
+      "time": "01:42",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:04.300508"
+    },
+    {
+      "time": "01:42",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:04.300508"
+    },
+    {
+      "time": "01:42",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:04.803404"
+    },
+    {
+      "time": "01:42",
+      "level": "OBSTACLE",
+      "message": "ℹ️ Препятствие на расстоянии 5.3 м",
+      "timestamp": "2026-08-27T16:40:04.803404"
+    },
+    {
+      "time": "01:42",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:04.803404"
+    },
+    {
+      "time": "01:42",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:04.803404"
+    },
+    {
+      "time": "01:43",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:05.304232"
+    },
+    {
+      "time": "01:43",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=8.9, Y=70.0, Z=-1.0",
+      "timestamp": "2026-08-27T16:40:05.305753"
+    },
+    {
+      "time": "01:43",
+      "level": "DRONE",
+      "message": "🚁 До цели: 50.9 м",
+      "timestamp": "2026-08-27T16:40:05.305753"
+    },
+    {
+      "time": "01:43",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:05.305753"
+    },
+    {
+      "time": "01:43",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:05.305753"
+    },
+    {
+      "time": "01:43",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:05.809108"
+    },
+    {
+      "time": "01:43",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:05.809108"
+    },
+    {
+      "time": "01:43",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:05.809108"
+    },
+    {
+      "time": "01:44",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:06.311237"
+    },
+    {
+      "time": "01:44",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:06.311237"
+    },
+    {
+      "time": "01:44",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:06.312237"
+    },
+    {
+      "time": "01:44",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:06.814049"
+    },
+    {
+      "time": "01:44",
+      "level": "ERROR",
+      "message": "Датчик GPS вышел из строя!",
+      "timestamp": "2026-08-27T16:40:06.814049"
+    },
+    {
+      "time": "01:44",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:06.814049"
+    },
+    {
+      "time": "01:44",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:06.814049"
+    },
+    {
+      "time": "01:44",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:06.814049"
+    },
+    {
+      "time": "01:45",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:07.316802"
+    },
+    {
+      "time": "01:45",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:07.316802"
+    },
+    {
+      "time": "01:45",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:07.316802"
+    },
+    {
+      "time": "01:45",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:07.316802"
+    },
+    {
+      "time": "01:45",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:07.819099"
+    },
+    {
+      "time": "01:45",
+      "level": "OBSTACLE",
+      "message": "ℹ️ Препятствие на расстоянии 6.8 м",
+      "timestamp": "2026-08-27T16:40:07.819099"
+    },
+    {
+      "time": "01:45",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=38.9, Y=80.9, Z=-1.0",
+      "timestamp": "2026-08-27T16:40:07.820098"
+    },
+    {
+      "time": "01:45",
+      "level": "DRONE",
+      "message": "🚁 До цели: 22.1 м",
+      "timestamp": "2026-08-27T16:40:07.820098"
+    },
+    {
+      "time": "01:45",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:07.820098"
+    },
+    {
+      "time": "01:45",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:07.820098"
+    },
+    {
+      "time": "01:45",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:07.820098"
+    },
+    {
+      "time": "01:46",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:08.321684"
+    },
+    {
+      "time": "01:46",
+      "level": "OBSTACLE",
+      "message": "ℹ️ Препятствие на расстоянии 5.7 м",
+      "timestamp": "2026-08-27T16:40:08.321684"
+    },
+    {
+      "time": "01:46",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:08.321684"
+    },
+    {
+      "time": "01:46",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:08.321684"
+    },
+    {
+      "time": "01:46",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:08.321684"
+    },
+    {
+      "time": "01:46",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:08.823760"
+    },
+    {
+      "time": "01:46",
+      "level": "WARN",
+      "message": "Датчик IMU: нестабильные показания",
+      "timestamp": "2026-08-27T16:40:08.823760"
+    },
+    {
+      "time": "01:46",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:08.823760"
+    },
+    {
+      "time": "01:46",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:08.823760"
+    },
+    {
+      "time": "01:46",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:08.823760"
+    },
+    {
+      "time": "01:47",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:09.325689"
+    },
+    {
+      "time": "01:47",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:09.325689"
+    },
+    {
+      "time": "01:47",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:09.325689"
+    },
+    {
+      "time": "01:47",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:09.325689"
+    },
+    {
+      "time": "01:47",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:09.828082"
+    },
+    {
+      "time": "01:47",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:09.828082"
+    },
+    {
+      "time": "01:47",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:09.828082"
+    },
+    {
+      "time": "01:47",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:09.828082"
+    },
+    {
+      "time": "01:48",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:10.329493"
+    },
+    {
+      "time": "01:48",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=23.8, Y=56.5, Z=-1.0",
+      "timestamp": "2026-08-27T16:40:10.330500"
+    },
+    {
+      "time": "01:48",
+      "level": "DRONE",
+      "message": "🚁 До цели: 50.8 м",
+      "timestamp": "2026-08-27T16:40:10.330500"
+    },
+    {
+      "time": "01:48",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:10.330500"
+    },
+    {
+      "time": "01:48",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:10.330500"
+    },
+    {
+      "time": "01:48",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:10.330500"
+    },
+    {
+      "time": "01:48",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:10.832198"
+    },
+    {
+      "time": "01:48",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:10.832198"
+    },
+    {
+      "time": "01:48",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:10.832198"
+    },
+    {
+      "time": "01:48",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:10.832198"
+    },
+    {
+      "time": "01:49",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:11.334316"
+    },
+    {
+      "time": "01:49",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:11.334316"
+    },
+    {
+      "time": "01:49",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:11.334316"
+    },
+    {
+      "time": "01:49",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:11.334316"
+    },
+    {
+      "time": "01:49",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:11.836434"
+    },
+    {
+      "time": "01:49",
+      "level": "ERROR",
+      "message": "Датчик IMU вышел из строя!",
+      "timestamp": "2026-08-27T16:40:11.836434"
+    },
+    {
+      "time": "01:49",
+      "level": "WARN",
+      "message": "Датчик Barometer: нестабильные показания",
+      "timestamp": "2026-08-27T16:40:11.836434"
+    },
+    {
+      "time": "01:49",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:11.836434"
+    },
+    {
+      "time": "01:49",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:11.836434"
+    },
+    {
+      "time": "01:49",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:11.836434"
+    },
+    {
+      "time": "01:49",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:11.836434"
+    },
+    {
+      "time": "01:50",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:12.339640"
+    },
+    {
+      "time": "01:50",
+      "level": "OBSTACLE",
+      "message": "ℹ️ Препятствие на расстоянии 5.0 м",
+      "timestamp": "2026-08-27T16:40:12.339640"
+    },
+    {
+      "time": "01:50",
+      "level": "WARN",
+      "message": "Датчик Camera: нестабильные показания",
+      "timestamp": "2026-08-27T16:40:12.339640"
+    },
+    {
+      "time": "01:50",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:12.339640"
+    },
+    {
+      "time": "01:50",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:12.339640"
+    },
+    {
+      "time": "01:50",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:12.339640"
+    },
+    {
+      "time": "01:50",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:12.339640"
+    },
+    {
+      "time": "01:50",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:12.842273"
+    },
+    {
+      "time": "01:50",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=23.8, Y=19.0, Z=-1.0",
+      "timestamp": "2026-08-27T16:40:12.842835"
+    },
+    {
+      "time": "01:50",
+      "level": "DRONE",
+      "message": "🚁 До цели: 85.2 м",
+      "timestamp": "2026-08-27T16:40:12.842835"
+    },
+    {
+      "time": "01:50",
+      "level": "ERROR",
+      "message": "Датчик Barometer вышел из строя!",
+      "timestamp": "2026-08-27T16:40:12.842835"
+    },
+    {
+      "time": "01:50",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:12.842835"
+    },
+    {
+      "time": "01:50",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:12.842835"
+    },
+    {
+      "time": "01:50",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:12.842835"
+    },
+    {
+      "time": "01:50",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:12.842835"
+    },
+    {
+      "time": "01:50",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:12.842835"
+    },
+    {
+      "time": "01:51",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:13.344215"
+    },
+    {
+      "time": "01:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:13.344215"
+    },
+    {
+      "time": "01:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:13.344215"
+    },
+    {
+      "time": "01:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:13.344215"
+    },
+    {
+      "time": "01:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:13.344215"
+    },
+    {
+      "time": "01:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:13.344215"
+    },
+    {
+      "time": "01:51",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:13.847410"
+    },
+    {
+      "time": "01:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:13.847410"
+    },
+    {
+      "time": "01:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:13.847410"
+    },
+    {
+      "time": "01:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:13.848406"
+    },
+    {
+      "time": "01:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:13.848406"
+    },
+    {
+      "time": "01:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:13.848406"
+    },
+    {
+      "time": "01:52",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:14.349398"
+    },
+    {
+      "time": "01:52",
+      "level": "WARN",
+      "message": "Датчик LiDAR: нестабильные показания",
+      "timestamp": "2026-08-27T16:40:14.349398"
+    },
+    {
+      "time": "01:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:14.349398"
+    },
+    {
+      "time": "01:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:14.350399"
+    },
+    {
+      "time": "01:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:14.350399"
+    },
+    {
+      "time": "01:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:14.350399"
+    },
+    {
+      "time": "01:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:14.350399"
+    },
+    {
+      "time": "01:52",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:14.852105"
+    },
+    {
+      "time": "01:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:14.852105"
+    },
+    {
+      "time": "01:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:14.853114"
+    },
+    {
+      "time": "01:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:14.853114"
+    },
+    {
+      "time": "01:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:14.853114"
+    },
+    {
+      "time": "01:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:14.853114"
+    },
+    {
+      "time": "01:53",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:15.355321"
+    },
+    {
+      "time": "01:53",
+      "level": "OBSTACLE",
+      "message": "ℹ️ Препятствие на расстоянии 5.4 м",
+      "timestamp": "2026-08-27T16:40:15.355321"
+    },
+    {
+      "time": "01:53",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=26.3, Y=77.5, Z=-1.0",
+      "timestamp": "2026-08-27T16:40:15.355321"
+    },
+    {
+      "time": "01:53",
+      "level": "DRONE",
+      "message": "🚁 До цели: 32.7 м",
+      "timestamp": "2026-08-27T16:40:15.355321"
+    },
+    {
+      "time": "01:53",
+      "level": "WARN",
+      "message": "Датчик GPS: нестабильные показания",
+      "timestamp": "2026-08-27T16:40:15.355321"
+    },
+    {
+      "time": "01:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:15.355321"
+    },
+    {
+      "time": "01:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:15.356329"
+    },
+    {
+      "time": "01:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:15.356329"
+    },
+    {
+      "time": "01:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:15.356329"
+    },
+    {
+      "time": "01:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:15.356329"
+    },
+    {
+      "time": "01:53",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:15.857970"
+    },
+    {
+      "time": "01:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:15.857970"
+    },
+    {
+      "time": "01:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:15.858971"
+    },
+    {
+      "time": "01:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:15.858971"
+    },
+    {
+      "time": "01:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:15.858971"
+    },
+    {
+      "time": "01:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:15.858971"
+    },
+    {
+      "time": "01:54",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:16.360567"
+    },
+    {
+      "time": "01:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T16:40:16.360567"
+    },
+    {
+      "time": "01:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:16.360567"
+    },
+    {
+      "time": "01:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:16.360567"
+    },
+    {
+      "time": "01:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:16.360567"
+    },
+    {
+      "time": "01:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:16.360567"
+    },
+    {
+      "time": "01:54",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:16.863789"
+    },
+    {
+      "time": "01:54",
+      "level": "ERROR",
+      "message": "Датчик LiDAR вышел из строя!",
+      "timestamp": "2026-08-27T16:40:16.863789"
+    },
+    {
+      "time": "01:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:16.863789"
+    },
+    {
+      "time": "01:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:16.863789"
+    },
+    {
+      "time": "01:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:16.863789"
+    },
+    {
+      "time": "01:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:16.863789"
+    },
+    {
+      "time": "01:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:16.863789"
+    },
+    {
+      "time": "01:55",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:17.366310"
+    },
+    {
+      "time": "01:55",
+      "level": "OBSTACLE",
+      "message": "ℹ️ Препятствие на расстоянии 7.0 м",
+      "timestamp": "2026-08-27T16:40:17.366310"
+    },
+    {
+      "time": "01:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:17.366310"
+    },
+    {
+      "time": "01:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:17.366310"
+    },
+    {
+      "time": "01:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:17.366310"
+    },
+    {
+      "time": "01:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:17.367313"
+    },
+    {
+      "time": "01:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:17.367313"
+    },
+    {
+      "time": "01:55",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:17.869925"
+    },
+    {
+      "time": "01:55",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=9.1, Y=55.1, Z=-1.0",
+      "timestamp": "2026-08-27T16:40:17.869925"
+    },
+    {
+      "time": "01:55",
+      "level": "DRONE",
+      "message": "🚁 До цели: 60.7 м",
+      "timestamp": "2026-08-27T16:40:17.869925"
+    },
+    {
+      "time": "01:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:17.869925"
+    },
+    {
+      "time": "01:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:17.869925"
+    },
+    {
+      "time": "01:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:17.869925"
+    },
+    {
+      "time": "01:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:17.869925"
+    },
+    {
+      "time": "01:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:17.869925"
+    },
+    {
+      "time": "01:56",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:18.371800"
+    },
+    {
+      "time": "01:56",
+      "level": "WARN",
+      "message": "Датчик Barometer: нестабильные показания",
+      "timestamp": "2026-08-27T16:40:18.371800"
+    },
+    {
+      "time": "01:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:18.371800"
+    },
+    {
+      "time": "01:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:18.371800"
+    },
+    {
+      "time": "01:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:18.372800"
+    },
+    {
+      "time": "01:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:18.372800"
+    },
+    {
+      "time": "01:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:18.372800"
+    },
+    {
+      "time": "01:56",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:18.873679"
+    },
+    {
+      "time": "01:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:18.874687"
+    },
+    {
+      "time": "01:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:18.874687"
+    },
+    {
+      "time": "01:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:18.874687"
+    },
+    {
+      "time": "01:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:18.874687"
+    },
+    {
+      "time": "01:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:18.874687"
+    },
+    {
+      "time": "01:57",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:19.376679"
+    },
+    {
+      "time": "01:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:19.376679"
+    },
+    {
+      "time": "01:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:19.376679"
+    },
+    {
+      "time": "01:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:19.376679"
+    },
+    {
+      "time": "01:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:19.377676"
+    },
+    {
+      "time": "01:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:19.377676"
+    },
+    {
+      "time": "01:57",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:19.879768"
+    },
+    {
+      "time": "01:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:19.879768"
+    },
+    {
+      "time": "01:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:19.879768"
+    },
+    {
+      "time": "01:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:19.879768"
+    },
+    {
+      "time": "01:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:19.879768"
+    },
+    {
+      "time": "01:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:19.879768"
+    },
+    {
+      "time": "01:58",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:20.382141"
+    },
+    {
+      "time": "01:58",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=15.0, Y=99.3, Z=-1.0",
+      "timestamp": "2026-08-27T16:40:20.382141"
+    },
+    {
+      "time": "01:58",
+      "level": "DRONE",
+      "message": "🚁 До цели: 35.0 м",
+      "timestamp": "2026-08-27T16:40:20.382141"
+    },
+    {
+      "time": "01:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:20.382141"
+    },
+    {
+      "time": "01:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:20.382141"
+    },
+    {
+      "time": "01:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:20.382141"
+    },
+    {
+      "time": "01:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:20.383156"
+    },
+    {
+      "time": "01:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:20.383156"
+    },
+    {
+      "time": "01:58",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:20.884596"
+    },
+    {
+      "time": "01:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:20.884596"
+    },
+    {
+      "time": "01:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:20.885594"
+    },
+    {
+      "time": "01:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:20.885594"
+    },
+    {
+      "time": "01:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:20.885594"
+    },
+    {
+      "time": "01:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:20.885594"
+    },
+    {
+      "time": "01:59",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:21.387016"
+    },
+    {
+      "time": "01:59",
+      "level": "ERROR",
+      "message": "Датчик Barometer вышел из строя!",
+      "timestamp": "2026-08-27T16:40:21.388026"
+    },
+    {
+      "time": "01:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:21.388026"
+    },
+    {
+      "time": "01:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:21.388026"
+    },
+    {
+      "time": "01:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:21.388026"
+    },
+    {
+      "time": "01:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:21.388026"
+    },
+    {
+      "time": "01:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:21.388026"
+    },
+    {
+      "time": "01:59",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:21.890077"
+    },
+    {
+      "time": "01:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:21.890077"
+    },
+    {
+      "time": "01:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:21.891080"
+    },
+    {
+      "time": "01:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:21.891080"
+    },
+    {
+      "time": "01:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:21.891080"
+    },
+    {
+      "time": "01:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:21.891080"
+    },
+    {
+      "time": "02:00",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:22.391903"
+    },
+    {
+      "time": "02:00",
+      "level": "OBSTACLE",
+      "message": "ℹ️ Препятствие на расстоянии 7.0 м",
+      "timestamp": "2026-08-27T16:40:22.393755"
+    },
+    {
+      "time": "02:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:22.393755"
+    },
+    {
+      "time": "02:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:22.393755"
+    },
+    {
+      "time": "02:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:22.393755"
+    },
+    {
+      "time": "02:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:22.394765"
+    },
+    {
+      "time": "02:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:22.394765"
+    },
+    {
+      "time": "02:00",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:22.897721"
+    },
+    {
+      "time": "02:00",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=36.5, Y=35.2, Z=-1.0",
+      "timestamp": "2026-08-27T16:40:22.897721"
+    },
+    {
+      "time": "02:00",
+      "level": "DRONE",
+      "message": "🚁 До цели: 66.2 м",
+      "timestamp": "2026-08-27T16:40:22.897721"
+    },
+    {
+      "time": "02:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:22.897721"
+    },
+    {
+      "time": "02:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:22.897721"
+    },
+    {
+      "time": "02:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:22.897721"
+    },
+    {
+      "time": "02:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:22.897721"
+    },
+    {
+      "time": "02:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:22.898732"
+    },
+    {
+      "time": "02:01",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:23.400082"
+    },
+    {
+      "time": "02:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:23.400082"
+    },
+    {
+      "time": "02:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:23.400082"
+    },
+    {
+      "time": "02:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:23.400082"
+    },
+    {
+      "time": "02:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:23.400082"
+    },
+    {
+      "time": "02:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:23.400082"
+    },
+    {
+      "time": "02:01",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:23.901589"
+    },
+    {
+      "time": "02:01",
+      "level": "OBSTACLE",
+      "message": "ℹ️ Препятствие на расстоянии 7.6 м",
+      "timestamp": "2026-08-27T16:40:23.901589"
+    },
+    {
+      "time": "02:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:23.902591"
+    },
+    {
+      "time": "02:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:23.902591"
+    },
+    {
+      "time": "02:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:23.902591"
+    },
+    {
+      "time": "02:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:23.902591"
+    },
+    {
+      "time": "02:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:23.902591"
+    },
+    {
+      "time": "02:02",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:24.404633"
+    },
+    {
+      "time": "02:02",
+      "level": "OBSTACLE",
+      "message": "ℹ️ Препятствие на расстоянии 7.7 м",
+      "timestamp": "2026-08-27T16:40:24.404633"
+    },
+    {
+      "time": "02:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:24.404633"
+    },
+    {
+      "time": "02:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:24.404633"
+    },
+    {
+      "time": "02:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:24.404633"
+    },
+    {
+      "time": "02:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:24.404633"
+    },
+    {
+      "time": "02:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:24.404633"
+    },
+    {
+      "time": "02:02",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:24.906475"
+    },
+    {
+      "time": "02:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:24.906475"
+    },
+    {
+      "time": "02:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:24.906475"
+    },
+    {
+      "time": "02:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:24.907484"
+    },
+    {
+      "time": "02:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:24.907484"
+    },
+    {
+      "time": "02:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:24.907484"
+    },
+    {
+      "time": "02:03",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:25.409855"
+    },
+    {
+      "time": "02:03",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=48.7, Y=45.5, Z=-1.0",
+      "timestamp": "2026-08-27T16:40:25.409855"
+    },
+    {
+      "time": "02:03",
+      "level": "DRONE",
+      "message": "🚁 До цели: 54.5 м",
+      "timestamp": "2026-08-27T16:40:25.409855"
+    },
+    {
+      "time": "02:03",
+      "level": "WARN",
+      "message": "Датчик IMU: нестабильные показания",
+      "timestamp": "2026-08-27T16:40:25.409855"
+    },
+    {
+      "time": "02:03",
+      "level": "WARN",
+      "message": "Датчик Camera: нестабильные показания",
+      "timestamp": "2026-08-27T16:40:25.409855"
+    },
+    {
+      "time": "02:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:25.409855"
+    },
+    {
+      "time": "02:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:25.410856"
+    },
+    {
+      "time": "02:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:25.410856"
+    },
+    {
+      "time": "02:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:25.410856"
+    },
+    {
+      "time": "02:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:25.410856"
+    },
+    {
+      "time": "02:03",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:25.912365"
+    },
+    {
+      "time": "02:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:25.912365"
+    },
+    {
+      "time": "02:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:25.912365"
+    },
+    {
+      "time": "02:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:25.912365"
+    },
+    {
+      "time": "02:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:25.912365"
+    },
+    {
+      "time": "02:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:25.913368"
+    },
+    {
+      "time": "02:04",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:26.414736"
+    },
+    {
+      "time": "02:04",
+      "level": "WARN",
+      "message": "Датчик LiDAR: нестабильные показания",
+      "timestamp": "2026-08-27T16:40:26.414736"
+    },
+    {
+      "time": "02:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:26.414736"
+    },
+    {
+      "time": "02:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:26.414736"
+    },
+    {
+      "time": "02:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:26.414736"
+    },
+    {
+      "time": "02:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:26.414736"
+    },
+    {
+      "time": "02:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:26.414736"
+    },
+    {
+      "time": "02:04",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:26.917081"
+    },
+    {
+      "time": "02:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:26.917081"
+    },
+    {
+      "time": "02:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:26.917081"
+    },
+    {
+      "time": "02:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:26.917081"
+    },
+    {
+      "time": "02:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:26.918084"
+    },
+    {
+      "time": "02:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:26.918084"
+    },
+    {
+      "time": "02:05",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:27.420019"
+    },
+    {
+      "time": "02:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:27.420019"
+    },
+    {
+      "time": "02:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:27.420019"
+    },
+    {
+      "time": "02:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:27.420019"
+    },
+    {
+      "time": "02:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:27.420019"
+    },
+    {
+      "time": "02:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:27.420019"
+    },
+    {
+      "time": "02:05",
+      "level": "WARN",
+      "message": "Ошибка получения данных: rpclib: server could not find function 'getDistanceSensorData' with argument count 2.",
+      "timestamp": "2026-08-27T16:40:27.922641"
+    },
+    {
+      "time": "02:05",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=15.7, Y=93.0, Z=-1.0",
+      "timestamp": "2026-08-27T16:40:27.922641"
+    },
+    {
+      "time": "02:05",
+      "level": "DRONE",
+      "message": "🚁 До цели: 35.0 м",
+      "timestamp": "2026-08-27T16:40:27.922641"
+    },
+    {
+      "time": "02:05",
+      "level": "WARN",
+      "message": "Датчик Camera: нестабильные показания",
+      "timestamp": "2026-08-27T16:40:27.922641"
+    },
+    {
+      "time": "02:05",
+      "level": "WARN",
+      "message": "Датчик GPS: нестабильные показания",
+      "timestamp": "2026-08-27T16:40:27.922641"
+    },
+    {
+      "time": "02:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T16:40:27.922641"
+    },
+    {
+      "time": "02:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T16:40:27.922641"
+    },
+    {
+      "time": "02:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:27.922641"
+    },
+    {
+      "time": "02:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T16:40:27.923639"
+    },
+    {
+      "time": "02:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T16:40:27.923639"
+    },
+    {
+      "time": "02:06",
+      "level": "DRONE",
+      "message": "🚁 Начинаем посадку...",
+      "timestamp": "2026-08-27T16:40:28.424030"
+    },
+    {
+      "time": "02:06",
+      "level": "OK",
+      "message": "Посадка выполнена!",
+      "timestamp": "2026-08-27T16:40:28.635549"
+    },
+    {
+      "time": "02:06",
+      "level": "OK",
+      "message": "СТАТУС: ПОЛЁТ ЗАВЕРШЁН",
+      "timestamp": "2026-08-27T16:40:28.635549"
+    },
+    {
+      "time": "02:06",
+      "level": "INFO",
+      "message": "Длительность: 60 сек",
+      "timestamp": "2026-08-27T16:40:28.635549"
+    },
+    {
+      "time": "02:06",
+      "level": "INFO",
+      "message": "Препятствий: 10",
+      "timestamp": "2026-08-27T16:40:28.635549"
+    },
+    {
+      "time": "02:06",
+      "level": "INFO",
+      "message": "Датчики: 3/5 OK, ошибок: 0",
+      "timestamp": "2026-08-27T16:40:28.636560"
+    },
+    {
+      "time": "02:06",
+      "level": "INFO",
+      "message": "Препятствий не обнаружено",
+      "timestamp": "2026-08-27T16:40:28.636560"
+    }
+  ],
+  "total": 344
+}

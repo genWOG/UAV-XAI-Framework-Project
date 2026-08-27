@@ -1,0 +1,2370 @@
+{
+  "start_time": "2026-08-27T13:23:01.077652",
+  "logs": [
+    {
+      "time": "00:00",
+      "level": "OK",
+      "message": "Подключение к AirSim установлено!",
+      "timestamp": "2026-08-27T13:23:01.090185"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "Запуск системы...",
+      "timestamp": "2026-08-27T13:23:01.090185"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "Режим: РЕАЛЬНЫЙ",
+      "timestamp": "2026-08-27T13:23:01.090185"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "Дрон: X-1000, версия 3.2",
+      "timestamp": "2026-08-27T13:23:01.090185"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "Время старта: 13:23:01",
+      "timestamp": "2026-08-27T13:23:01.090692"
+    },
+    {
+      "time": "00:00",
+      "level": "ROUTE",
+      "message": "🗺️ Планирование маршрута: (0,0) → (50,100)",
+      "timestamp": "2026-08-27T13:23:01.090692"
+    },
+    {
+      "time": "00:00",
+      "level": "ROUTE",
+      "message": "🗺️ Высота: 1 м",
+      "timestamp": "2026-08-27T13:23:01.090692"
+    },
+    {
+      "time": "00:00",
+      "level": "OK",
+      "message": "Маршрут построен. Длина: 111.8 м",
+      "timestamp": "2026-08-27T13:23:01.090692"
+    },
+    {
+      "time": "00:00",
+      "level": "OK",
+      "message": "Разрешение на взлёт получено",
+      "timestamp": "2026-08-27T13:23:01.090692"
+    },
+    {
+      "time": "00:14",
+      "level": "OK",
+      "message": "Взлёт выполнен!",
+      "timestamp": "2026-08-27T13:23:15.576209"
+    },
+    {
+      "time": "00:14",
+      "level": "DRONE",
+      "message": "🚁 Движение к цели: X=50 м, Y=100 м, высота=1 м",
+      "timestamp": "2026-08-27T13:23:15.576209"
+    },
+    {
+      "time": "04:42",
+      "level": "OK",
+      "message": "Перемещение выполнено!",
+      "timestamp": "2026-08-27T13:27:43.528282"
+    },
+    {
+      "time": "04:42",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:43.528282"
+    },
+    {
+      "time": "04:42",
+      "level": "ERROR",
+      "message": "Датчик GPS вышел из строя!",
+      "timestamp": "2026-08-27T13:27:43.528282"
+    },
+    {
+      "time": "04:42",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:43.528282"
+    },
+    {
+      "time": "04:42",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:44.030293"
+    },
+    {
+      "time": "04:42",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:44.030293"
+    },
+    {
+      "time": "04:43",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:44.530804"
+    },
+    {
+      "time": "04:43",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:44.530804"
+    },
+    {
+      "time": "04:43",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:45.031570"
+    },
+    {
+      "time": "04:43",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:45.031570"
+    },
+    {
+      "time": "04:44",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:45.532665"
+    },
+    {
+      "time": "04:44",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=6.3, Y=63.8, Z=-1.0",
+      "timestamp": "2026-08-27T13:27:45.532665"
+    },
+    {
+      "time": "04:44",
+      "level": "DRONE",
+      "message": "🚁 До цели: 56.8 м",
+      "timestamp": "2026-08-27T13:27:45.532665"
+    },
+    {
+      "time": "04:44",
+      "level": "ERROR",
+      "message": "Датчик Camera вышел из строя!",
+      "timestamp": "2026-08-27T13:27:45.532665"
+    },
+    {
+      "time": "04:44",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:45.532665"
+    },
+    {
+      "time": "04:44",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:45.532665"
+    },
+    {
+      "time": "04:44",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:46.034468"
+    },
+    {
+      "time": "04:44",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:46.034468"
+    },
+    {
+      "time": "04:44",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:46.034468"
+    },
+    {
+      "time": "04:45",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:46.535753"
+    },
+    {
+      "time": "04:45",
+      "level": "ERROR",
+      "message": "Датчик Camera вышел из строя!",
+      "timestamp": "2026-08-27T13:27:46.535753"
+    },
+    {
+      "time": "04:45",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:46.535753"
+    },
+    {
+      "time": "04:45",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:46.535753"
+    },
+    {
+      "time": "04:45",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:46.535753"
+    },
+    {
+      "time": "04:45",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:47.037260"
+    },
+    {
+      "time": "04:45",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:47.037260"
+    },
+    {
+      "time": "04:45",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:47.037260"
+    },
+    {
+      "time": "04:45",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:47.037260"
+    },
+    {
+      "time": "04:46",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:47.538605"
+    },
+    {
+      "time": "04:46",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:47.538605"
+    },
+    {
+      "time": "04:46",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:47.538605"
+    },
+    {
+      "time": "04:46",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:47.538605"
+    },
+    {
+      "time": "04:46",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:48.039591"
+    },
+    {
+      "time": "04:46",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=14.1, Y=80.1, Z=-1.0",
+      "timestamp": "2026-08-27T13:27:48.039591"
+    },
+    {
+      "time": "04:46",
+      "level": "DRONE",
+      "message": "🚁 До цели: 41.0 м",
+      "timestamp": "2026-08-27T13:27:48.039591"
+    },
+    {
+      "time": "04:46",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:48.039591"
+    },
+    {
+      "time": "04:46",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:48.039591"
+    },
+    {
+      "time": "04:46",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:48.039591"
+    },
+    {
+      "time": "04:47",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:48.540889"
+    },
+    {
+      "time": "04:47",
+      "level": "OBSTACLE",
+      "message": "ℹ️ Препятствие на расстоянии 9.6 м",
+      "timestamp": "2026-08-27T13:27:48.540889"
+    },
+    {
+      "time": "04:47",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:48.540889"
+    },
+    {
+      "time": "04:47",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:48.540889"
+    },
+    {
+      "time": "04:47",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:48.540889"
+    },
+    {
+      "time": "04:47",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:49.041897"
+    },
+    {
+      "time": "04:47",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:49.041897"
+    },
+    {
+      "time": "04:47",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:49.041897"
+    },
+    {
+      "time": "04:47",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:49.041897"
+    },
+    {
+      "time": "04:48",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:49.543101"
+    },
+    {
+      "time": "04:48",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:49.543101"
+    },
+    {
+      "time": "04:48",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:49.543101"
+    },
+    {
+      "time": "04:48",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:49.543101"
+    },
+    {
+      "time": "04:48",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:50.044151"
+    },
+    {
+      "time": "04:48",
+      "level": "ERROR",
+      "message": "Датчик IMU вышел из строя!",
+      "timestamp": "2026-08-27T13:27:50.044151"
+    },
+    {
+      "time": "04:48",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:50.044151"
+    },
+    {
+      "time": "04:48",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:50.044151"
+    },
+    {
+      "time": "04:48",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:50.044151"
+    },
+    {
+      "time": "04:48",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:50.044151"
+    },
+    {
+      "time": "04:49",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:50.545533"
+    },
+    {
+      "time": "04:49",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=24.8, Y=8.7, Z=-1.0",
+      "timestamp": "2026-08-27T13:27:50.545533"
+    },
+    {
+      "time": "04:49",
+      "level": "DRONE",
+      "message": "🚁 До цели: 94.7 м",
+      "timestamp": "2026-08-27T13:27:50.545533"
+    },
+    {
+      "time": "04:49",
+      "level": "ERROR",
+      "message": "Датчик Camera вышел из строя!",
+      "timestamp": "2026-08-27T13:27:50.545533"
+    },
+    {
+      "time": "04:49",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:50.545533"
+    },
+    {
+      "time": "04:49",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:50.545533"
+    },
+    {
+      "time": "04:49",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:50.545533"
+    },
+    {
+      "time": "04:49",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:50.545533"
+    },
+    {
+      "time": "04:49",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:50.545533"
+    },
+    {
+      "time": "04:49",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:51.047374"
+    },
+    {
+      "time": "04:49",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:51.047374"
+    },
+    {
+      "time": "04:49",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:51.047374"
+    },
+    {
+      "time": "04:49",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:51.047374"
+    },
+    {
+      "time": "04:49",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:51.047374"
+    },
+    {
+      "time": "04:49",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:51.047374"
+    },
+    {
+      "time": "04:50",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:51.548432"
+    },
+    {
+      "time": "04:50",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:51.548432"
+    },
+    {
+      "time": "04:50",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:51.548432"
+    },
+    {
+      "time": "04:50",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:51.548432"
+    },
+    {
+      "time": "04:50",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:51.548432"
+    },
+    {
+      "time": "04:50",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:51.548432"
+    },
+    {
+      "time": "04:50",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:52.049845"
+    },
+    {
+      "time": "04:50",
+      "level": "OBSTACLE",
+      "message": "ℹ️ Препятствие на расстоянии 7.0 м",
+      "timestamp": "2026-08-27T13:27:52.049845"
+    },
+    {
+      "time": "04:50",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:52.049845"
+    },
+    {
+      "time": "04:50",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:52.049845"
+    },
+    {
+      "time": "04:50",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:52.049845"
+    },
+    {
+      "time": "04:50",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:52.049845"
+    },
+    {
+      "time": "04:50",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:52.050862"
+    },
+    {
+      "time": "04:51",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:52.551137"
+    },
+    {
+      "time": "04:51",
+      "level": "OBSTACLE",
+      "message": "ℹ️ Препятствие на расстоянии 6.4 м",
+      "timestamp": "2026-08-27T13:27:52.551137"
+    },
+    {
+      "time": "04:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:52.551137"
+    },
+    {
+      "time": "04:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:52.551137"
+    },
+    {
+      "time": "04:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:52.551137"
+    },
+    {
+      "time": "04:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:52.551137"
+    },
+    {
+      "time": "04:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:52.551137"
+    },
+    {
+      "time": "04:51",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:53.052709"
+    },
+    {
+      "time": "04:51",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=14.4, Y=58.1, Z=-1.0",
+      "timestamp": "2026-08-27T13:27:53.052709"
+    },
+    {
+      "time": "04:51",
+      "level": "DRONE",
+      "message": "🚁 До цели: 55.0 м",
+      "timestamp": "2026-08-27T13:27:53.052709"
+    },
+    {
+      "time": "04:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:53.052709"
+    },
+    {
+      "time": "04:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:53.052709"
+    },
+    {
+      "time": "04:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:53.052709"
+    },
+    {
+      "time": "04:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:53.052709"
+    },
+    {
+      "time": "04:51",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:53.052709"
+    },
+    {
+      "time": "04:52",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:53.554565"
+    },
+    {
+      "time": "04:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:53.554565"
+    },
+    {
+      "time": "04:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:53.554565"
+    },
+    {
+      "time": "04:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:53.554565"
+    },
+    {
+      "time": "04:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:53.554565"
+    },
+    {
+      "time": "04:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:53.554565"
+    },
+    {
+      "time": "04:52",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:54.056218"
+    },
+    {
+      "time": "04:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:54.056218"
+    },
+    {
+      "time": "04:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:54.056218"
+    },
+    {
+      "time": "04:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:54.056218"
+    },
+    {
+      "time": "04:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:54.056218"
+    },
+    {
+      "time": "04:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:54.056218"
+    },
+    {
+      "time": "04:53",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:54.557331"
+    },
+    {
+      "time": "04:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:54.557331"
+    },
+    {
+      "time": "04:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:54.557860"
+    },
+    {
+      "time": "04:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:54.557860"
+    },
+    {
+      "time": "04:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:54.557860"
+    },
+    {
+      "time": "04:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:54.557860"
+    },
+    {
+      "time": "04:53",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:55.058644"
+    },
+    {
+      "time": "04:53",
+      "level": "ERROR",
+      "message": "Датчик Camera вышел из строя!",
+      "timestamp": "2026-08-27T13:27:55.058644"
+    },
+    {
+      "time": "04:53",
+      "level": "WARN",
+      "message": "Датчик GPS: нестабильные показания",
+      "timestamp": "2026-08-27T13:27:55.058644"
+    },
+    {
+      "time": "04:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:55.058644"
+    },
+    {
+      "time": "04:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:55.058644"
+    },
+    {
+      "time": "04:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:55.058644"
+    },
+    {
+      "time": "04:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:55.058644"
+    },
+    {
+      "time": "04:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:55.058644"
+    },
+    {
+      "time": "04:54",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:55.559960"
+    },
+    {
+      "time": "04:54",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=23.9, Y=59.8, Z=-1.0",
+      "timestamp": "2026-08-27T13:27:55.559960"
+    },
+    {
+      "time": "04:54",
+      "level": "DRONE",
+      "message": "🚁 До цели: 47.9 м",
+      "timestamp": "2026-08-27T13:27:55.559960"
+    },
+    {
+      "time": "04:54",
+      "level": "ERROR",
+      "message": "Датчик GPS вышел из строя!",
+      "timestamp": "2026-08-27T13:27:55.559960"
+    },
+    {
+      "time": "04:54",
+      "level": "WARN",
+      "message": "Датчик Barometer: нестабильные показания",
+      "timestamp": "2026-08-27T13:27:55.559960"
+    },
+    {
+      "time": "04:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:55.559960"
+    },
+    {
+      "time": "04:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:55.559960"
+    },
+    {
+      "time": "04:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:55.559960"
+    },
+    {
+      "time": "04:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:55.559960"
+    },
+    {
+      "time": "04:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:55.559960"
+    },
+    {
+      "time": "04:54",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:56.062179"
+    },
+    {
+      "time": "04:54",
+      "level": "WARN",
+      "message": "Датчик Camera: нестабильные показания",
+      "timestamp": "2026-08-27T13:27:56.062179"
+    },
+    {
+      "time": "04:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:56.062179"
+    },
+    {
+      "time": "04:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:56.062179"
+    },
+    {
+      "time": "04:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:56.062179"
+    },
+    {
+      "time": "04:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:56.062179"
+    },
+    {
+      "time": "04:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:56.062179"
+    },
+    {
+      "time": "04:55",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:56.564050"
+    },
+    {
+      "time": "04:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:56.564050"
+    },
+    {
+      "time": "04:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:56.564050"
+    },
+    {
+      "time": "04:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:56.564050"
+    },
+    {
+      "time": "04:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:56.564050"
+    },
+    {
+      "time": "04:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:56.564050"
+    },
+    {
+      "time": "04:55",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:57.065482"
+    },
+    {
+      "time": "04:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:57.065482"
+    },
+    {
+      "time": "04:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:57.066016"
+    },
+    {
+      "time": "04:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:57.066016"
+    },
+    {
+      "time": "04:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:57.066016"
+    },
+    {
+      "time": "04:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:57.066016"
+    },
+    {
+      "time": "04:56",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:57.566887"
+    },
+    {
+      "time": "04:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:57.566887"
+    },
+    {
+      "time": "04:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:57.567412"
+    },
+    {
+      "time": "04:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:57.567412"
+    },
+    {
+      "time": "04:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:57.567412"
+    },
+    {
+      "time": "04:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:57.567412"
+    },
+    {
+      "time": "04:56",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:58.068348"
+    },
+    {
+      "time": "04:56",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=27.9, Y=55.4, Z=-1.0",
+      "timestamp": "2026-08-27T13:27:58.068348"
+    },
+    {
+      "time": "04:56",
+      "level": "DRONE",
+      "message": "🚁 До цели: 49.8 м",
+      "timestamp": "2026-08-27T13:27:58.068348"
+    },
+    {
+      "time": "04:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:58.068866"
+    },
+    {
+      "time": "04:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:58.068866"
+    },
+    {
+      "time": "04:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:58.068866"
+    },
+    {
+      "time": "04:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:58.068866"
+    },
+    {
+      "time": "04:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:58.068866"
+    },
+    {
+      "time": "04:57",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:58.569558"
+    },
+    {
+      "time": "04:57",
+      "level": "ERROR",
+      "message": "Датчик GPS вышел из строя!",
+      "timestamp": "2026-08-27T13:27:58.569558"
+    },
+    {
+      "time": "04:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:58.569558"
+    },
+    {
+      "time": "04:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:58.569558"
+    },
+    {
+      "time": "04:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:58.569558"
+    },
+    {
+      "time": "04:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:58.569558"
+    },
+    {
+      "time": "04:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:58.570079"
+    },
+    {
+      "time": "04:57",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:59.070303"
+    },
+    {
+      "time": "04:57",
+      "level": "OBSTACLE",
+      "message": "ℹ️ Препятствие на расстоянии 6.4 м",
+      "timestamp": "2026-08-27T13:27:59.070303"
+    },
+    {
+      "time": "04:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:59.070303"
+    },
+    {
+      "time": "04:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:59.070303"
+    },
+    {
+      "time": "04:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:59.070823"
+    },
+    {
+      "time": "04:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:59.070823"
+    },
+    {
+      "time": "04:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:59.070823"
+    },
+    {
+      "time": "04:58",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:27:59.571447"
+    },
+    {
+      "time": "04:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:27:59.571447"
+    },
+    {
+      "time": "04:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:59.571447"
+    },
+    {
+      "time": "04:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:27:59.571447"
+    },
+    {
+      "time": "04:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:59.571447"
+    },
+    {
+      "time": "04:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:27:59.571447"
+    },
+    {
+      "time": "04:58",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:00.072254"
+    },
+    {
+      "time": "04:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:28:00.072254"
+    },
+    {
+      "time": "04:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:00.072254"
+    },
+    {
+      "time": "04:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:00.072254"
+    },
+    {
+      "time": "04:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:00.072254"
+    },
+    {
+      "time": "04:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:00.072254"
+    },
+    {
+      "time": "04:59",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:00.573113"
+    },
+    {
+      "time": "04:59",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=28.1, Y=70.5, Z=-1.0",
+      "timestamp": "2026-08-27T13:28:00.573113"
+    },
+    {
+      "time": "04:59",
+      "level": "DRONE",
+      "message": "🚁 До цели: 36.8 м",
+      "timestamp": "2026-08-27T13:28:00.573113"
+    },
+    {
+      "time": "04:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:28:00.573113"
+    },
+    {
+      "time": "04:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:00.573113"
+    },
+    {
+      "time": "04:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:00.573113"
+    },
+    {
+      "time": "04:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:00.573113"
+    },
+    {
+      "time": "04:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:00.573113"
+    },
+    {
+      "time": "04:59",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:01.074455"
+    },
+    {
+      "time": "04:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:28:01.074455"
+    },
+    {
+      "time": "04:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:01.074999"
+    },
+    {
+      "time": "04:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:01.074999"
+    },
+    {
+      "time": "04:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:01.074999"
+    },
+    {
+      "time": "04:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:01.074999"
+    },
+    {
+      "time": "05:00",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:01.575901"
+    },
+    {
+      "time": "05:00",
+      "level": "ERROR",
+      "message": "Датчик Barometer вышел из строя!",
+      "timestamp": "2026-08-27T13:28:01.575901"
+    },
+    {
+      "time": "05:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:01.575901"
+    },
+    {
+      "time": "05:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:01.575901"
+    },
+    {
+      "time": "05:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:01.575901"
+    },
+    {
+      "time": "05:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:01.575901"
+    },
+    {
+      "time": "05:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:01.575901"
+    },
+    {
+      "time": "05:00",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:02.077114"
+    },
+    {
+      "time": "05:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:02.077114"
+    },
+    {
+      "time": "05:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:02.077114"
+    },
+    {
+      "time": "05:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:02.077114"
+    },
+    {
+      "time": "05:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:02.077114"
+    },
+    {
+      "time": "05:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:02.077114"
+    },
+    {
+      "time": "05:01",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:02.578011"
+    },
+    {
+      "time": "05:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:02.578011"
+    },
+    {
+      "time": "05:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:02.578011"
+    },
+    {
+      "time": "05:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:02.578011"
+    },
+    {
+      "time": "05:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:02.578011"
+    },
+    {
+      "time": "05:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:02.578011"
+    },
+    {
+      "time": "05:02",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:03.079207"
+    },
+    {
+      "time": "05:02",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=45.8, Y=69.7, Z=-1.0",
+      "timestamp": "2026-08-27T13:28:03.079207"
+    },
+    {
+      "time": "05:02",
+      "level": "DRONE",
+      "message": "🚁 До цели: 30.6 м",
+      "timestamp": "2026-08-27T13:28:03.079207"
+    },
+    {
+      "time": "05:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:03.079207"
+    },
+    {
+      "time": "05:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:03.079207"
+    },
+    {
+      "time": "05:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:03.079207"
+    },
+    {
+      "time": "05:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:03.079207"
+    },
+    {
+      "time": "05:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:03.079207"
+    },
+    {
+      "time": "05:02",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:03.580728"
+    },
+    {
+      "time": "05:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:03.580728"
+    },
+    {
+      "time": "05:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:03.580728"
+    },
+    {
+      "time": "05:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:03.580728"
+    },
+    {
+      "time": "05:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:03.580728"
+    },
+    {
+      "time": "05:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:03.580728"
+    },
+    {
+      "time": "05:03",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:04.082136"
+    },
+    {
+      "time": "05:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:04.082136"
+    },
+    {
+      "time": "05:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:04.082136"
+    },
+    {
+      "time": "05:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:04.082136"
+    },
+    {
+      "time": "05:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:04.082136"
+    },
+    {
+      "time": "05:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:04.082136"
+    },
+    {
+      "time": "05:03",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:04.583662"
+    },
+    {
+      "time": "05:03",
+      "level": "OBSTACLE",
+      "message": "ℹ️ Препятствие на расстоянии 7.1 м",
+      "timestamp": "2026-08-27T13:28:04.583662"
+    },
+    {
+      "time": "05:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:04.583662"
+    },
+    {
+      "time": "05:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:04.583662"
+    },
+    {
+      "time": "05:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:04.583662"
+    },
+    {
+      "time": "05:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:04.583662"
+    },
+    {
+      "time": "05:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:04.584685"
+    },
+    {
+      "time": "05:04",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:05.085357"
+    },
+    {
+      "time": "05:04",
+      "level": "WARN",
+      "message": "Датчик GPS: нестабильные показания",
+      "timestamp": "2026-08-27T13:28:05.085357"
+    },
+    {
+      "time": "05:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:05.085357"
+    },
+    {
+      "time": "05:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:05.085357"
+    },
+    {
+      "time": "05:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:05.085357"
+    },
+    {
+      "time": "05:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:05.085357"
+    },
+    {
+      "time": "05:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:05.085357"
+    },
+    {
+      "time": "05:04",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:05.587139"
+    },
+    {
+      "time": "05:04",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=14.0, Y=47.1, Z=-1.0",
+      "timestamp": "2026-08-27T13:28:05.587139"
+    },
+    {
+      "time": "05:04",
+      "level": "DRONE",
+      "message": "🚁 До цели: 64.0 м",
+      "timestamp": "2026-08-27T13:28:05.587139"
+    },
+    {
+      "time": "05:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:05.587139"
+    },
+    {
+      "time": "05:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:05.587139"
+    },
+    {
+      "time": "05:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:05.587139"
+    },
+    {
+      "time": "05:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:05.587139"
+    },
+    {
+      "time": "05:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:05.587139"
+    },
+    {
+      "time": "05:05",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:06.088739"
+    },
+    {
+      "time": "05:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:06.088739"
+    },
+    {
+      "time": "05:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:06.088739"
+    },
+    {
+      "time": "05:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:06.088739"
+    },
+    {
+      "time": "05:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:06.088739"
+    },
+    {
+      "time": "05:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:06.088739"
+    },
+    {
+      "time": "05:05",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:06.589929"
+    },
+    {
+      "time": "05:05",
+      "level": "WARN",
+      "message": "Датчик IMU: нестабильные показания",
+      "timestamp": "2026-08-27T13:28:06.589929"
+    },
+    {
+      "time": "05:05",
+      "level": "WARN",
+      "message": "Датчик GPS: нестабильные показания",
+      "timestamp": "2026-08-27T13:28:06.589929"
+    },
+    {
+      "time": "05:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:06.589929"
+    },
+    {
+      "time": "05:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:06.589929"
+    },
+    {
+      "time": "05:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:06.589929"
+    },
+    {
+      "time": "05:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:06.589929"
+    },
+    {
+      "time": "05:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:06.589929"
+    },
+    {
+      "time": "05:06",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:07.091624"
+    },
+    {
+      "time": "05:06",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:07.091624"
+    },
+    {
+      "time": "05:06",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:07.091624"
+    },
+    {
+      "time": "05:06",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:07.091624"
+    },
+    {
+      "time": "05:06",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:07.091624"
+    },
+    {
+      "time": "05:06",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:07.091624"
+    },
+    {
+      "time": "05:06",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:07.593303"
+    },
+    {
+      "time": "05:06",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:07.593303"
+    },
+    {
+      "time": "05:06",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:07.593303"
+    },
+    {
+      "time": "05:06",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:07.593303"
+    },
+    {
+      "time": "05:06",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:07.593303"
+    },
+    {
+      "time": "05:06",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:07.593303"
+    },
+    {
+      "time": "05:07",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:08.094557"
+    },
+    {
+      "time": "05:07",
+      "level": "OBSTACLE",
+      "message": "ℹ️ Препятствие на расстоянии 6.2 м",
+      "timestamp": "2026-08-27T13:28:08.094557"
+    },
+    {
+      "time": "05:07",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=41.9, Y=24.6, Z=-1.0",
+      "timestamp": "2026-08-27T13:28:08.094557"
+    },
+    {
+      "time": "05:07",
+      "level": "DRONE",
+      "message": "🚁 До цели: 75.8 м",
+      "timestamp": "2026-08-27T13:28:08.094557"
+    },
+    {
+      "time": "05:07",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:08.094557"
+    },
+    {
+      "time": "05:07",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:08.094557"
+    },
+    {
+      "time": "05:07",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:08.094557"
+    },
+    {
+      "time": "05:07",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:08.094557"
+    },
+    {
+      "time": "05:07",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:08.094557"
+    },
+    {
+      "time": "05:07",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:08.596226"
+    },
+    {
+      "time": "05:07",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:08.596226"
+    },
+    {
+      "time": "05:07",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:08.596226"
+    },
+    {
+      "time": "05:07",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:08.596226"
+    },
+    {
+      "time": "05:07",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:08.596226"
+    },
+    {
+      "time": "05:07",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:08.596226"
+    },
+    {
+      "time": "05:08",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:09.097659"
+    },
+    {
+      "time": "05:08",
+      "level": "ERROR",
+      "message": "Датчик GPS вышел из строя!",
+      "timestamp": "2026-08-27T13:28:09.097659"
+    },
+    {
+      "time": "05:08",
+      "level": "WARN",
+      "message": "Датчик Barometer: нестабильные показания",
+      "timestamp": "2026-08-27T13:28:09.097659"
+    },
+    {
+      "time": "05:08",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:09.097659"
+    },
+    {
+      "time": "05:08",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:09.097659"
+    },
+    {
+      "time": "05:08",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:09.097659"
+    },
+    {
+      "time": "05:08",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:09.097659"
+    },
+    {
+      "time": "05:08",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:09.097659"
+    },
+    {
+      "time": "05:08",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:09.599299"
+    },
+    {
+      "time": "05:08",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:09.599299"
+    },
+    {
+      "time": "05:08",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:09.599299"
+    },
+    {
+      "time": "05:08",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:09.599299"
+    },
+    {
+      "time": "05:08",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:09.599299"
+    },
+    {
+      "time": "05:08",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:09.599299"
+    },
+    {
+      "time": "05:09",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:10.100991"
+    },
+    {
+      "time": "05:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T13:28:10.100991"
+    },
+    {
+      "time": "05:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:10.100991"
+    },
+    {
+      "time": "05:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:10.100991"
+    },
+    {
+      "time": "05:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:10.100991"
+    },
+    {
+      "time": "05:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:10.100991"
+    },
+    {
+      "time": "05:09",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:10.602349"
+    },
+    {
+      "time": "05:09",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=37.1, Y=63.2, Z=-1.0",
+      "timestamp": "2026-08-27T13:28:10.602349"
+    },
+    {
+      "time": "05:09",
+      "level": "DRONE",
+      "message": "🚁 До цели: 39.0 м",
+      "timestamp": "2026-08-27T13:28:10.602349"
+    },
+    {
+      "time": "05:09",
+      "level": "ERROR",
+      "message": "Датчик IMU вышел из строя!",
+      "timestamp": "2026-08-27T13:28:10.602349"
+    },
+    {
+      "time": "05:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:10.602349"
+    },
+    {
+      "time": "05:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:10.602349"
+    },
+    {
+      "time": "05:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:10.602349"
+    },
+    {
+      "time": "05:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:10.602349"
+    },
+    {
+      "time": "05:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:28:10.602349"
+    },
+    {
+      "time": "05:10",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:11.103703"
+    },
+    {
+      "time": "05:10",
+      "level": "OBSTACLE",
+      "message": "ℹ️ Препятствие на расстоянии 8.8 м",
+      "timestamp": "2026-08-27T13:28:11.103703"
+    },
+    {
+      "time": "05:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:11.103703"
+    },
+    {
+      "time": "05:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:11.103703"
+    },
+    {
+      "time": "05:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:11.103703"
+    },
+    {
+      "time": "05:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:11.103703"
+    },
+    {
+      "time": "05:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:28:11.103703"
+    },
+    {
+      "time": "05:10",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:11.604996"
+    },
+    {
+      "time": "05:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:11.604996"
+    },
+    {
+      "time": "05:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:11.604996"
+    },
+    {
+      "time": "05:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:11.604996"
+    },
+    {
+      "time": "05:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:11.604996"
+    },
+    {
+      "time": "05:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:28:11.604996"
+    },
+    {
+      "time": "05:11",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:12.106688"
+    },
+    {
+      "time": "05:11",
+      "level": "ERROR",
+      "message": "Датчик IMU вышел из строя!",
+      "timestamp": "2026-08-27T13:28:12.106688"
+    },
+    {
+      "time": "05:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:12.106688"
+    },
+    {
+      "time": "05:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:12.106688"
+    },
+    {
+      "time": "05:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:12.106688"
+    },
+    {
+      "time": "05:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:28:12.106688"
+    },
+    {
+      "time": "05:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:28:12.106688"
+    },
+    {
+      "time": "05:11",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:12.608385"
+    },
+    {
+      "time": "05:11",
+      "level": "OBSTACLE",
+      "message": "ℹ️ Препятствие на расстоянии 5.9 м",
+      "timestamp": "2026-08-27T13:28:12.608385"
+    },
+    {
+      "time": "05:11",
+      "level": "WARN",
+      "message": "Датчик Barometer: нестабильные показания",
+      "timestamp": "2026-08-27T13:28:12.608385"
+    },
+    {
+      "time": "05:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:12.608385"
+    },
+    {
+      "time": "05:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:12.608385"
+    },
+    {
+      "time": "05:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:12.608385"
+    },
+    {
+      "time": "05:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:28:12.608385"
+    },
+    {
+      "time": "05:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:28:12.608385"
+    },
+    {
+      "time": "05:12",
+      "level": "WARN",
+      "message": "Ошибка получения данных: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:13.110052"
+    },
+    {
+      "time": "05:12",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=27.7, Y=63.5, Z=-1.0",
+      "timestamp": "2026-08-27T13:28:13.110052"
+    },
+    {
+      "time": "05:12",
+      "level": "DRONE",
+      "message": "🚁 До цели: 42.8 м",
+      "timestamp": "2026-08-27T13:28:13.110052"
+    },
+    {
+      "time": "05:12",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:13.110052"
+    },
+    {
+      "time": "05:12",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T13:28:13.110052"
+    },
+    {
+      "time": "05:12",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T13:28:13.110052"
+    },
+    {
+      "time": "05:12",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:28:13.110052"
+    },
+    {
+      "time": "05:12",
+      "level": "ERROR",
+      "message": "Ошибка датчика IMU",
+      "timestamp": "2026-08-27T13:28:13.110052"
+    },
+    {
+      "time": "05:12",
+      "level": "DRONE",
+      "message": "🚁 Начинаем посадку...",
+      "timestamp": "2026-08-27T13:28:13.611762"
+    },
+    {
+      "time": "05:12",
+      "level": "ERROR",
+      "message": "Ошибка посадки: Client is closed, connection could not be set",
+      "timestamp": "2026-08-27T13:28:13.611762"
+    },
+    {
+      "time": "05:12",
+      "level": "OK",
+      "message": "СТАТУС: ПОЛЁТ ЗАВЕРШЁН",
+      "timestamp": "2026-08-27T13:28:13.611762"
+    },
+    {
+      "time": "05:12",
+      "level": "INFO",
+      "message": "Длительность: 60 сек",
+      "timestamp": "2026-08-27T13:28:13.612788"
+    },
+    {
+      "time": "05:12",
+      "level": "INFO",
+      "message": "Препятствий: 8",
+      "timestamp": "2026-08-27T13:28:13.612788"
+    },
+    {
+      "time": "05:12",
+      "level": "INFO",
+      "message": "Датчики: 5/5 OK, ошибок: 0",
+      "timestamp": "2026-08-27T13:28:13.612788"
+    },
+    {
+      "time": "05:12",
+      "level": "INFO",
+      "message": "Препятствий не обнаружено",
+      "timestamp": "2026-08-27T13:28:13.612788"
+    }
+  ],
+  "total": 394
+}

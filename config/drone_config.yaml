@@ -1,0 +1,24 @@
+# Конфигурация дрона X-1000
+drone:
+  model: "X-1000"
+  version: "3.2"
+  max_speed: 15  # м/с
+  max_altitude: 120  # м
+  battery: 100  # %
+  sensors:
+    - IMU
+    - LiDAR
+    - Camera
+    - GPS
+    - Barometer
+
+flight:
+  default_altitude: 1  # м
+  default_speed: 5  # м/с
+  obstacle_avoidance: true
+  rerouting_enabled: true
+
+logging:
+  level: INFO
+  save_images: true
+  save_video: false

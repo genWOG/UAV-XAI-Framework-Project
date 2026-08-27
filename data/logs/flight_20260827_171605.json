@@ -1,0 +1,1794 @@
+{
+  "start_time": "2026-08-27T17:14:46.395380",
+  "logs": [
+    {
+      "time": "00:00",
+      "level": "OK",
+      "message": "✅ Используется Cosys-AirSim (UE5)",
+      "timestamp": "2026-08-27T17:14:46.605145"
+    },
+    {
+      "time": "00:00",
+      "level": "OK",
+      "message": "✅ Подключение к AirSim установлено!",
+      "timestamp": "2026-08-27T17:14:46.626750"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "✅ XAIEngine инициализирован",
+      "timestamp": "2026-08-27T17:14:46.626750"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "   Доступные методы: ['grad_cam']",
+      "timestamp": "2026-08-27T17:14:46.626750"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "✅ XAI активирован",
+      "timestamp": "2026-08-27T17:14:46.626750"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "Запуск системы...",
+      "timestamp": "2026-08-27T17:14:46.626750"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "Режим: РЕАЛЬНЫЙ",
+      "timestamp": "2026-08-27T17:14:46.626750"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "Дрон: X-1000, версия 3.2",
+      "timestamp": "2026-08-27T17:14:46.626750"
+    },
+    {
+      "time": "00:00",
+      "level": "SYSTEM",
+      "message": "Время старта: 17:14:46",
+      "timestamp": "2026-08-27T17:14:46.626750"
+    },
+    {
+      "time": "00:00",
+      "level": "ROUTE",
+      "message": "🗺️ Планирование маршрута: (0,0) → (50,100)",
+      "timestamp": "2026-08-27T17:14:46.626750"
+    },
+    {
+      "time": "00:00",
+      "level": "ROUTE",
+      "message": "🗺️ Высота: 1 м",
+      "timestamp": "2026-08-27T17:14:46.626750"
+    },
+    {
+      "time": "00:00",
+      "level": "OK",
+      "message": "Маршрут построен. Длина: 111.8 м",
+      "timestamp": "2026-08-27T17:14:46.626750"
+    },
+    {
+      "time": "00:00",
+      "level": "OK",
+      "message": "Разрешение на взлёт получено",
+      "timestamp": "2026-08-27T17:14:46.626750"
+    },
+    {
+      "time": "00:14",
+      "level": "OK",
+      "message": "✅ Взлёт выполнен!",
+      "timestamp": "2026-08-27T17:15:01.140294"
+    },
+    {
+      "time": "00:14",
+      "level": "DRONE",
+      "message": "🚁 Движение к цели: X=50 м, Y=100 м, высота=1 м",
+      "timestamp": "2026-08-27T17:15:01.141304"
+    },
+    {
+      "time": "00:48",
+      "level": "OK",
+      "message": "✅ Перемещение выполнено!",
+      "timestamp": "2026-08-27T17:15:35.272273"
+    },
+    {
+      "time": "00:49",
+      "level": "WARN",
+      "message": "Датчик Camera: нестабильные показания",
+      "timestamp": "2026-08-27T17:15:35.774476"
+    },
+    {
+      "time": "00:49",
+      "level": "WARN",
+      "message": "Датчик LiDAR: нестабильные показания",
+      "timestamp": "2026-08-27T17:15:36.276882"
+    },
+    {
+      "time": "00:51",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:15:37.399690"
+    },
+    {
+      "time": "00:51",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:15:37.400693"
+    },
+    {
+      "time": "00:51",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:15:37.400693"
+    },
+    {
+      "time": "00:51",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:15:37.400693"
+    },
+    {
+      "time": "00:52",
+      "level": "ERROR",
+      "message": "Датчик Camera вышел из строя!",
+      "timestamp": "2026-08-27T17:15:38.403357"
+    },
+    {
+      "time": "00:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:38.403357"
+    },
+    {
+      "time": "00:52",
+      "level": "ERROR",
+      "message": "Датчик Barometer вышел из строя!",
+      "timestamp": "2026-08-27T17:15:38.905234"
+    },
+    {
+      "time": "00:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:38.905234"
+    },
+    {
+      "time": "00:52",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:38.905234"
+    },
+    {
+      "time": "00:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:39.406070"
+    },
+    {
+      "time": "00:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:39.407078"
+    },
+    {
+      "time": "00:53",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:15:39.908648"
+    },
+    {
+      "time": "00:53",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:15:39.908648"
+    },
+    {
+      "time": "00:53",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:15:39.908648"
+    },
+    {
+      "time": "00:53",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:15:39.908648"
+    },
+    {
+      "time": "00:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:39.909657"
+    },
+    {
+      "time": "00:53",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:39.909657"
+    },
+    {
+      "time": "00:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:40.410358"
+    },
+    {
+      "time": "00:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:40.410358"
+    },
+    {
+      "time": "00:54",
+      "level": "WARN",
+      "message": "Датчик LiDAR: нестабильные показания",
+      "timestamp": "2026-08-27T17:15:40.911739"
+    },
+    {
+      "time": "00:54",
+      "level": "WARN",
+      "message": "Датчик Barometer: нестабильные показания",
+      "timestamp": "2026-08-27T17:15:40.911739"
+    },
+    {
+      "time": "00:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:40.911739"
+    },
+    {
+      "time": "00:54",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:40.911739"
+    },
+    {
+      "time": "00:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:41.413699"
+    },
+    {
+      "time": "00:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:41.413699"
+    },
+    {
+      "time": "00:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:41.914030"
+    },
+    {
+      "time": "00:55",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:41.914030"
+    },
+    {
+      "time": "00:56",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:15:42.416739"
+    },
+    {
+      "time": "00:56",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:15:42.416739"
+    },
+    {
+      "time": "00:56",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:15:42.416739"
+    },
+    {
+      "time": "00:56",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:15:42.416739"
+    },
+    {
+      "time": "00:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:42.416739"
+    },
+    {
+      "time": "00:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:42.416739"
+    },
+    {
+      "time": "00:56",
+      "level": "WARN",
+      "message": "Датчик IMU: нестабильные показания",
+      "timestamp": "2026-08-27T17:15:42.918171"
+    },
+    {
+      "time": "00:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:42.918171"
+    },
+    {
+      "time": "00:56",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:42.918171"
+    },
+    {
+      "time": "00:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:43.419292"
+    },
+    {
+      "time": "00:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:43.419292"
+    },
+    {
+      "time": "00:57",
+      "level": "ERROR",
+      "message": "Датчик LiDAR вышел из строя!",
+      "timestamp": "2026-08-27T17:15:43.920893"
+    },
+    {
+      "time": "00:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:43.920893"
+    },
+    {
+      "time": "00:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:43.920893"
+    },
+    {
+      "time": "00:57",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:43.920893"
+    },
+    {
+      "time": "00:58",
+      "level": "WARN",
+      "message": "Датчик LiDAR: нестабильные показания",
+      "timestamp": "2026-08-27T17:15:44.423375"
+    },
+    {
+      "time": "00:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:44.423375"
+    },
+    {
+      "time": "00:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:44.424376"
+    },
+    {
+      "time": "00:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:44.424376"
+    },
+    {
+      "time": "00:58",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:15:44.926487"
+    },
+    {
+      "time": "00:58",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:15:44.926487"
+    },
+    {
+      "time": "00:58",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:15:44.926487"
+    },
+    {
+      "time": "00:58",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:15:44.926487"
+    },
+    {
+      "time": "00:58",
+      "level": "WARN",
+      "message": "Датчик Barometer: нестабильные показания",
+      "timestamp": "2026-08-27T17:15:44.926487"
+    },
+    {
+      "time": "00:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:44.926487"
+    },
+    {
+      "time": "00:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:44.926487"
+    },
+    {
+      "time": "00:58",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:44.926487"
+    },
+    {
+      "time": "00:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:45.428160"
+    },
+    {
+      "time": "00:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:45.428160"
+    },
+    {
+      "time": "00:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:45.428160"
+    },
+    {
+      "time": "00:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:45.931076"
+    },
+    {
+      "time": "00:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:45.931076"
+    },
+    {
+      "time": "00:59",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:45.931076"
+    },
+    {
+      "time": "01:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:46.431549"
+    },
+    {
+      "time": "01:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:46.431549"
+    },
+    {
+      "time": "01:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:46.432555"
+    },
+    {
+      "time": "01:00",
+      "level": "WARN",
+      "message": "Датчик LiDAR: нестабильные показания",
+      "timestamp": "2026-08-27T17:15:46.933711"
+    },
+    {
+      "time": "01:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:46.934720"
+    },
+    {
+      "time": "01:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:46.934720"
+    },
+    {
+      "time": "01:00",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:46.934720"
+    },
+    {
+      "time": "01:01",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:15:47.436602"
+    },
+    {
+      "time": "01:01",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:15:47.436602"
+    },
+    {
+      "time": "01:01",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:15:47.436602"
+    },
+    {
+      "time": "01:01",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:15:47.436602"
+    },
+    {
+      "time": "01:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:47.436602"
+    },
+    {
+      "time": "01:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:47.436602"
+    },
+    {
+      "time": "01:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:47.436602"
+    },
+    {
+      "time": "01:01",
+      "level": "WARN",
+      "message": "Датчик LiDAR: нестабильные показания",
+      "timestamp": "2026-08-27T17:15:47.938666"
+    },
+    {
+      "time": "01:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:47.939678"
+    },
+    {
+      "time": "01:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:47.939678"
+    },
+    {
+      "time": "01:01",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:47.939678"
+    },
+    {
+      "time": "01:02",
+      "level": "WARN",
+      "message": "Датчик Camera: нестабильные показания",
+      "timestamp": "2026-08-27T17:15:48.441101"
+    },
+    {
+      "time": "01:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:48.441101"
+    },
+    {
+      "time": "01:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:48.441101"
+    },
+    {
+      "time": "01:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:48.441101"
+    },
+    {
+      "time": "01:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:48.942959"
+    },
+    {
+      "time": "01:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:48.942959"
+    },
+    {
+      "time": "01:02",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:48.942959"
+    },
+    {
+      "time": "01:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:49.444308"
+    },
+    {
+      "time": "01:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:49.444308"
+    },
+    {
+      "time": "01:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:49.444308"
+    },
+    {
+      "time": "01:03",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:15:49.946821"
+    },
+    {
+      "time": "01:03",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:15:49.946821"
+    },
+    {
+      "time": "01:03",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:15:49.948330"
+    },
+    {
+      "time": "01:03",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:15:49.948330"
+    },
+    {
+      "time": "01:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:49.948330"
+    },
+    {
+      "time": "01:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:49.948330"
+    },
+    {
+      "time": "01:03",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:49.948330"
+    },
+    {
+      "time": "01:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:50.449785"
+    },
+    {
+      "time": "01:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:50.449785"
+    },
+    {
+      "time": "01:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:50.449785"
+    },
+    {
+      "time": "01:04",
+      "level": "WARN",
+      "message": "Датчик IMU: нестабильные показания",
+      "timestamp": "2026-08-27T17:15:50.951544"
+    },
+    {
+      "time": "01:04",
+      "level": "WARN",
+      "message": "Датчик LiDAR: нестабильные показания",
+      "timestamp": "2026-08-27T17:15:50.951544"
+    },
+    {
+      "time": "01:04",
+      "level": "WARN",
+      "message": "Датчик Barometer: нестабильные показания",
+      "timestamp": "2026-08-27T17:15:50.951544"
+    },
+    {
+      "time": "01:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:50.951544"
+    },
+    {
+      "time": "01:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:50.951544"
+    },
+    {
+      "time": "01:04",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:50.951544"
+    },
+    {
+      "time": "01:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:51.452325"
+    },
+    {
+      "time": "01:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:51.452325"
+    },
+    {
+      "time": "01:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:51.452325"
+    },
+    {
+      "time": "01:05",
+      "level": "ERROR",
+      "message": "Датчик Camera вышел из строя!",
+      "timestamp": "2026-08-27T17:15:51.953661"
+    },
+    {
+      "time": "01:05",
+      "level": "WARN",
+      "message": "Датчик GPS: нестабильные показания",
+      "timestamp": "2026-08-27T17:15:51.953661"
+    },
+    {
+      "time": "01:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:51.954672"
+    },
+    {
+      "time": "01:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:51.954672"
+    },
+    {
+      "time": "01:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:51.954672"
+    },
+    {
+      "time": "01:05",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:51.954672"
+    },
+    {
+      "time": "01:06",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:15:52.456642"
+    },
+    {
+      "time": "01:06",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:15:52.456642"
+    },
+    {
+      "time": "01:06",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:15:52.456642"
+    },
+    {
+      "time": "01:06",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:15:52.456642"
+    },
+    {
+      "time": "01:06",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:52.456642"
+    },
+    {
+      "time": "01:06",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:52.456642"
+    },
+    {
+      "time": "01:06",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:52.456642"
+    },
+    {
+      "time": "01:06",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:52.456642"
+    },
+    {
+      "time": "01:06",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:52.958190"
+    },
+    {
+      "time": "01:06",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:52.958190"
+    },
+    {
+      "time": "01:06",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:52.959199"
+    },
+    {
+      "time": "01:06",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:52.959199"
+    },
+    {
+      "time": "01:07",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:53.459492"
+    },
+    {
+      "time": "01:07",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:53.459492"
+    },
+    {
+      "time": "01:07",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:53.460500"
+    },
+    {
+      "time": "01:07",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:53.460500"
+    },
+    {
+      "time": "01:07",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:53.960588"
+    },
+    {
+      "time": "01:07",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:53.961600"
+    },
+    {
+      "time": "01:07",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:53.961600"
+    },
+    {
+      "time": "01:07",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:53.961600"
+    },
+    {
+      "time": "01:08",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:54.462996"
+    },
+    {
+      "time": "01:08",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:54.462996"
+    },
+    {
+      "time": "01:08",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:54.462996"
+    },
+    {
+      "time": "01:08",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:54.462996"
+    },
+    {
+      "time": "01:08",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:15:54.965248"
+    },
+    {
+      "time": "01:08",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:15:54.965248"
+    },
+    {
+      "time": "01:08",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:15:54.965248"
+    },
+    {
+      "time": "01:08",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:15:54.965248"
+    },
+    {
+      "time": "01:08",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:54.965248"
+    },
+    {
+      "time": "01:08",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:54.965248"
+    },
+    {
+      "time": "01:08",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:54.965248"
+    },
+    {
+      "time": "01:08",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:54.965248"
+    },
+    {
+      "time": "01:09",
+      "level": "ERROR",
+      "message": "Датчик GPS вышел из строя!",
+      "timestamp": "2026-08-27T17:15:55.466691"
+    },
+    {
+      "time": "01:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:55.466691"
+    },
+    {
+      "time": "01:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:55.466691"
+    },
+    {
+      "time": "01:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:55.466691"
+    },
+    {
+      "time": "01:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:55.466691"
+    },
+    {
+      "time": "01:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:15:55.466691"
+    },
+    {
+      "time": "01:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:55.968323"
+    },
+    {
+      "time": "01:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:55.968323"
+    },
+    {
+      "time": "01:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:55.968323"
+    },
+    {
+      "time": "01:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:55.968323"
+    },
+    {
+      "time": "01:09",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:15:55.968323"
+    },
+    {
+      "time": "01:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:56.469594"
+    },
+    {
+      "time": "01:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:56.469594"
+    },
+    {
+      "time": "01:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:56.470602"
+    },
+    {
+      "time": "01:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:56.470602"
+    },
+    {
+      "time": "01:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:15:56.470602"
+    },
+    {
+      "time": "01:10",
+      "level": "WARN",
+      "message": "Датчик Camera: нестабильные показания",
+      "timestamp": "2026-08-27T17:15:56.971148"
+    },
+    {
+      "time": "01:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:56.971148"
+    },
+    {
+      "time": "01:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:56.972154"
+    },
+    {
+      "time": "01:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:56.972154"
+    },
+    {
+      "time": "01:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:56.972154"
+    },
+    {
+      "time": "01:10",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:15:56.972154"
+    },
+    {
+      "time": "01:11",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:15:57.474102"
+    },
+    {
+      "time": "01:11",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:15:57.474102"
+    },
+    {
+      "time": "01:11",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:15:57.474102"
+    },
+    {
+      "time": "01:11",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:15:57.474102"
+    },
+    {
+      "time": "01:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:57.474102"
+    },
+    {
+      "time": "01:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:57.474102"
+    },
+    {
+      "time": "01:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:57.474102"
+    },
+    {
+      "time": "01:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:57.475100"
+    },
+    {
+      "time": "01:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:15:57.475100"
+    },
+    {
+      "time": "01:11",
+      "level": "WARN",
+      "message": "Датчик Camera: нестабильные показания",
+      "timestamp": "2026-08-27T17:15:57.976288"
+    },
+    {
+      "time": "01:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:57.976288"
+    },
+    {
+      "time": "01:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:57.976288"
+    },
+    {
+      "time": "01:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:57.976288"
+    },
+    {
+      "time": "01:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:57.976288"
+    },
+    {
+      "time": "01:11",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:15:57.976288"
+    },
+    {
+      "time": "01:12",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:58.476825"
+    },
+    {
+      "time": "01:12",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:58.476825"
+    },
+    {
+      "time": "01:12",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:58.476825"
+    },
+    {
+      "time": "01:12",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:58.476825"
+    },
+    {
+      "time": "01:12",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:15:58.476825"
+    },
+    {
+      "time": "01:12",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:58.978440"
+    },
+    {
+      "time": "01:12",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:58.979447"
+    },
+    {
+      "time": "01:12",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:58.979447"
+    },
+    {
+      "time": "01:12",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:58.979447"
+    },
+    {
+      "time": "01:12",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:15:58.979447"
+    },
+    {
+      "time": "01:13",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:59.480087"
+    },
+    {
+      "time": "01:13",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:59.480087"
+    },
+    {
+      "time": "01:13",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:59.480087"
+    },
+    {
+      "time": "01:13",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:59.481357"
+    },
+    {
+      "time": "01:13",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:15:59.481357"
+    },
+    {
+      "time": "01:13",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:15:59.983148"
+    },
+    {
+      "time": "01:13",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:15:59.983148"
+    },
+    {
+      "time": "01:13",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:15:59.983148"
+    },
+    {
+      "time": "01:13",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:15:59.983148"
+    },
+    {
+      "time": "01:13",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:59.984145"
+    },
+    {
+      "time": "01:13",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:15:59.984145"
+    },
+    {
+      "time": "01:13",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:15:59.984145"
+    },
+    {
+      "time": "01:13",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:15:59.984145"
+    },
+    {
+      "time": "01:13",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:15:59.984145"
+    },
+    {
+      "time": "01:14",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:00.485564"
+    },
+    {
+      "time": "01:14",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:16:00.485564"
+    },
+    {
+      "time": "01:14",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:16:00.485564"
+    },
+    {
+      "time": "01:14",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:00.485564"
+    },
+    {
+      "time": "01:14",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:16:00.485564"
+    },
+    {
+      "time": "01:14",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:00.986546"
+    },
+    {
+      "time": "01:14",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:16:00.986546"
+    },
+    {
+      "time": "01:14",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:16:00.986546"
+    },
+    {
+      "time": "01:14",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:00.986546"
+    },
+    {
+      "time": "01:14",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:16:00.986546"
+    },
+    {
+      "time": "01:15",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:01.488329"
+    },
+    {
+      "time": "01:15",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:16:01.488329"
+    },
+    {
+      "time": "01:15",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:16:01.488329"
+    },
+    {
+      "time": "01:15",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:01.488329"
+    },
+    {
+      "time": "01:15",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:16:01.488329"
+    },
+    {
+      "time": "01:15",
+      "level": "WARN",
+      "message": "Датчик Barometer: нестабильные показания",
+      "timestamp": "2026-08-27T17:16:01.989700"
+    },
+    {
+      "time": "01:15",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:01.989700"
+    },
+    {
+      "time": "01:15",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:16:01.989700"
+    },
+    {
+      "time": "01:15",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:16:01.989700"
+    },
+    {
+      "time": "01:15",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:01.989700"
+    },
+    {
+      "time": "01:15",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:16:01.989700"
+    },
+    {
+      "time": "01:16",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:16:02.493338"
+    },
+    {
+      "time": "01:16",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:16:02.494329"
+    },
+    {
+      "time": "01:16",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:16:02.494329"
+    },
+    {
+      "time": "01:16",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:16:02.494329"
+    },
+    {
+      "time": "01:16",
+      "level": "WARN",
+      "message": "Датчик LiDAR: нестабильные показания",
+      "timestamp": "2026-08-27T17:16:02.494329"
+    },
+    {
+      "time": "01:16",
+      "level": "WARN",
+      "message": "Датчик GPS: нестабильные показания",
+      "timestamp": "2026-08-27T17:16:02.494329"
+    },
+    {
+      "time": "01:16",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:02.494329"
+    },
+    {
+      "time": "01:16",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:16:02.494329"
+    },
+    {
+      "time": "01:16",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:16:02.495330"
+    },
+    {
+      "time": "01:16",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:02.495330"
+    },
+    {
+      "time": "01:16",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:16:02.495330"
+    },
+    {
+      "time": "01:16",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:02.996406"
+    },
+    {
+      "time": "01:16",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:16:02.996406"
+    },
+    {
+      "time": "01:16",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:16:02.996406"
+    },
+    {
+      "time": "01:16",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:02.996406"
+    },
+    {
+      "time": "01:16",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:16:02.996406"
+    },
+    {
+      "time": "01:17",
+      "level": "WARN",
+      "message": "Датчик IMU: нестабильные показания",
+      "timestamp": "2026-08-27T17:16:03.498154"
+    },
+    {
+      "time": "01:17",
+      "level": "WARN",
+      "message": "Датчик LiDAR: нестабильные показания",
+      "timestamp": "2026-08-27T17:16:03.498154"
+    },
+    {
+      "time": "01:17",
+      "level": "WARN",
+      "message": "Датчик Barometer: нестабильные показания",
+      "timestamp": "2026-08-27T17:16:03.498154"
+    },
+    {
+      "time": "01:17",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:03.498154"
+    },
+    {
+      "time": "01:17",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:16:03.498154"
+    },
+    {
+      "time": "01:17",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:16:03.499162"
+    },
+    {
+      "time": "01:17",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:03.499162"
+    },
+    {
+      "time": "01:17",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:16:03.501178"
+    },
+    {
+      "time": "01:17",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:04.004122"
+    },
+    {
+      "time": "01:17",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:16:04.004122"
+    },
+    {
+      "time": "01:17",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:16:04.004122"
+    },
+    {
+      "time": "01:17",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:04.004122"
+    },
+    {
+      "time": "01:17",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:16:04.005123"
+    },
+    {
+      "time": "01:18",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:04.505415"
+    },
+    {
+      "time": "01:18",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:16:04.505415"
+    },
+    {
+      "time": "01:18",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:16:04.505415"
+    },
+    {
+      "time": "01:18",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:04.505415"
+    },
+    {
+      "time": "01:18",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:16:04.506890"
+    },
+    {
+      "time": "01:18",
+      "level": "ERROR",
+      "message": "❌ XAI ошибка: Dimension out of range (expected to be in range of [-2, 1], but got 2)",
+      "timestamp": "2026-08-27T17:16:05.009806"
+    },
+    {
+      "time": "01:18",
+      "level": "INFO",
+      "message": "📊 Решение: Продолжить (уверенность: 0.85)",
+      "timestamp": "2026-08-27T17:16:05.009806"
+    },
+    {
+      "time": "01:18",
+      "level": "DRONE",
+      "message": "🚁 Координаты: X=0.0, Y=0.0, Z=1.6",
+      "timestamp": "2026-08-27T17:16:05.009806"
+    },
+    {
+      "time": "01:18",
+      "level": "DRONE",
+      "message": "🚁 До цели: 111.8 м",
+      "timestamp": "2026-08-27T17:16:05.009806"
+    },
+    {
+      "time": "01:18",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:05.009806"
+    },
+    {
+      "time": "01:18",
+      "level": "ERROR",
+      "message": "Ошибка датчика Barometer",
+      "timestamp": "2026-08-27T17:16:05.010814"
+    },
+    {
+      "time": "01:18",
+      "level": "ERROR",
+      "message": "Ошибка датчика LiDAR",
+      "timestamp": "2026-08-27T17:16:05.010814"
+    },
+    {
+      "time": "01:18",
+      "level": "ERROR",
+      "message": "Ошибка датчика Camera",
+      "timestamp": "2026-08-27T17:16:05.010814"
+    },
+    {
+      "time": "01:18",
+      "level": "ERROR",
+      "message": "Ошибка датчика GPS",
+      "timestamp": "2026-08-27T17:16:05.010814"
+    },
+    {
+      "time": "01:19",
+      "level": "DRONE",
+      "message": "🚁 Начинаем посадку...",
+      "timestamp": "2026-08-27T17:16:05.511536"
+    },
+    {
+      "time": "01:19",
+      "level": "OK",
+      "message": "✅ Посадка выполнена!",
+      "timestamp": "2026-08-27T17:16:05.724028"
+    },
+    {
+      "time": "01:19",
+      "level": "OK",
+      "message": "СТАТУС: ПОЛЁТ ЗАВЕРШЁН",
+      "timestamp": "2026-08-27T17:16:05.725028"
+    },
+    {
+      "time": "01:19",
+      "level": "INFO",
+      "message": "Длительность: 60 сек",
+      "timestamp": "2026-08-27T17:16:05.725028"
+    },
+    {
+      "time": "01:19",
+      "level": "INFO",
+      "message": "Препятствий: 0",
+      "timestamp": "2026-08-27T17:16:05.725028"
+    },
+    {
+      "time": "01:19",
+      "level": "INFO",
+      "message": "Датчики: 5/5 OK, ошибок: 0",
+      "timestamp": "2026-08-27T17:16:05.725028"
+    },
+    {
+      "time": "01:19",
+      "level": "INFO",
+      "message": "Препятствий не обнаружено",
+      "timestamp": "2026-08-27T17:16:05.725028"
+    },
+    {
+      "time": "01:19",
+      "level": "INFO",
+      "message": "Всего объяснений: 0",
+      "timestamp": "2026-08-27T17:16:05.725028"
+    },
+    {
+      "time": "01:19",
+      "level": "INFO",
+      "message": "Аномалий: 0",
+      "timestamp": "2026-08-27T17:16:05.725028"
+    },
+    {
+      "time": "01:19",
+      "level": "INFO",
+      "message": "XAI сохранены: data/logs/xai_20260827_171605.json",
+      "timestamp": "2026-08-27T17:16:05.726024"
+    }
+  ],
+  "total": 298
+}
