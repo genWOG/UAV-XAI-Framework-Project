@@ -9,8 +9,8 @@ class XAIEngine:
     """
     High-level interface for XAI methods.
 
-    The engine manages explainer registration and creates
-    explainer instances on demand.
+    The engine manages explainer registration and
+    creates explainer instances on demand.
     """
 
     def __init__(
@@ -53,46 +53,58 @@ class XAIEngine:
         self,
         method: str,
         target_layer: Any = None,
+        explainer_kwargs: dict[str, Any] | None = None,
     ) -> Explainer:
         """
         Create or reuse an explainer instance.
-
-        For Grad-CAM, target_layer is part of the instance
-        configuration.
         """
+
+        explainer_kwargs = (
+            explainer_kwargs
+            if explainer_kwargs is not None
+            else {}
+        )
 
         explainer_cls = self.registry.get(
             method
         )
 
-        cache_key = (
-            method,
-            id(target_layer),
-        )
+        # Grad-CAM keeps its hooks and therefore
+        # is cached by target layer.
+        if method == "grad_cam":
 
-        if cache_key not in self._explainer_instances:
-
-            if method == "grad_cam":
-                if target_layer is None:
-                    raise ValueError(
-                        "target_layer is required "
-                        "for Grad-CAM."
-                    )
-
-                explainer = explainer_cls(
-                    target_layer=target_layer
+            if target_layer is None:
+                raise ValueError(
+                    "target_layer is required "
+                    "for Grad-CAM."
                 )
 
-            else:
-                explainer = explainer_cls()
+            cache_key = (
+                method,
+                id(target_layer),
+            )
 
-            self._explainer_instances[
+            if cache_key not in self._explainer_instances:
+
+                explainer = explainer_cls(
+                    target_layer=target_layer,
+                    **explainer_kwargs,
+                )
+
+                self._explainer_instances[
+                    cache_key
+                ] = explainer
+
+            return self._explainer_instances[
                 cache_key
-            ] = explainer
+            ]
 
-        return self._explainer_instances[
-            cache_key
-        ]
+        # Tabular explainers currently get a fresh
+        # instance because their configuration may
+        # include training/reference data.
+        return explainer_cls(
+            **explainer_kwargs
+        )
 
     def explain(
         self,
@@ -104,27 +116,6 @@ class XAIEngine:
     ) -> ExplanationResult:
         """
         Generate an explanation using a registered method.
-
-        Parameters
-        ----------
-        method:
-            Name of the XAI method.
-
-        model:
-            Model being explained.
-
-        input_data:
-            Model input.
-
-        target:
-            Target class/action.
-
-        kwargs:
-            Method-specific configuration.
-
-        Returns
-        -------
-        ExplanationResult
         """
 
         target_layer = kwargs.pop(
@@ -132,9 +123,12 @@ class XAIEngine:
             None,
         )
 
+        explainer_kwargs = kwargs
+
         explainer = self._get_instance(
             method=method,
             target_layer=target_layer,
+            explainer_kwargs=explainer_kwargs,
         )
 
         return explainer.explain(

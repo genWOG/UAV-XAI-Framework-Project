@@ -1,5 +1,9 @@
 from .engine import XAIEngine
-from ..methods import GradCAMExplainer
+from ..methods import (
+    GradCAMExplainer,
+    LimeTabularExplainer,
+    ShapTabularExplainer,
+)
 
 
 def create_default_engine() -> XAIEngine:
@@ -13,6 +17,16 @@ def create_default_engine() -> XAIEngine:
     engine.register(
         "grad_cam",
         GradCAMExplainer,
+    )
+
+    engine.register(
+        "lime",
+        LimeTabularExplainer,
+    )
+
+    engine.register(
+        "shap",
+        ShapTabularExplainer,
     )
 
     return engine
