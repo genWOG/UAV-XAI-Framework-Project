@@ -49,7 +49,7 @@ class ObstacleDetector:
         
         # 👉 1. ПРОВЕРКА СТОЛКНОВЕНИЯ
         if sensors.get('collision', False):
-            object_name = sensors.get('object_name', 'неизвестно')
+            object_name = self._get_object_name(sensors)
             distance = sensors.get('obstacle_distance', 0.0)
             
             result = {

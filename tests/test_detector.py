@@ -1,35 +1,106 @@
-"""
-Тест обнаружения препятствий
-"""
+import pytest
 
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'xai'))
-
-from modules.log_manager import LogManager
 from modules.obstacle_detector import ObstacleDetector
 
-print("🧪 ТЕСТ: Обнаружение препятствий")
-print("="*40)
 
-log = LogManager(log_dir="test_logs")
-detector = ObstacleDetector(log)
+def test_detector_no_obstacle():
+    detector = ObstacleDetector()
 
-# Тестовые данные
-test_points = [
-    (10, 5, -1, 5.0),
-    (30, 20, -1, 5.0),
-    (50, 40, -1, 5.0),
-    (80, 70, -1, 5.0)
-]
+    state = {
+        "position": {
+            "x": 10.0,
+            "y": 5.0,
+            "z": -1.0,
+        },
+        "velocity": {
+            "vx": 0.0,
+            "vy": 0.0,
+            "vz": 0.0,
+        },
+        "orientation": {
+            "yaw": 0.0,
+            "roll": 0.0,
+            "pitch": 0.0,
+        },
+        "sensors": {
+            "obstacle_distance": 100.0,
+            "obstacle_density": 0.0,
+            "battery": 100.0,
+            "collision": False,
+        },
+    }
 
-for x, y, z, speed in test_points:
-    sensors = {'lidar': 30, 'camera': True}
-    result = detector.detect(x, y, z, speed, sensors)
-    if result:
-        print(f"✅ Обнаружено: {result['object']} (тип: {result['type']}, дист: {result['distance']:.1f} м)")
-    else:
-        print(f"❌ Ничего не обнаружено в ({x}, {y})")
+    result = detector.detect(state)
 
-print("\n📊 Статистика:", detector.get_summary())
-print("✅ Тест завершён!")
+    assert result is None
+
+
+def test_detector_critical_obstacle():
+    detector = ObstacleDetector()
+
+    state = {
+        "position": {
+            "x": 10.0,
+            "y": 5.0,
+            "z": -1.0,
+        },
+        "velocity": {
+            "vx": 2.0,
+            "vy": 0.0,
+            "vz": 0.0,
+        },
+        "orientation": {
+            "yaw": 0.0,
+            "roll": 0.0,
+            "pitch": 0.0,
+        },
+        "sensors": {
+            "obstacle_distance": 2.0,
+            "obstacle_density": 0.2,
+            "battery": 80.0,
+            "collision": False,
+            "object_name": "wall",
+        },
+    }
+
+    result = detector.detect(state)
+
+    assert result is not None
+    assert result["type"] == "collision"
+    assert result["distance"] == pytest.approx(2.0)
+    assert result["object"] == "стена"
+
+
+def test_detector_collision():
+    detector = ObstacleDetector()
+
+    state = {
+        "position": {
+            "x": 10.0,
+            "y": 5.0,
+            "z": -1.0,
+        },
+        "velocity": {
+            "vx": 1.0,
+            "vy": 0.0,
+            "vz": 0.0,
+        },
+        "orientation": {
+            "yaw": 0.0,
+            "roll": 0.0,
+            "pitch": 0.0,
+        },
+        "sensors": {
+            "obstacle_distance": 0.0,
+            "obstacle_density": 1.0,
+            "battery": 80.0,
+            "collision": True,
+            "object_name": "building",
+        },
+    }
+
+    result = detector.detect(state)
+
+    assert result is not None
+    assert result["type"] == "collision"
+    assert result["object"] == "здание"
