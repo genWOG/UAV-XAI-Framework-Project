@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "uav-xai"
+version = "0.1.0"
+description = "Explainable AI framework for autonomous UAV decision-making systems"
+readme = "README.md"
+requires-python = ">=3.11"
+
+dependencies = [
+    "numpy",
+    "pandas",
+    "scipy",
+    "matplotlib",
+    "plotly",
+    "scikit-learn",
+    "jupyterlab",
+    "pillow",
+    "pyyaml",
+    "torch",
+    "torchvision",
+    "lime",
+    "shap",
+    "captum",
+    "zennit",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]

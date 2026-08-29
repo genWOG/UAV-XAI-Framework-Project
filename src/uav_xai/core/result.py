@@ -7,22 +7,9 @@ import numpy as np
 @dataclass
 class ExplanationResult:
     """
-    Standardized result returned by every XAI method.
+    Unified result returned by any XAI method.
 
-    Attributes
-    ----------
-    method:
-        Name of the explanation method, e.g. "grad_cam".
-    attribution:
-        2D or 3D attribution map produced by the explainer.
-    target:
-        Target class/action for which the explanation was generated.
-    confidence:
-        Model confidence for the target.
-    runtime_ms:
-        Explanation generation time in milliseconds.
-    metadata:
-        Additional method-specific information.
+    Supports image, tabular and other input modalities.
     """
 
     method: str
@@ -32,4 +19,10 @@ class ExplanationResult:
     confidence: float | None = None
     runtime_ms: float | None = None
 
-    metadata: dict[str, Any] = field(default_factory=dict)
+    input_type: str = "unknown"
+
+    feature_names: list[str] | None = None
+
+    metadata: dict[str, Any] = field(
+        default_factory=dict
+    )
