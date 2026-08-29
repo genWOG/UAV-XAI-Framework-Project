@@ -1,0 +1,22 @@
+experiment:
+  name: bmw_image_xai
+
+image:
+  path: data/images/test.jpg
+
+model:
+  name: resnet18
+
+xai:
+  input_type: image
+  method: grad_cam
+  target_layer: layer4[-1].conv2
+  num_samples: 500
+
+metrics:
+  enabled: true
+  steps: 20
+  baseline_value: 0.0
+
+output:
+  root: results

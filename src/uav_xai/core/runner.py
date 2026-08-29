@@ -396,9 +396,18 @@ class ExperimentRunner:
             "target_layer"
         )
 
+        input_type = self.config["xai"].get(
+            "input_type",
+            "image",
+        )
+
         target_layer = None
 
         if method == "grad_cam":
+            target_layer_path = self.config["xai"].get(
+                "target_layer"
+            )
+
             if not target_layer_path:
                 raise ValueError(
                     "target_layer is required "
@@ -410,12 +419,55 @@ class ExperimentRunner:
                 target_layer_path,
             )
 
+        if input_type == "image" and method == "lime":
+
+            method = "lime_image"
+
+        elif input_type == "tabular" and method == "lime":
+
+            method = "lime_tabular"
+
+        elif input_type == "tabular" and method == "shap":
+
+            method = "shap_tabular"
+
+        explain_kwargs = {}
+
+        if method == "grad_cam":
+            explain_kwargs["target_layer"] = target_layer
+
+        if method == "lime_image":
+
+            def preprocess(
+                rgb_image: np.ndarray,
+            ) -> torch.Tensor:
+                pil_image = Image.fromarray(
+                    rgb_image.astype(np.uint8)
+                )
+
+                return weights.transforms()(
+                    pil_image
+                )
+
+            explain_kwargs["preprocess"] = preprocess
+
+            explain_kwargs["num_samples"] = int(
+                self.config["xai"].get(
+                    "num_samples",
+                    500,
+                )
+            )
+
         explanation = engine.explain(
             method=method,
             model=model,
-            input_data=input_tensor,
+            input_data=(
+                np.asarray(original_image)
+                if method == "lime_image"
+                else input_tensor
+            ),
             target=prediction.class_id,
-            target_layer=target_layer,
+            **explain_kwargs,
         )
 
         print(
@@ -436,8 +488,9 @@ class ExperimentRunner:
             "[5/6] Saving visualization..."
         )
 
-        gradcam_path = (
-            output_dir / "gradcam.png"
+        visualization_path = (
+            output_dir
+            / f"{method}.png"
         )
 
         visualization = (
@@ -450,11 +503,11 @@ class ExperimentRunner:
 
         save_image(
             visualization,
-            gradcam_path,
+            visualization_path,
         )
 
         print(
-            f"      Saved: {gradcam_path}"
+            f"      Saved: {visualization_path}"
         )
 
         # --------------------------------------------------
@@ -616,8 +669,8 @@ class ExperimentRunner:
             },
             "metrics": None,
             "artifacts": {
-                "gradcam": str(
-                    gradcam_path.name
+                "explanation": str(
+                    visualization_path.name
                 ),
             },
         }
@@ -679,7 +732,7 @@ class ExperimentRunner:
         )
 
         print(
-            f"Grad-CAM: {gradcam_path}"
+            f"Explanation: {visualization_path}"
         )
 
         if metrics_enabled:

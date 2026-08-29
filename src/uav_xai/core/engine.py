@@ -49,6 +49,24 @@ class XAIEngine:
 
         return self.registry.list_methods()
 
+    def _resolve_method(
+        self,
+        method: str,
+    ) -> str:
+        """
+        Resolve backward-compatible method aliases.
+        """
+
+        aliases = {
+            "lime": "lime_tabular",
+            "shap": "shap_tabular",
+        }
+
+        return aliases.get(
+            method,
+            method,
+        )
+
     def _get_instance(
         self,
         method: str,
@@ -121,6 +139,10 @@ class XAIEngine:
         target_layer = kwargs.pop(
             "target_layer",
             None,
+        )
+
+        method = self._resolve_method(
+            method
         )
 
         explainer_kwargs = kwargs
