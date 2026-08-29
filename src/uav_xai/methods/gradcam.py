@@ -131,6 +131,7 @@ class GradCAMExplainer(Explainer):
             target=target,
             confidence=confidence,
             runtime_ms=runtime_ms,
+            input_type="image",
             metadata={
                 "input_shape": tuple(input_data.shape),
                 "output_shape": tuple(output.shape),

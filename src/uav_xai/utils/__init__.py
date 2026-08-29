@@ -4,8 +4,15 @@ from .visualization import (
     plot_faithfulness_curves,
 )
 
+from .image import (
+    validate_image_tensor,
+    tensor_to_numpy_image,
+)
+
 __all__ = [
     "overlay_heatmap",
     "save_image",
     "plot_faithfulness_curves",
+    "validate_image_tensor",
+    "tensor_to_numpy_image",
 ]

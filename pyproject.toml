@@ -15,6 +15,7 @@ dependencies = [
     "scipy",
     "matplotlib",
     "plotly",
+    "scikit-image",
     "scikit-learn",
     "jupyterlab",
     "pillow",
