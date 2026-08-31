@@ -2,6 +2,7 @@ import argparse
 import sys
 
 from .core.runner import ExperimentRunner
+from .core.benchmark import BenchmarkRunner
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -31,6 +32,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Path to YAML configuration.",
     )
 
+    benchmark_parser = subparsers.add_parser(
+        "benchmark",
+        help="Run a repeated XAI benchmark.",
+    )
+
+    benchmark_parser.add_argument(
+        "--config",
+        required=True,
+        help="Path to YAML benchmark configuration.",
+    )
+
     return parser
 
 
@@ -42,6 +54,24 @@ def main() -> int:
     if args.command == "experiment":
         try:
             runner = ExperimentRunner(
+                args.config
+            )
+
+            runner.run()
+
+            return 0
+
+        except Exception as exc:
+            print(
+                f"ERROR: {exc}",
+                file=sys.stderr,
+            )
+
+            return 1
+
+    if args.command == "benchmark":
+        try:
+            runner = BenchmarkRunner(
                 args.config
             )
 

@@ -7,6 +7,7 @@ from .engine import XAIEngine
 from .factory import create_default_engine
 from .config import load_config
 from .runner import ExperimentRunner
+from .benchmark import BenchmarkRunner
 
 __all__ = [
     "Explainer",
@@ -18,4 +19,5 @@ __all__ = [
     "create_default_engine",
     "load_config",
     "ExperimentRunner",
+    "BenchmarkRunner",
 ]

@@ -1,8 +1,8 @@
 experiment:
-  name: bmw_image_benchmark
+  name: dog_image_benchmark
 
 image:
-  path: data/images/test.jpg
+  path: data/images/dog.jpg
 
 model:
   name: resnet18
