@@ -46,6 +46,7 @@ def test_shap_tabular_explanation():
     engine = create_default_engine()
 
     result = engine.explain(
+        input_type="tabular",
         method="shap",
         model=model,
         input_data=instance,

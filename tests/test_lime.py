@@ -45,6 +45,7 @@ def test_lime_tabular_explanation():
     engine = create_default_engine()
 
     result = engine.explain(
+        input_type="tabular",
         method="lime",
         model=model,
         input_data=instance,

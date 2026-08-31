@@ -9,7 +9,7 @@ model:
 
 xai:
   input_type: image
-  method: grad_cam
+  method: lime
   target_layer: layer4[-1].conv2
   num_samples: 500
 

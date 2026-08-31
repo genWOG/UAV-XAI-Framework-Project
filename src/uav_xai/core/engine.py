@@ -9,8 +9,8 @@ class XAIEngine:
     """
     High-level interface for XAI methods.
 
-    The engine manages explainer registration and
-    creates explainer instances on demand.
+    Explainer selection and constructor-specific configuration
+    are delegated to the registry.
     """
 
     def __init__(
@@ -24,146 +24,158 @@ class XAIEngine:
         )
 
         self._explainer_instances: dict[
-            tuple[str, int],
+            tuple[str, str, int],
             Explainer,
         ] = {}
 
     def register(
         self,
-        name: str,
-        explainer_cls: type[Explainer],
-    ) -> None:
-        """
-        Register an XAI method.
-        """
-
-        self.registry.register(
-            name,
-            explainer_cls,
-        )
-
-    def list_methods(self) -> list[str]:
-        """
-        Return available XAI methods.
-        """
-
-        return self.registry.list_methods()
-
-    def _resolve_method(
-        self,
+        input_type: str,
         method: str,
-    ) -> str:
-        """
-        Resolve backward-compatible method aliases.
-        """
-
-        aliases = {
-            "lime": "lime_tabular",
-            "shap": "shap_tabular",
-        }
-
-        return aliases.get(
-            method,
-            method,
+        explainer_cls: type[Explainer],
+        cache_instance: bool = False,
+        build_kwargs: Any = None,
+        build_input: Any = None,
+    ) -> None:
+        self.registry.register(
+            input_type=input_type,
+            method=method,
+            explainer_cls=explainer_cls,
+            cache_instance=cache_instance,
+            build_kwargs=build_kwargs,
+            build_input=build_input,
         )
+
+    def list_methods(
+        self,
+        input_type: str | None = None,
+    ) -> list[str]:
+        return self.registry.list_methods(
+            input_type=input_type,
+        )
+
+    def list_methods_all(
+        self,
+    ) -> list[tuple[str, str]]:
+        return self.registry.list_entries()
 
     def _get_instance(
         self,
+        input_type: str,
         method: str,
-        target_layer: Any = None,
-        explainer_kwargs: dict[str, Any] | None = None,
+        context: dict[str, Any] | None = None,
     ) -> Explainer:
-        """
-        Create or reuse an explainer instance.
-        """
 
-        explainer_kwargs = (
-            explainer_kwargs
-            if explainer_kwargs is not None
+        context = (
+            context
+            if context is not None
             else {}
         )
 
-        explainer_cls = self.registry.get(
-            method
+        spec = self.registry.get_spec(
+            input_type=input_type,
+            method=method,
         )
 
-        # Grad-CAM keeps its hooks and therefore
-        # is cached by target layer.
-        if method == "grad_cam":
+        constructor_kwargs = (
+            self.registry.build_explainer_kwargs(
+                input_type=input_type,
+                method=method,
+                context=context,
+            )
+        )
 
-            if target_layer is None:
-                raise ValueError(
-                    "target_layer is required "
-                    "for Grad-CAM."
-                )
+        # Cached explainers may own resources,
+        # for example PyTorch hooks.
+        if not spec.cache_instance:
 
-            cache_key = (
-                method,
-                id(target_layer),
+            return spec.explainer_cls(
+                **constructor_kwargs
             )
 
-            if cache_key not in self._explainer_instances:
-
-                explainer = explainer_cls(
-                    target_layer=target_layer,
-                    **explainer_kwargs,
-                )
-
-                self._explainer_instances[
-                    cache_key
-                ] = explainer
-
-            return self._explainer_instances[
-                cache_key
-            ]
-
-        # Tabular explainers currently get a fresh
-        # instance because their configuration may
-        # include training/reference data.
-        return explainer_cls(
-            **explainer_kwargs
+        resource_key = id(
+            context.get("target_layer")
         )
+
+        cache_key = (
+            input_type,
+            method,
+            resource_key,
+        )
+
+        if cache_key not in self._explainer_instances:
+
+            self._explainer_instances[
+                cache_key
+            ] = spec.explainer_cls(
+                **constructor_kwargs
+            )
+
+        return self._explainer_instances[
+            cache_key
+        ]
 
     def explain(
         self,
+        input_type: str,
         method: str,
         model: Any,
         input_data: Any,
         target: int | str | None = None,
+        context: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> ExplanationResult:
         """
         Generate an explanation using a registered method.
+
+        ``context`` contains shared experiment information,
+        while additional keyword arguments remain supported
+        for backward compatibility and are merged into the
+        explainer context.
         """
 
-        target_layer = kwargs.pop(
-            "target_layer",
-            None,
+        merged_context: dict[str, Any] = {}
+
+        if context is not None:
+            merged_context.update(context)
+
+        merged_context.update(kwargs)
+
+        merged_context.setdefault(
+            "model",
+            model,
         )
 
-        method = self._resolve_method(
-            method
+        merged_context.setdefault(
+            "input_data",
+            input_data,
         )
 
-        explainer_kwargs = kwargs
+        merged_context.setdefault(
+            "target",
+            target,
+        )
 
         explainer = self._get_instance(
+            input_type=input_type,
             method=method,
-            target_layer=target_layer,
-            explainer_kwargs=explainer_kwargs,
+            context=merged_context,
+        )
+
+        resolved_input = self.registry.build_input_data(
+            input_type=input_type,
+            method=method,
+            context=merged_context,
+            default_input=input_data,
         )
 
         return explainer.explain(
             model=model,
-            input_data=input_data,
+            input_data=resolved_input,
             target=target,
         )
 
     def close(self) -> None:
-        """
-        Release explainer resources and hooks.
-        """
-
         for explainer in (
             self._explainer_instances.values()
         ):

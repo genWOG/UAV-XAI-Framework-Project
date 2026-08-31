@@ -14,7 +14,6 @@ from torchvision.models import (
 
 from .config import load_config
 from .predictor import ModelPredictor
-from ..methods import GradCAMExplainer
 from ..metrics import (
     compute_deletion,
     compute_insertion,
@@ -390,6 +389,51 @@ class ExperimentRunner:
             "method"
         ]
 
+        input_type = self.config["xai"].get(
+            "input_type",
+            "image",
+        )
+
+        xai_config = self.config["xai"]
+
+        target_layer = None
+
+        target_layer_path = xai_config.get(
+            "target_layer"
+        )
+
+        if target_layer_path:
+            target_layer = _resolve_module(
+                model,
+                target_layer_path,
+            )
+
+        transform = weights.transforms()
+
+
+        def preprocess(
+            rgb_image: np.ndarray,
+        ) -> torch.Tensor:
+            pil_image = Image.fromarray(
+                rgb_image.astype(np.uint8)
+            )
+
+            return transform(
+                pil_image
+            )
+
+
+        context = {
+            "model": model,
+            "weights": weights,
+            "input_type": input_type,
+            "xai_config": xai_config,
+            "target_layer": target_layer,
+            "preprocess": preprocess,
+            "input_tensor": input_tensor,
+            "original_image": original_image,
+        }
+        
         target_layer_path = self.config[
             "xai"
         ].get(
@@ -403,71 +447,13 @@ class ExperimentRunner:
 
         target_layer = None
 
-        if method == "grad_cam":
-            target_layer_path = self.config["xai"].get(
-                "target_layer"
-            )
-
-            if not target_layer_path:
-                raise ValueError(
-                    "target_layer is required "
-                    "for Grad-CAM."
-                )
-
-            target_layer = _resolve_module(
-                model,
-                target_layer_path,
-            )
-
-        if input_type == "image" and method == "lime":
-
-            method = "lime_image"
-
-        elif input_type == "tabular" and method == "lime":
-
-            method = "lime_tabular"
-
-        elif input_type == "tabular" and method == "shap":
-
-            method = "shap_tabular"
-
-        explain_kwargs = {}
-
-        if method == "grad_cam":
-            explain_kwargs["target_layer"] = target_layer
-
-        if method == "lime_image":
-
-            def preprocess(
-                rgb_image: np.ndarray,
-            ) -> torch.Tensor:
-                pil_image = Image.fromarray(
-                    rgb_image.astype(np.uint8)
-                )
-
-                return weights.transforms()(
-                    pil_image
-                )
-
-            explain_kwargs["preprocess"] = preprocess
-
-            explain_kwargs["num_samples"] = int(
-                self.config["xai"].get(
-                    "num_samples",
-                    500,
-                )
-            )
-
         explanation = engine.explain(
+            input_type=input_type,
             method=method,
             model=model,
-            input_data=(
-                np.asarray(original_image)
-                if method == "lime_image"
-                else input_tensor
-            ),
+            input_data=input_tensor,
             target=prediction.class_id,
-            **explain_kwargs,
+            context=context,
         )
 
         print(
