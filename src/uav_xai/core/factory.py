@@ -9,6 +9,8 @@ from ..methods import (
     LimeImageExplainer,
     LimeTabularExplainer,
     ShapTabularExplainer,
+    ShapImageExplainer,
+    LrpImageExplainer,
 )
 
 
@@ -86,6 +88,93 @@ def _lime_image_kwargs(
         ),
     }
 
+def _shap_image_kwargs(
+    context: dict[str, Any],
+) -> dict[str, Any]:
+    preprocess = context.get(
+        "preprocess"
+    )
+
+    if preprocess is None:
+        raise ValueError(
+            "SHAP Image requires preprocess."
+        )
+
+    xai_config = context.get(
+        "xai_config",
+        {},
+    )
+
+    return {
+        "preprocess": preprocess,
+        "nsamples": int(
+            xai_config.get(
+                "nsamples",
+                100,
+            )
+        ),
+        "num_segments": int(
+            xai_config.get(
+                "num_segments",
+                30,
+            )
+        ),
+        "compactness": float(
+            xai_config.get(
+                "compactness",
+                10.0,
+            )
+        ),
+        "hide_color": xai_config.get(
+            "hide_color",
+            0,
+        ),
+    }
+
+def _lrp_image_kwargs(
+    context: dict[str, Any],
+) -> dict[str, Any]:
+    preprocess = context.get(
+        "preprocess"
+    )
+
+    if preprocess is None:
+        raise ValueError(
+            "LRP Image requires preprocess."
+        )
+
+    xai_config = context.get(
+        "xai_config",
+        {},
+    )
+
+    return {
+        "preprocess": preprocess,
+        "epsilon": float(
+            xai_config.get(
+                "epsilon",
+                1e-6,
+            )
+        ),
+        "gamma": float(
+            xai_config.get(
+                "gamma",
+                0.1,
+            )
+        ),
+        "low": float(
+            xai_config.get(
+                "low",
+                0.0,
+            )
+        ),
+        "high": float(
+            xai_config.get(
+                "high",
+                1.0,
+            )
+        ),
+    }
 
 def _lime_tabular_kwargs(
     context: dict[str, Any],
@@ -179,6 +268,22 @@ def create_default_engine() -> XAIEngine:
         method="lime",
         explainer_cls=LimeImageExplainer,
         build_kwargs=_lime_image_kwargs,
+        build_input=_lime_image_input,
+    )
+
+    engine.register(
+        input_type="image",
+        method="shap",
+        explainer_cls=ShapImageExplainer,
+        build_kwargs=_shap_image_kwargs,
+        build_input=_lime_image_input,
+    )
+
+    engine.register(
+        input_type="image",
+        method="lrp",
+        explainer_cls=LrpImageExplainer,
+        build_kwargs=_lrp_image_kwargs,
         build_input=_lime_image_input,
     )
 

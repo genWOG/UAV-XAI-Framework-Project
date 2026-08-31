@@ -9,9 +9,12 @@ model:
 
 xai:
   input_type: image
-  method: lime
+  method: lrp
   target_layer: layer4[-1].conv2
-  num_samples: 500
+  nsamples: 100
+  num_segments: 30
+  compactness: 10.0
+  hide_color: 0
 
 metrics:
   enabled: true

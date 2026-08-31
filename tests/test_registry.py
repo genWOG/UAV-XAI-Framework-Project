@@ -170,3 +170,31 @@ def test_engine_uses_registry_builder():
     )
 
     assert instance.value == 123
+
+def test_registry_contains_image_shap():
+    from uav_xai import create_default_engine
+
+    engine = create_default_engine()
+
+    assert (
+        "shap"
+        in engine.list_methods(
+            "image"
+        )
+    )
+
+    engine.close()
+
+def test_registry_contains_image_lrp():
+    from uav_xai import create_default_engine
+
+    engine = create_default_engine()
+
+    assert (
+        "lrp"
+        in engine.list_methods(
+            "image"
+        )
+    )
+
+    engine.close()
