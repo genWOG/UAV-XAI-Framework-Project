@@ -1,6 +1,9 @@
 from .base import Explainer
 from .result import ExplanationResult
-from .prediction import PredictionResult
+from .prediction import (
+    DetectionResult,
+    PredictionResult,
+)
 from .predictor import ModelPredictor
 from .registry import ExplainerRegistry
 from .engine import XAIEngine
@@ -12,6 +15,7 @@ from .benchmark import BenchmarkRunner
 __all__ = [
     "Explainer",
     "ExplanationResult",
+    "DetectionResult",
     "PredictionResult",
     "ModelPredictor",
     "ExplainerRegistry",
