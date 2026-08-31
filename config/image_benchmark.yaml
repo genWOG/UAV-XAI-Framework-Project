@@ -1,0 +1,38 @@
+experiment:
+  name: bmw_image_benchmark
+
+image:
+  path: data/images/test.jpg
+
+model:
+  name: resnet18
+
+xai:
+  input_type: image
+  methods:
+    - grad_cam
+    - lime
+    - shap
+    - lrp
+
+  target_layer: layer4[-1].conv2
+
+  num_samples: 500
+  nsamples: 100
+
+  num_segments: 30
+  compactness: 10.0
+  hide_color: 0
+
+  epsilon: 0.000001
+  gamma: 0.1
+  low: 0.0
+  high: 1.0
+
+metrics:
+  enabled: true
+  steps: 20
+  baseline_value: 0.0
+
+output:
+  root: results
