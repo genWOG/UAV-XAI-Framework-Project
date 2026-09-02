@@ -1,7 +1,7 @@
 """
 Адаптер для подключения к AirSim / Cosys-AirSim.
-Поддерживает все основные датчики: GPS, IMU, Barometer, Magnetometer, Camera.
-LiDAR - опционально, если недоступен - использует fallback.
+
+Версия 4.0 — АСИНХРОННОЕ ДВИЖЕНИЕ (без блокировок)
 """
 
 import time
@@ -15,11 +15,12 @@ class AirSimAdapter:
         self.connected = False
         self.airsim_version = None
         self.lidar_available = True
-        self.distance_sensor_available = False  # 👈 НОВОЕ
+        self.distance_sensor_available = False
         self.max_altitude = 10
         self._import_airsim()
 
     def _import_airsim(self):
+        # Пытаемся импортировать Cosys-AirSim
         try:
             import cosysairsim as airsim
             self.airsim_version = 'cosys'
@@ -27,6 +28,7 @@ class AirSimAdapter:
         except ImportError:
             pass
 
+        # Если не получилось — пробуем оригинальный AirSim
         if self.airsim_version is None:
             try:
                 import airsim
@@ -36,13 +38,14 @@ class AirSimAdapter:
                 self.log.error("❌ AirSim не установлен")
                 return
 
+        # Подключаемся
         try:
             self.client = airsim.MultirotorClient()
             self.client.confirmConnection()
             self.connected = True
             self.log.ok("✅ Подключение к AirSim установлено!")
             self._check_lidar()
-            self._check_distance_sensor()  # 👈 НОВОЕ
+            self._check_distance_sensor()
         except Exception as e:
             self.log.error(f"❌ Ошибка подключения: {e}")
             self.connected = False
@@ -55,11 +58,9 @@ class AirSimAdapter:
                 self.log.ok("✅ LiDAR доступен")
             else:
                 self.lidar_available = False
-                self.log.warn("⚠️ LiDAR не доступен (используются базовые сенсоры)")
-        except Exception as e:
+                self.log.warn("⚠️ LiDAR не доступен")
+        except Exception:
             self.lidar_available = False
-            self.log.warn(f"⚠️ LiDAR не доступен: {e}")
-            self.log.warn("   Используются базовые сенсоры")
 
     def _check_distance_sensor(self):
         """Проверяет доступность DistanceSensor."""
@@ -67,28 +68,25 @@ class AirSimAdapter:
             distance_data = self.client.getDistanceSensorData()
             if distance_data and hasattr(distance_data, 'distance'):
                 dist = float(distance_data.distance)
-                if dist > 0 and dist < 1000:  # Реалистичное значение
+                if dist > 0 and dist < 1000:
                     self.distance_sensor_available = True
                     self.log.ok(f"✅ DistanceSensor доступен (расстояние: {dist:.1f} м)")
-                else:
-                    self.distance_sensor_available = False
-                    self.log.warn("⚠️ DistanceSensor: некорректные данные")
-            else:
-                self.distance_sensor_available = False
-                self.log.warn("⚠️ DistanceSensor не доступен")
+                    return
+            self.distance_sensor_available = False
+            self.log.warn("⚠️ DistanceSensor не доступен")
         except Exception as e:
             self.distance_sensor_available = False
             self.log.warn(f"⚠️ DistanceSensor ошибка: {e}")
 
     def takeoff(self) -> bool:
+        """Взлёт."""
         if not self.connected:
             self.log.error("❌ Нет подключения к AirSim")
             return False
-
         try:
             self.client.enableApiControl(True)
             self.client.armDisarm(True)
-            self.client.takeoffAsync().join()
+            self.client.takeoffAsync()  # БЕЗ .join()!
             self.log.ok("✅ Взлёт выполнен!")
             return True
         except Exception as e:
@@ -96,11 +94,11 @@ class AirSimAdapter:
             return False
 
     def land(self) -> bool:
+        """Посадка."""
         if not self.connected:
             return False
-
         try:
-            self.client.landAsync().join()
+            self.client.landAsync()  # БЕЗ .join()!
             self.client.armDisarm(False)
             self.client.enableApiControl(False)
             self.log.ok("✅ Посадка выполнена!")
@@ -110,29 +108,31 @@ class AirSimAdapter:
             return False
 
     def move_to(self, x: float, y: float, z: float, speed: float, force: bool = False) -> bool:
+        """
+        АСИНХРОННОЕ движение к точке — без блокировки!
+        """
         if not self.connected:
             return False
 
         # Ограничение высоты
         if z < -self.max_altitude:
-            self.log.warn(f"⚠️ Превышена максимальная высота! {abs(z):.1f} > {self.max_altitude} м")
             z = -self.max_altitude
 
         try:
             state = self.client.getMultirotorState()
             pos = state.kinematics_estimated.position
-            
             dx = x - pos.x_val
             dy = y - pos.y_val
             dz = z - pos.z_val
             dist = (dx*dx + dy*dy + dz*dz) ** 0.5
-            
+
             if dist > 0.5:
                 vx = (dx / dist) * speed
                 vy = (dy / dist) * speed
                 vz = (dz / dist) * speed
-                self.client.moveByVelocityAsync(vx, vy, vz, 1.0).join()
-                self.log.ok(f"✅ Перемещение к ({x:.1f}, {y:.1f}, {z:.1f})")
+                # 👇 БЕЗ .join()! Просто отправляем команду
+                self.client.moveByVelocityAsync(vx, vy, vz, 0.5)
+                self.log.ok(f"✅ Команда движения к ({x:.1f}, {y:.1f}, {z:.1f}) отправлена")
                 return True
             else:
                 self.log.ok("✅ Уже на месте!")
@@ -141,22 +141,31 @@ class AirSimAdapter:
             self.log.error(f"❌ Ошибка перемещения: {e}")
             return False
 
-    def get_state(self):
-        if not self.connected:
-            return self._empty_state()
+    def get_distance_to_obstacle(self) -> float:
+        """Возвращает расстояние до ближайшего препятствия через DistanceSensor."""
+        if not self.distance_sensor_available:
+            return 100.0
+        try:
+            data = self.client.getDistanceSensorData()
+            if data and hasattr(data, 'distance'):
+                return float(data.distance)
+        except Exception:
+            pass
+        return 100.0
 
+    def get_state(self):
+        """Возвращает состояние дрона или None при ошибке."""
+        if not self.connected:
+            return None
         try:
             state = self.client.getMultirotorState()
             pos = state.kinematics_estimated.position
             vel = state.kinematics_estimated.linear_velocity
             orient = state.kinematics_estimated.orientation
-            
             roll, pitch, yaw = self._quaternion_to_euler(
                 orient.x_val, orient.y_val, orient.z_val, orient.w_val
             )
-            
             sensor_data = self._get_sensor_data()
-            
             return {
                 'position': {'x': pos.x_val, 'y': pos.y_val, 'z': pos.z_val},
                 'velocity': {'x': vel.x_val, 'y': vel.y_val, 'z': vel.z_val},
@@ -165,9 +174,11 @@ class AirSimAdapter:
             }
         except Exception as e:
             self.log.warn(f"⚠️ Ошибка получения данных: {e}")
-            return self._empty_state()
+            self.connected = False
+            return None
 
     def _get_sensor_data(self):
+        """Сбор данных со всех сенсоров."""
         sensor_data = {
             'obstacle_distance': 100.0,
             'obstacle_density': 0.0,
@@ -180,11 +191,11 @@ class AirSimAdapter:
             'magnetometer': {'mag': [0, 0, 0]},
             'camera': None,
             'lidar_points': [],
-            'distance_sensor_distance': 100.0,  # 👈 НОВОЕ
-            'distance_sensor_available': self.distance_sensor_available,  # 👈 НОВОЕ
+            'distance_sensor_distance': 100.0,
+            'distance_sensor_available': self.distance_sensor_available,
         }
 
-        # 👉 LiDAR (только если доступен)
+        # LiDAR (если доступен)
         if self.lidar_available:
             try:
                 lidar_data = self.client.getLidarData()
@@ -199,28 +210,25 @@ class AirSimAdapter:
                             sensor_data['obstacle_density'] = float(len(distances[distances < 10]) / len(distances))
                     else:
                         self.lidar_available = False
-            except Exception as e:
+            except Exception:
                 self.lidar_available = False
 
-        # 👉 ГЛАВНОЕ: DistanceSensor (работает без LiDAR!)
+        # DistanceSensor (главный источник!)
         try:
             distance_data = self.client.getDistanceSensorData()
             if distance_data and hasattr(distance_data, 'distance'):
                 dist = float(distance_data.distance)
                 sensor_data['distance_sensor_distance'] = dist
                 sensor_data['distance_sensor_available'] = True
-                
-                # Логируем только если расстояние изменилось или близко
-                if dist < 30 and dist < sensor_data['obstacle_distance']:
+                if dist < sensor_data['obstacle_distance']:
                     sensor_data['obstacle_distance'] = dist
+                # Логируем только если близко
+                if dist < 30:
                     self.log.info(f"📡 DistanceSensor: {dist:.1f} м")
-                elif dist < 50:
-                    sensor_data['obstacle_distance'] = min(sensor_data['obstacle_distance'], dist)
-        except Exception as e:
-            # Просто пропускаем
+        except Exception:
             pass
 
-        # 👉 Столкновения
+        # Столкновения
         try:
             collision_info = self.client.simGetCollisionInfo()
             if collision_info and hasattr(collision_info, 'has_collided'):
@@ -236,11 +244,10 @@ class AirSimAdapter:
                         dz = impact.z_val - pos.z_val
                         dist = (dx*dx + dy*dy + dz*dz) ** 0.5
                         sensor_data['obstacle_distance'] = float(dist)
-                        sensor_data['distance_sensor_distance'] = float(dist)
         except:
             pass
 
-        # 👉 GPS
+        # GPS
         try:
             gps = self.client.getGpsData()
             if gps and hasattr(gps, 'gnss'):
@@ -252,64 +259,42 @@ class AirSimAdapter:
         except:
             pass
 
-        # 👉 IMU
+        # IMU
         try:
             imu = self.client.getImuData()
             if imu:
                 sensor_data['imu'] = {
-                    'accel': [
-                        imu.linear_acceleration.x_val,
-                        imu.linear_acceleration.y_val,
-                        imu.linear_acceleration.z_val
-                    ],
-                    'gyro': [
-                        imu.angular_velocity.x_val,
-                        imu.angular_velocity.y_val,
-                        imu.angular_velocity.z_val
-                    ]
+                    'accel': [imu.linear_acceleration.x_val,
+                              imu.linear_acceleration.y_val,
+                              imu.linear_acceleration.z_val],
+                    'gyro': [imu.angular_velocity.x_val,
+                             imu.angular_velocity.y_val,
+                             imu.angular_velocity.z_val]
                 }
         except:
             pass
 
-        # 👉 Barometer
+        # Barometer
         try:
             baro = self.client.getBarometerData()
             if baro:
-                sensor_data['barometer'] = {
-                    'pressure': baro.pressure,
-                    'altitude': baro.altitude
-                }
+                sensor_data['barometer'] = {'pressure': baro.pressure, 'altitude': baro.altitude}
         except:
             pass
 
-        # 👉 Magnetometer
+        # Magnetometer
         try:
             mag = self.client.getMagnetometerData()
             if mag:
                 sensor_data['magnetometer'] = {
-                    'mag': [
-                        mag.magnetic_field.x_val,
-                        mag.magnetic_field.y_val,
-                        mag.magnetic_field.z_val
-                    ]
+                    'mag': [mag.magnetic_field.x_val,
+                            mag.magnetic_field.y_val,
+                            mag.magnetic_field.z_val]
                 }
         except:
             pass
 
-        # 👉 Camera
-        try:
-            import airsim
-            responses = self.client.simGetImages([
-                airsim.ImageRequest("0", airsim.ImageType.Scene, False, False)
-            ])
-            if responses:
-                img = np.frombuffer(responses[0].image_data_uint8, dtype=np.uint8)
-                img = img.reshape(responses[0].height, responses[0].width, 3)
-                sensor_data['camera'] = img
-        except:
-            pass
-
-        # 👉 Battery
+        # Battery
         try:
             battery = self.client.getBatteryState()
             if battery and hasattr(battery, 'percentage'):
@@ -347,32 +332,15 @@ class AirSimAdapter:
         sinr_cosp = 2 * (w * x + y * z)
         cosr_cosp = 1 - 2 * (x * x + y * y)
         roll = math.atan2(sinr_cosp, cosr_cosp)
-        
         sinp = 2 * (w * y - z * x)
         if abs(sinp) >= 1:
             pitch = math.copysign(math.pi / 2, sinp)
         else:
             pitch = math.asin(sinp)
-        
         siny_cosp = 2 * (w * z + x * y)
         cosy_cosp = 1 - 2 * (y * y + z * z)
         yaw = math.atan2(siny_cosp, cosy_cosp)
-        
         return roll, pitch, yaw
-
-    def get_camera_image(self):
-        try:
-            import airsim
-            responses = self.client.simGetImages([
-                airsim.ImageRequest("0", airsim.ImageType.Scene, False, False)
-            ])
-            if responses:
-                img = np.frombuffer(responses[0].image_data_uint8, dtype=np.uint8)
-                img = img.reshape(responses[0].height, responses[0].width, 3)
-                return img
-        except:
-            pass
-        return None
 
     def disconnect(self):
         self.connected = False
