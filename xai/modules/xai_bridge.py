@@ -1,6 +1,6 @@
 """
 XAI Bridge — связующий слой между flight_monitor.py и XAI-методами.
-Версия 3.3 — исправлен SHAP
+Версия 3.4 — исправлен SHAP (инициализация с моделью)
 """
 
 import sys
@@ -106,21 +106,16 @@ class XAIBridge:
                 self._log(f"❌ Ошибка LIME: {e}", level='error')
                 self.lime_explainer = None
         
-        # 👉 ИНИЦИАЛИЗАЦИЯ SHAP (ИСПРАВЛЕННАЯ)
+        # 👉 ПОДГОТОВКА ДАННЫХ ДЛЯ SHAP (без создания explainer)
         self.shap_explainer = None
+        self._shap_sample_data = None
         if SHAP_AVAILABLE and training_data is not None:
             try:
-                # Проверяем данные
                 if isinstance(training_data, np.ndarray) and len(training_data) > 0:
                     if len(training_data.shape) == 2 and training_data.shape[0] > 0:
-                        # Проверяем на NaN
                         if not np.any(np.isnan(training_data)):
-                            sample_data = training_data[:100] if len(training_data) > 100 else training_data
-                            self.shap_explainer = shap.KernelExplainer(
-                                model=lambda x: None,
-                                data=sample_data
-                            )
-                            self._log("✅ SHAP Explainer инициализирован", level='system')
+                            self._shap_sample_data = training_data[:100] if len(training_data) > 100 else training_data
+                            self._log("✅ SHAP данные подготовлены (explainer будет создан при установке модели)", level='system')
                         else:
                             self._log("⚠️ SHAP: данные содержат NaN", level='warn')
                     else:
@@ -128,8 +123,7 @@ class XAIBridge:
                 else:
                     self._log("⚠️ SHAP: данные пустые или неверного типа", level='warn')
             except Exception as e:
-                self._log(f"❌ Ошибка SHAP: {e}", level='error')
-                self.shap_explainer = None
+                self._log(f"❌ Ошибка подготовки данных SHAP: {e}", level='error')
         
         self._log(f"✅ XAI Bridge инициализирован. Методы: {self.available_methods}", level='system')
 
@@ -149,7 +143,22 @@ class XAIBridge:
     def set_model(self, model):
         """Устанавливает sklearn-модель для LIME и SHAP."""
         self.sklearn_model = model
-        if self.shap_explainer is not None and model is not None:
+        
+        # 👉 ИНИЦИАЛИЗИРУЕМ SHAP ТОЛЬКО КОГДА ЕСТЬ МОДЕЛЬ
+        if SHAP_AVAILABLE and hasattr(self, '_shap_sample_data') and self._shap_sample_data is not None:
+            try:
+                import shap
+                self.shap_explainer = shap.KernelExplainer(
+                    model.predict_proba,  # 👈 СРАЗУ С МОДЕЛЬЮ!
+                    self._shap_sample_data
+                )
+                self._log("✅ SHAP Explainer инициализирован с моделью", level='system')
+            except Exception as e:
+                self._log(f"❌ Ошибка SHAP при инициализации с моделью: {e}", level='error')
+                self.shap_explainer = None
+        
+        # Если SHAP уже был создан — обновляем модель
+        elif self.shap_explainer is not None and model is not None:
             try:
                 self.shap_explainer.model = model.predict_proba
                 self._log("✅ SHAP модель обновлена", level='system')
@@ -284,9 +293,6 @@ class XAIBridge:
             if self.shap_explainer is None:
                 raise ValueError("SHAP Explainer не инициализирован")
             
-            # Обновляем модель
-            self.shap_explainer.model = self.sklearn_model.predict_proba
-            
             # Получаем SHAP значения
             shap_values = self.shap_explainer.shap_values(
                 features.reshape(1, -1),
@@ -302,7 +308,11 @@ class XAIBridge:
                 else:
                     importance = shap_values[0][0]
             else:
-                importance = shap_values[0]
+                # SHAP возвращает массив (n_samples, n_features, n_classes)
+                if len(shap_values.shape) == 3:
+                    importance = shap_values[0, :, action]
+                else:
+                    importance = shap_values[0]
             
             anomaly = self._check_anomaly(features, action, confidence)
             
