@@ -38,3 +38,6 @@ results/
 htmlcov/
 build/
 src/uav_xai.egg-info/
+
+data/logs/
+dist/
