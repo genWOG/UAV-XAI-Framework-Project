@@ -11,6 +11,9 @@ from .factory import create_default_engine
 from .config import load_config
 from .runner import ExperimentRunner
 from .benchmark import BenchmarkRunner
+from .target import XAITarget
+from .target_resolver import TargetResolver
+from .target_builder import TargetBuilder
 
 __all__ = [
     "Explainer",
@@ -24,4 +27,7 @@ __all__ = [
     "load_config",
     "ExperimentRunner",
     "BenchmarkRunner",
+    "XAITarget",
+    "TargetResolver",
+    "TargetBuilder",
 ]

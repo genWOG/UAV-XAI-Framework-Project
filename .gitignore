@@ -27,6 +27,7 @@ Thumbs.db
 *.tar.gz
 *.rar
 *.7z
+*.pt
 data/raw/
 data/processed/
 models/
@@ -35,3 +36,5 @@ results/
 .mypy_cache/
 .coverage
 htmlcov/
+build/
+src/uav_xai.egg-info/

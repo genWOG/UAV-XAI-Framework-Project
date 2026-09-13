@@ -1,0 +1,29 @@
+experiment:
+  name: yolo_detection
+
+model:
+  name: yolo26n
+  task: detection
+  weights: yolo26n.pt
+
+image:
+  path: data/images/modern_ship.jpg
+
+xai:
+  input_type: image
+  method: grad_cam
+  image_size: 640
+
+  detection_iou_threshold: 0.20
+  detection_score_threshold: 0.05
+  detection_top_k: 8
+
+target:
+  type: detection
+  index: 0
+
+metrics:
+  enabled: false
+
+output:
+  root: results

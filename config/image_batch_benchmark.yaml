@@ -2,13 +2,14 @@ experiment:
   name: image_xai_benchmark
 
 benchmark:
-  runs: 3
+  runs: 5
 
 input:
   type: image
   paths:
     - data/images/test.jpg
     - data/images/dog.jpg
+    - data/images/house.jpg
 
 model:
   name: resnet18

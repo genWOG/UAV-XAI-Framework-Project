@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -16,16 +17,143 @@ from torchvision.models import (
 
 from .config import load_config
 from .predictor import ModelPredictor
+from .target_resolver import TargetResolver
+
 from ..metrics import (
     compute_deletion,
     compute_insertion,
 )
+
 from ..utils import (
     overlay_heatmap,
     plot_faithfulness_curves,
     save_image,
 )
+
 from ..core import create_default_engine
+
+
+def _prepare_yolo_xai_input(
+    image: Image.Image,
+    size: int = 640,
+) -> tuple[
+    torch.Tensor,
+    dict[str, Any],
+]:
+    """
+    Prepare an autograd-compatible YOLO tensor.
+
+    Uses standard square letterbox preprocessing:
+        resize while preserving aspect ratio;
+        pad with value 114;
+        convert RGB image into [1, 3, H, W];
+        normalize to [0, 1].
+
+    Returns
+    -------
+    tensor:
+        [1, 3, size, size]
+
+    metadata:
+        Letterbox transform parameters.
+    """
+
+    image_np = np.asarray(
+        image.convert("RGB")
+    )
+
+    original_height, original_width = (
+        image_np.shape[:2]
+    )
+
+    scale = min(
+        size / original_height,
+        size / original_width,
+    )
+
+    resized_width = int(
+        round(
+            original_width * scale
+        )
+    )
+
+    resized_height = int(
+        round(
+            original_height * scale
+        )
+    )
+
+    resized = cv2.resize(
+        image_np,
+        (
+            resized_width,
+            resized_height,
+        ),
+        interpolation=cv2.INTER_LINEAR,
+    )
+
+    canvas = np.full(
+        (
+            size,
+            size,
+            3,
+        ),
+        114,
+        dtype=np.uint8,
+    )
+
+    pad_x = (
+        size - resized_width
+    ) // 2
+
+    pad_y = (
+        size - resized_height
+    ) // 2
+
+    canvas[
+        pad_y:
+        pad_y + resized_height,
+        pad_x:
+        pad_x + resized_width,
+    ] = resized
+
+    tensor = (
+        torch.from_numpy(
+            canvas
+        )
+        .permute(
+            2,
+            0,
+            1,
+        )
+        .contiguous()
+        .float()
+        / 255.0
+    )
+
+    tensor = tensor.unsqueeze(0)
+
+    metadata = {
+        "scale": float(scale),
+        "pad_x": int(pad_x),
+        "pad_y": int(pad_y),
+        "original_width": int(
+            original_width
+        ),
+        "original_height": int(
+            original_height
+        ),
+        "input_width": int(size),
+        "input_height": int(size),
+        "resized_width": int(
+            resized_width
+        ),
+        "resized_height": int(
+            resized_height
+        ),
+    }
+
+    return tensor, metadata
 
 
 def _resolve_module(
@@ -33,31 +161,60 @@ def _resolve_module(
     path: str,
 ) -> torch.nn.Module:
     """
-    Resolve a PyTorch module from a dotted path.
+    Resolve a module from a path.
 
-    Example
-    -------
-    layer4[-1].conv2
+    Supported examples:
 
-    Parameters
-    ----------
-    root:
-        Root PyTorch module.
-
-    path:
-        Module path.
-
-    Returns
-    -------
-    torch.nn.Module
+        layer4[-1].conv2
+        16
+        model.16
     """
 
     current: Any = root
 
     for part in path.split("."):
 
-        if "[" in part and part.endswith("]"):
-            name, index_text = part.split("[", 1)
+        if part.isdigit():
+
+            index = int(part)
+
+            if hasattr(
+                current,
+                "model",
+            ):
+                current = current.model[
+                    index
+                ]
+
+            elif isinstance(
+                current,
+                (list, tuple),
+            ):
+                current = current[
+                    index
+                ]
+
+            else:
+                raise ValueError(
+                    f"Cannot resolve numeric "
+                    f"layer '{part}' from "
+                    f"{type(current).__name__}."
+                )
+
+            continue
+
+        if (
+            "["
+            in part
+            and part.endswith("]")
+        ):
+
+            name, index_text = (
+                part.split(
+                    "[",
+                    1,
+                )
+            )
 
             index = int(
                 index_text[:-1]
@@ -68,9 +225,12 @@ def _resolve_module(
                 name,
             )
 
-            current = current[index]
+            current = current[
+                index
+            ]
 
         else:
+
             current = getattr(
                 current,
                 part,
@@ -82,16 +242,15 @@ def _resolve_module(
     ):
         raise TypeError(
             f"Resolved object '{path}' "
-            f"is not a torch.nn.Module."
+            "is not a torch.nn.Module."
         )
 
     return current
 
 
-def _json_default(value: Any) -> Any:
-    """
-    Convert numpy/PyTorch objects into JSON-compatible values.
-    """
+def _json_default(
+    value: Any,
+) -> Any:
 
     if isinstance(
         value,
@@ -115,7 +274,11 @@ def _json_default(value: Any) -> Any:
         value,
         torch.Tensor,
     ):
-        return value.detach().cpu().tolist()
+        return (
+            value.detach()
+            .cpu()
+            .tolist()
+        )
 
     if isinstance(
         value,
@@ -124,20 +287,31 @@ def _json_default(value: Any) -> Any:
         return str(value)
 
     raise TypeError(
-        f"Object of type {type(value).__name__} "
+        f"Object of type "
+        f"{type(value).__name__} "
         "is not JSON serializable."
     )
 
 
 class ExperimentRunner:
     """
-    Run a complete XAI experiment from a YAML configuration.
+    Run a complete configurable XAI experiment.
+
+    Supports:
+        - classification;
+        - object detection;
+        - multiple XAI methods;
+        - structured detection targets;
+        - multi-scale YOLO Grad-CAM;
+        - per-method artifacts;
+        - classification faithfulness metrics.
     """
 
     def __init__(
         self,
         config_path: str | Path,
     ) -> None:
+
         self.config_path = Path(
             config_path
         )
@@ -152,25 +326,40 @@ class ExperimentRunner:
             else "cpu"
         )
 
-        self.output_dir: Path | None = None
+        self.output_dir: (
+            Path | None
+        ) = None
 
-    def _create_output_dir(self) -> Path:
-        experiment_name = self.config[
+    # ============================================================
+    # Output
+    # ============================================================
+
+    def _create_output_dir(
+        self,
+    ) -> Path:
+
+        name = self.config[
             "experiment"
         ][
             "name"
         ]
 
-        timestamp = datetime.now().strftime(
-            "%Y%m%d_%H%M%S"
+        timestamp = (
+            datetime.now().strftime(
+                "%Y%m%d_%H%M%S"
+            )
         )
 
         root = Path(
-            self.config["output"]["root"]
+            self.config[
+                "output"
+            ][
+                "root"
+            ]
         )
 
         output_dir = root / (
-            f"{experiment_name}_{timestamp}"
+            f"{name}_{timestamp}"
         )
 
         output_dir.mkdir(
@@ -182,106 +371,228 @@ class ExperimentRunner:
 
         return output_dir
 
-    def _load_model(self):
+    def _save_config(
+        self,
+        output_dir: Path,
+    ) -> None:
+
+        shutil.copy2(
+            self.config_path,
+            output_dir
+            / "config.yaml",
+        )
+
+    # ============================================================
+    # Model
+    # ============================================================
+
+    def _load_model(
+        self,
+    ) -> dict[str, Any]:
+
         model_config = self.config[
             "model"
         ]
 
-        model_name = model_config[
-            "name"
-        ].lower()
+        model_name = (
+            str(
+                model_config[
+                    "name"
+                ]
+            )
+            .strip()
+            .lower()
+        )
 
-        if model_name != "resnet18":
-            raise ValueError(
-                f"Unsupported model: {model_name}. "
-                "Currently supported: resnet18."
+        task = (
+            str(
+                model_config.get(
+                    "task",
+                    "classification",
+                )
+            )
+            .strip()
+            .lower()
+        )
+
+        if model_name == "resnet18":
+
+            if task != "classification":
+                raise ValueError(
+                    "ResNet-18 supports "
+                    "classification only."
+                )
+
+            weights = (
+                ResNet18_Weights.DEFAULT
             )
 
-        weights = (
-            ResNet18_Weights.DEFAULT
+            model = resnet18(
+                weights=weights
+            )
+
+            model = model.to(
+                self.device
+            )
+
+            model.eval()
+
+            return {
+                "model": model,
+                "weights": weights,
+                "task": "classification",
+                "name": model_name,
+            }
+
+        if model_name.startswith(
+            "yolo"
+        ):
+
+            from ultralytics import YOLO
+
+            model_path = (
+                model_config.get(
+                    "weights",
+                    f"{model_name}.pt",
+                )
+            )
+
+            model = YOLO(
+                model_path
+            )
+
+            model.model.eval()
+
+            return {
+                "model": model,
+                "weights": None,
+                "task": task,
+                "name": model_name,
+            }
+
+        raise ValueError(
+            f"Unsupported model: "
+            f"{model_name}"
         )
 
-        model = resnet18(
-            weights=weights
-        )
-
-        model = model.to(
-            self.device
-        )
-
-        model.eval()
-
-        return model, weights
+    # ============================================================
+    # Image
+    # ============================================================
 
     def _load_image(
         self,
-        weights: ResNet18_Weights,
-    ):
+        weights: Any,
+        task: str,
+    ) -> tuple[
+        Image.Image,
+        Any,
+    ]:
+
         image_path = Path(
-            self.config["image"]["path"]
+            self.config[
+                "image"
+            ][
+                "path"
+            ]
         )
 
         if not image_path.exists():
             raise FileNotFoundError(
-                f"Image not found: {image_path}"
+                f"Image not found: "
+                f"{image_path}"
             )
 
         image = Image.open(
             image_path
         ).convert("RGB")
 
-        transform = weights.transforms()
+        if task == "classification":
 
-        input_tensor = transform(
-            image
-        ).unsqueeze(0)
+            if weights is None:
+                raise ValueError(
+                    "Classification model "
+                    "requires weights."
+                )
 
-        input_tensor = input_tensor.to(
-            self.device
+            transform = (
+                weights.transforms()
+            )
+
+            input_data = (
+                transform(
+                    image
+                )
+                .unsqueeze(0)
+                .to(self.device)
+            )
+
+            return (
+                image,
+                input_data,
+            )
+
+        if task == "detection":
+
+            return (
+                image,
+                str(image_path),
+            )
+
+        raise ValueError(
+            f"Unsupported task: "
+            f"{task}"
         )
 
-        return image, input_tensor
+    # ============================================================
+    # Methods
+    # ============================================================
 
-    def _get_methods(self) -> list[str]:
-        """
-        Return configured XAI methods.
+    def _get_methods(
+        self,
+    ) -> list[str]:
 
-        Supports both:
-            xai.method: grad_cam
-
-        and:
-            xai.methods:
-            - grad_cam
-            - lime
-            - shap
-            - lrp
-        """
-
-        xai_config = self.config["xai"]
+        xai_config = self.config[
+            "xai"
+        ]
 
         if "methods" in xai_config:
-            methods = xai_config["methods"]
 
-            if not isinstance(methods, list):
+            methods = xai_config[
+                "methods"
+            ]
+
+            if not isinstance(
+                methods,
+                list,
+            ):
                 raise ValueError(
-                    "xai.methods must be a list."
+                    "xai.methods must "
+                    "be a list."
                 )
 
             if not methods:
                 raise ValueError(
-                    "xai.methods cannot be empty."
+                    "xai.methods cannot "
+                    "be empty."
                 )
 
             return [
-                str(method).strip().lower()
+                str(method)
+                .strip()
+                .lower()
                 for method in methods
             ]
 
         if "method" in xai_config:
+
             return [
                 str(
-                    xai_config["method"]
-                ).strip().lower()
+                    xai_config[
+                        "method"
+                    ]
+                )
+                .strip()
+                .lower()
             ]
 
         raise ValueError(
@@ -289,108 +600,307 @@ class ExperimentRunner:
             "'method' or 'methods'."
         )
 
+    # ============================================================
+    # Target layer
+    # ============================================================
 
-    def _build_xai_context(
+    def _resolve_xai_target_layer(
         self,
-        model: torch.nn.Module,
-        weights: ResNet18_Weights,
-        original_image: Image.Image,
-        input_tensor: torch.Tensor,
-    ) -> dict[str, Any]:
-        """
-        Build shared context used by explainers.
-        """
-
-        xai_config = self.config["xai"]
-
-        target_layer = None
-
-        target_layer_path = xai_config.get(
-            "target_layer"
-        )
+        model: Any,
+        task: str,
+        target_layer_path: (
+            str | None
+        ),
+    ) -> Any:
 
         if target_layer_path:
-            target_layer = _resolve_module(
-                model,
+
+            root = (
+                model.model
+                if task == "detection"
+                else model
+            )
+
+            return _resolve_module(
+                root,
                 target_layer_path,
             )
 
-        transform = weights.transforms()
+        if task == "classification":
+            return None
 
-        def preprocess(
-            rgb_image: np.ndarray,
-        ) -> torch.Tensor:
-            pil_image = Image.fromarray(
-                rgb_image.astype(
-                    np.uint8
+        if task != "detection":
+            return None
+
+        network = getattr(
+            model,
+            "model",
+            None,
+        )
+
+        if network is None:
+            raise ValueError(
+                "Detection model does not expose "
+                "its internal model."
+            )
+
+        layers = getattr(
+            network,
+            "model",
+            None,
+        )
+
+        if layers is None:
+            raise ValueError(
+                "Detection model does not expose "
+                "its layer list."
+            )
+
+        # YOLO26 Detect receives:
+        #
+        #   [16, 19, 22]
+        #
+        # corresponding to P3/P4/P5.
+        #
+        # Use all three scales for detection XAI.
+        target_indices = [
+            16,
+            19,
+            22,
+        ]
+
+        target_layers = []
+
+        for index in target_indices:
+
+            if index >= len(layers):
+                raise ValueError(
+                    f"Target layer {index} "
+                    f"is unavailable; "
+                    f"model contains "
+                    f"{len(layers)} layers."
                 )
+
+            layer = layers[
+                index
+            ]
+
+            if not isinstance(
+                layer,
+                torch.nn.Module,
+            ):
+                raise TypeError(
+                    f"Target layer {index} "
+                    "is not a torch.nn.Module."
+                )
+
+            target_layers.append(
+                layer
             )
 
-            return transform(
-                pil_image
+        return target_layers
+
+    # ============================================================
+    # Context
+    # ============================================================
+
+    def _build_xai_context(
+        self,
+        model: Any,
+        weights: Any,
+        original_image: Image.Image,
+        input_data: Any,
+        xai_input: torch.Tensor,
+        xai_target: Any,
+        task: str,
+        letterbox: (
+            dict[str, Any]
+            | None
+        ),
+    ) -> dict[str, Any]:
+
+        xai_config = self.config[
+            "xai"
+        ]
+
+        target_layer = (
+            self._resolve_xai_target_layer(
+                model=model,
+                task=task,
+                target_layer_path=(
+                    xai_config.get(
+                        "target_layer"
+                    )
+                ),
             )
+        )
+
+        if isinstance(
+            target_layer,
+            (list, tuple),
+        ):
+
+            target_layers = list(
+                target_layer
+            )
+
+            single_target_layer = None
+
+        else:
+
+            target_layers = None
+            single_target_layer = (
+                target_layer
+            )
+
+        preprocess = None
+
+        if (
+            task == "classification"
+            and weights is not None
+        ):
+
+            transform = (
+                weights.transforms()
+            )
+
+            def preprocess(
+                rgb_image: np.ndarray,
+            ) -> torch.Tensor:
+
+                pil_image = (
+                    Image.fromarray(
+                        rgb_image.astype(
+                            np.uint8
+                        )
+                    )
+                )
+
+                return transform(
+                    pil_image
+                )
 
         return {
             "model": model,
             "weights": weights,
+            "task": task,
             "input_type": xai_config.get(
                 "input_type",
                 "image",
             ),
             "xai_config": xai_config,
-            "target_layer": target_layer,
+            "target_layer": single_target_layer,
+            "target_layers": target_layers,
             "preprocess": preprocess,
-            "input_tensor": input_tensor,
+            "input_data": input_data,
+            "xai_input": xai_input,
+            "xai_target": xai_target,
             "original_image": original_image,
+            "letterbox": letterbox,
+
+            "detection_iou_threshold": float(
+                xai_config.get(
+                    "detection_iou_threshold",
+                    0.10,
+                )
+            ),
+
+            "detection_score_threshold": float(
+                xai_config.get(
+                    "detection_score_threshold",
+                    0.01,
+                )
+            ),
+
+            "detection_top_k": int(
+                xai_config.get(
+                    "detection_top_k",
+                    16,
+                )
+            ),
         }
 
-    def _save_config(
-        self,
-        output_dir: Path,
-    ) -> None:
-        destination = (
-            output_dir / "config.yaml"
-        )
-
-        shutil.copy2(
-            self.config_path,
-            destination,
-        )
+    # ============================================================
+    # One explanation
+    # ============================================================
 
     def _run_explanation(
         self,
-        engine,
-        model: torch.nn.Module,
+        engine: Any,
+        model: Any,
         prediction: Any,
         original_image: Image.Image,
-        input_tensor: torch.Tensor,
+        input_data: Any,
         context: dict[str, Any],
         method: str,
     ) -> dict[str, Any]:
-        """
-        Run one XAI method and save its artifacts.
-        """
 
-        input_type = context["input_type"]
+        xai_target = context["xai_target"]
+
+        if xai_target.task == "classification":
+            method_target = xai_target.class_id
+        else:
+            method_target = xai_target
 
         explanation = engine.explain(
-            input_type=input_type,
+            input_type=context["input_type"],
             method=method,
             model=model,
-            input_data=input_tensor,
-            target=prediction.class_id,
+            input_data=context["xai_input"],
+            target=method_target,
             context=context,
         )
+
+        # --------------------------------------------------------
+        # Visualization
+        #
+        # IMPORTANT:
+        # do not bbox-mask detection CAM here.
+        # The raw multi-query/multi-scale attribution is what
+        # we want to inspect first.
+        # --------------------------------------------------------
 
         visualization_path = (
             self.output_dir
             / f"{method}.png"
         )
 
-        visualization = overlay_heatmap(
-            image=original_image,
-            heatmap=explanation.attribution,
-            alpha=0.45,
+        heatmap = (
+            explanation.attribution
+        )
+
+        # Grad-CAM generated on 640x640 is mapped from
+        # the model-input coordinate system back to the
+        # original image dimensions.
+        if (
+            context["task"]
+            == "detection"
+        ):
+
+            letterbox = context[
+                "letterbox"
+            ]
+
+            heatmap = (
+                self._restore_detection_heatmap(
+                    heatmap=heatmap,
+                    letterbox=letterbox,
+                    output_size=(
+                        original_image.size
+                    ),
+                )
+            )
+
+            explanation.attribution = (
+                heatmap
+            )
+
+        visualization = (
+            overlay_heatmap(
+                image=original_image,
+                heatmap=heatmap,
+                alpha=0.45,
+            )
         )
 
         save_image(
@@ -398,14 +908,26 @@ class ExperimentRunner:
             visualization_path,
         )
 
-        metrics_config = self.config.get(
-            "metrics",
-            {},
+        # --------------------------------------------------------
+        # Metrics
+        # --------------------------------------------------------
+
+        metrics_config = (
+            self.config.get(
+                "metrics",
+                {},
+            )
         )
 
-        metrics_enabled = metrics_config.get(
-            "enabled",
-            True,
+        metrics_enabled = (
+            bool(
+                metrics_config.get(
+                    "enabled",
+                    True,
+                )
+            )
+            and context["task"]
+            == "classification"
         )
 
         deletion_result = None
@@ -413,6 +935,7 @@ class ExperimentRunner:
         metrics_path = None
 
         if metrics_enabled:
+
             steps = int(
                 metrics_config.get(
                     "steps",
@@ -427,22 +950,34 @@ class ExperimentRunner:
                 )
             )
 
-            deletion_result = compute_deletion(
-                model=model,
-                input_tensor=input_tensor,
-                attribution=explanation.attribution,
-                target=prediction.class_id,
-                steps=steps,
-                baseline_value=baseline_value,
+            deletion_result = (
+                compute_deletion(
+                    model=model,
+                    input_tensor=input_data,
+                    attribution=(
+                        explanation.attribution
+                    ),
+                    target=prediction.class_id,
+                    steps=steps,
+                    baseline_value=(
+                        baseline_value
+                    ),
+                )
             )
 
-            insertion_result = compute_insertion(
-                model=model,
-                input_tensor=input_tensor,
-                attribution=explanation.attribution,
-                target=prediction.class_id,
-                steps=steps,
-                baseline_value=baseline_value,
+            insertion_result = (
+                compute_insertion(
+                    model=model,
+                    input_tensor=input_data,
+                    attribution=(
+                        explanation.attribution
+                    ),
+                    target=prediction.class_id,
+                    steps=steps,
+                    baseline_value=(
+                        baseline_value
+                    ),
+                )
             )
 
             metrics_path = (
@@ -486,12 +1021,14 @@ class ExperimentRunner:
                 ),
             },
             "metrics": None,
+            "metadata": explanation.metadata,
         }
 
         if (
             deletion_result is not None
             and insertion_result is not None
         ):
+
             result["metrics"] = {
                 "deletion_auc": (
                     deletion_result.auc
@@ -511,13 +1048,125 @@ class ExperimentRunner:
 
         return result
 
+    # ============================================================
+    # Detection heatmap restore
+    # ============================================================
+
+    @staticmethod
+    def _restore_detection_heatmap(
+        heatmap: np.ndarray,
+        letterbox: dict[str, Any],
+        output_size: tuple[int, int],
+    ) -> np.ndarray:
+        """
+        Map model-input CAM back to original-image resolution.
+
+        No bbox masking is applied here.
+        """
+
+        if heatmap.ndim != 2:
+            raise ValueError(
+                "Detection heatmap must be 2D."
+            )
+
+        input_width = int(
+            letterbox["input_width"]
+        )
+
+        input_height = int(
+            letterbox["input_height"]
+        )
+
+        pad_x = int(
+            letterbox["pad_x"]
+        )
+
+        pad_y = int(
+            letterbox["pad_y"]
+        )
+
+        resized_width = int(
+            letterbox["resized_width"]
+        )
+
+        resized_height = int(
+            letterbox["resized_height"]
+        )
+
+        cam = cv2.resize(
+            heatmap.astype(
+                np.float32
+            ),
+            (
+                input_width,
+                input_height,
+            ),
+            interpolation=cv2.INTER_LINEAR,
+        )
+
+        y1 = pad_y
+        y2 = (
+            pad_y
+            + resized_height
+        )
+
+        x1 = pad_x
+        x2 = (
+            pad_x
+            + resized_width
+        )
+
+        cam = cam[
+            y1:y2,
+            x1:x2,
+        ]
+
+        output_width, output_height = (
+            output_size
+        )
+
+        cam = cv2.resize(
+            cam,
+            (
+                output_width,
+                output_height,
+            ),
+            interpolation=cv2.INTER_LINEAR,
+        )
+
+        cam_min = float(
+            cam.min()
+        )
+
+        cam_max = float(
+            cam.max()
+        )
+
+        if (
+            cam_max
+            - cam_min
+            > 1e-8
+        ):
+            cam = (
+                cam - cam_min
+            ) / (
+                cam_max - cam_min
+            )
+
+        return np.clip(
+            cam,
+            0.0,
+            1.0,
+        )
+
+    # ============================================================
+    # CSV
+    # ============================================================
+
     def _save_comparison_csv(
         self,
         explanations: dict[str, Any],
     ) -> Path:
-        """
-        Save aggregated XAI benchmark results to CSV.
-        """
 
         output_path = (
             self.output_dir
@@ -526,25 +1175,39 @@ class ExperimentRunner:
 
         rows = []
 
-        for method, result in explanations.items():
-            metrics = result.get(
-                "metrics"
-            ) or {}
+        for method, result in (
+            explanations.items()
+        ):
+
+            metrics = (
+                result.get(
+                    "metrics"
+                )
+                or {}
+            )
 
             rows.append(
                 {
                     "method": method,
-                    "runtime_ms": result[
-                        "runtime_ms"
-                    ],
-                    "confidence": result[
-                        "confidence"
-                    ],
-                    "deletion_auc": metrics.get(
-                        "deletion_auc"
+                    "runtime_ms": (
+                        result[
+                            "runtime_ms"
+                        ]
                     ),
-                    "insertion_auc": metrics.get(
-                        "insertion_auc"
+                    "confidence": (
+                        result[
+                            "confidence"
+                        ]
+                    ),
+                    "deletion_auc": (
+                        metrics.get(
+                            "deletion_auc"
+                        )
+                    ),
+                    "insertion_auc": (
+                        metrics.get(
+                            "insertion_auc"
+                        )
                     ),
                 }
             )
@@ -567,24 +1230,29 @@ class ExperimentRunner:
             )
 
             writer.writeheader()
-            writer.writerows(rows)
+            writer.writerows(
+                rows
+            )
 
         return output_path
+
+    # ============================================================
+    # Runtime plot
+    # ============================================================
 
     def _save_runtime_plot(
         self,
         explanations: dict[str, Any],
     ) -> Path:
-        """
-        Save XAI runtime comparison plot.
-        """
 
         methods = list(
             explanations.keys()
         )
 
         runtimes = [
-            explanations[method][
+            explanations[
+                method
+            ][
                 "runtime_ms"
             ]
             for method in methods
@@ -627,34 +1295,21 @@ class ExperimentRunner:
 
         return output_path
 
+    # ============================================================
+    # Faithfulness plot
+    # ============================================================
+
     def _save_faithfulness_plot(
         self,
         explanations: dict[str, Any],
     ) -> Path:
-        """
-        Save deletion/insertion AUC comparison.
-        """
 
-        methods = list(
-            explanations.keys()
-        )
-
-        deletion = [
-            explanations[method][
-                "metrics"
-            ]["deletion_auc"]
-            for method in methods
-            if explanations[method][
-                "metrics"
-            ] is not None
-        ]
-
-        insertion = [
-            explanations[method][
-                "metrics"
-            ]["insertion_auc"]
-            for method in methods
-            if explanations[method][
+        valid_methods = [
+            method
+            for method in explanations
+            if explanations[
+                method
+            ][
                 "metrics"
             ] is not None
         ]
@@ -664,34 +1319,74 @@ class ExperimentRunner:
             / "faithfulness_comparison.png"
         )
 
-        x = np.arange(
-            len(methods)
-        )
-
-        width = 0.35
-
         plt.figure(
             figsize=(9, 5)
         )
 
-        plt.bar(
-            x - width / 2,
-            deletion,
-            width,
-            label="Deletion AUC",
-        )
+        if valid_methods:
 
-        plt.bar(
-            x + width / 2,
-            insertion,
-            width,
-            label="Insertion AUC",
-        )
+            deletion = [
+                explanations[
+                    method
+                ][
+                    "metrics"
+                ][
+                    "deletion_auc"
+                ]
+                for method in valid_methods
+            ]
 
-        plt.xticks(
-            x,
-            methods,
-        )
+            insertion = [
+                explanations[
+                    method
+                ][
+                    "metrics"
+                ][
+                    "insertion_auc"
+                ]
+                for method in valid_methods
+            ]
+
+            x = np.arange(
+                len(valid_methods)
+            )
+
+            width = 0.35
+
+            plt.bar(
+                x - width / 2,
+                deletion,
+                width,
+                label="Deletion AUC",
+            )
+
+            plt.bar(
+                x + width / 2,
+                insertion,
+                width,
+                label="Insertion AUC",
+            )
+
+            plt.xticks(
+                x,
+                valid_methods,
+            )
+
+            plt.legend()
+
+        else:
+
+            plt.text(
+                0.5,
+                0.5,
+                "Faithfulness metrics "
+                "are disabled for this task.",
+                ha="center",
+                va="center",
+                transform=plt.gca().transAxes,
+            )
+
+            plt.xticks([])
 
         plt.ylabel(
             "AUC"
@@ -705,8 +1400,6 @@ class ExperimentRunner:
             "XAI Faithfulness Comparison"
         )
 
-        plt.legend()
-
         plt.tight_layout()
 
         plt.savefig(
@@ -718,55 +1411,92 @@ class ExperimentRunner:
 
         return output_path
 
-    def run(self) -> dict[str, Any]:
-        """
-        Run a configured XAI experiment.
+    # ============================================================
+    # Main
+    # ============================================================
 
-        Supports a single method or a list of methods.
-        """
+    def run(
+        self,
+    ) -> dict[str, Any]:
 
-        output_dir = self._create_output_dir()
+        output_dir = (
+            self._create_output_dir()
+        )
 
         self._save_config(
             output_dir
         )
 
         print("=" * 60)
-        print("UAV-XAI EXPERIMENT")
+        print(
+            "UAV-XAI EXPERIMENT"
+        )
         print("=" * 60)
 
         print(
-            f"Config: {self.config_path}"
+            f"Config: "
+            f"{self.config_path}"
         )
 
         print(
-            f"Device: {self.device}"
+            f"Device: "
+            f"{self.device}"
         )
 
         print(
-            f"Output: {output_dir}"
+            f"Output: "
+            f"{output_dir}"
         )
 
-        # --------------------------------------------------
-        # Model
-        # --------------------------------------------------
+        # --------------------------------------------------------
+        # 1. Model
+        # --------------------------------------------------------
 
         print()
-        print("[1/6] Loading model...")
+        print(
+            "[1/6] Loading model..."
+        )
 
-        model, weights = self._load_model()
+        model_info = (
+            self._load_model()
+        )
 
-        print("      Model: ResNet-18")
+        model = model_info[
+            "model"
+        ]
 
-        # --------------------------------------------------
-        # Image
-        # --------------------------------------------------
+        weights = model_info[
+            "weights"
+        ]
+
+        task = model_info[
+            "task"
+        ]
+
+        model_name = model_info[
+            "name"
+        ]
+
+        print(
+            f"      Model: "
+            f"{model_name}"
+        )
+
+        # --------------------------------------------------------
+        # 2. Image
+        # --------------------------------------------------------
 
         print()
-        print("[2/6] Loading image...")
+        print(
+            "[2/6] Loading image..."
+        )
 
-        original_image, input_tensor = (
-            self._load_image(weights)
+        (
+            original_image,
+            input_data,
+        ) = self._load_image(
+            weights=weights,
+            task=task,
         )
 
         print(
@@ -774,156 +1504,332 @@ class ExperimentRunner:
             f"{original_image.size}"
         )
 
-        # --------------------------------------------------
-        # Prediction
-        # --------------------------------------------------
+        # --------------------------------------------------------
+        # 3. Prediction
+        # --------------------------------------------------------
 
         print()
-        print("[3/6] Running prediction...")
+        print(
+            "[3/6] Running prediction..."
+        )
 
         predictor = ModelPredictor(
-            model
+            model=model,
+            task=task,
         )
 
-        prediction = predictor.predict(
-            input_tensor
+        prediction = (
+            predictor.predict(
+                input_data
+            )
         )
 
-        categories = weights.meta[
-            "categories"
-        ]
+        predicted_class = None
+        categories = None
 
-        predicted_class = categories[
-            prediction.class_id
-        ]
+        if task == "classification":
+
+            categories = (
+                weights.meta[
+                    "categories"
+                ]
+            )
+
+            predicted_class = (
+                categories[
+                    prediction.class_id
+                ]
+            )
+
+            print(
+                f"      Class: "
+                f"{predicted_class}"
+            )
+
+            print(
+                f"      Class ID: "
+                f"{prediction.class_id}"
+            )
+
+            print(
+                f"      Confidence: "
+                f"{prediction.confidence:.4f}"
+            )
+
+        elif task == "detection":
+
+            detections = (
+                prediction.detections
+                or []
+            )
+
+            if not detections:
+                raise ValueError(
+                    "YOLO produced "
+                    "no detections."
+                )
+
+            for (
+                index,
+                detection,
+            ) in enumerate(
+                detections,
+                start=1,
+            ):
+
+                print(
+                    f"      Detection {index}: "
+                    f"{detection.class_name} "
+                    f"confidence="
+                    f"{detection.confidence:.4f} "
+                    f"bbox="
+                    f"{detection.bbox}"
+                )
+
+        else:
+
+            raise ValueError(
+                f"Unsupported task: "
+                f"{task}"
+            )
+
+        # --------------------------------------------------------
+        # XAI target
+        # --------------------------------------------------------
+
+        target_config = (
+            self.config.get(
+                "target",
+                {},
+            )
+        )
+
+        target_type = (
+            target_config.get(
+                "type"
+            )
+        )
+
+        detection_index = int(
+            target_config.get(
+                "index",
+                0,
+            )
+        )
+
+        xai_target = (
+            TargetResolver.resolve(
+                prediction=prediction,
+                target_type=target_type,
+                detection_index=(
+                    detection_index
+                ),
+            )
+        )
+
+        # --------------------------------------------------------
+        # XAI input
+        # --------------------------------------------------------
+
+        letterbox = None
+
+        if task == "detection":
+
+            (
+                xai_input,
+                letterbox,
+            ) = (
+                _prepare_yolo_xai_input(
+                    original_image,
+                    size=int(
+                        self.config[
+                            "xai"
+                        ].get(
+                            "image_size",
+                            640,
+                        )
+                    ),
+                )
+            )
+
+            xai_input = (
+                xai_input
+                .detach()
+                .clone()
+                .requires_grad_(True)
+                .to(self.device)
+            )
+
+        else:
+
+            xai_input = (
+                input_data
+            )
 
         print(
-            f"      Class: {predicted_class}"
+            f"      XAI input: "
+            f"shape="
+            f"{tuple(xai_input.shape)} "
+            f"requires_grad="
+            f"{xai_input.requires_grad}"
         )
 
-        print(
-            f"      Class ID: "
-            f"{prediction.class_id}"
-        )
-
-        print(
-            f"      Confidence: "
-            f"{prediction.confidence:.4f}"
-        )
-
-        # --------------------------------------------------
-        # XAI
-        # --------------------------------------------------
+        # --------------------------------------------------------
+        # 4. XAI
+        # --------------------------------------------------------
 
         print()
-        print("[4/6] Generating explanations...")
-
-        engine = create_default_engine()
-
-        methods = self._get_methods()
-
-        context = self._build_xai_context(
-            model=model,
-            weights=weights,
-            original_image=original_image,
-            input_tensor=input_tensor,
+        print(
+            "[4/6] Generating explanations..."
         )
 
-        explanations: dict[str, Any] = {}
+        engine = (
+            create_default_engine()
+        )
 
-        for index, method in enumerate(
-            methods,
-            start=1,
-        ):
+        methods = (
+            self._get_methods()
+        )
+
+        context = (
+            self._build_xai_context(
+                model=model,
+                weights=weights,
+                original_image=(
+                    original_image
+                ),
+                input_data=input_data,
+                xai_input=xai_input,
+                xai_target=xai_target,
+                task=task,
+                letterbox=letterbox,
+            )
+        )
+
+        explanations: dict[
+            str,
+            Any,
+        ] = {}
+
+        try:
+
+            for (
+                index,
+                method,
+            ) in enumerate(
+                methods,
+                start=1,
+            ):
+
+                print()
+
+                print(
+                    f"      [{index}/{len(methods)}] "
+                    f"{method}"
+                )
+
+                method_result = (
+                    self._run_explanation(
+                        engine=engine,
+                        model=model,
+                        prediction=(
+                            prediction
+                        ),
+                        original_image=(
+                            original_image
+                        ),
+                        input_data=input_data,
+                        context=context,
+                        method=method,
+                    )
+                )
+
+                explanations[
+                    method
+                ] = method_result
+
+                print(
+                    f"          Runtime: "
+                    f"{method_result['runtime_ms']:.2f} ms"
+                )
+
+                if (
+                    method_result[
+                        "metrics"
+                    ]
+                    is not None
+                ):
+
+                    print(
+                        f"          Deletion AUC: "
+                        f"{method_result['metrics']['deletion_auc']:.4f}"
+                    )
+
+                    print(
+                        f"          Insertion AUC: "
+                        f"{method_result['metrics']['insertion_auc']:.4f}"
+                    )
+
+            # ----------------------------------------------------
+            # 5. Summary
+            # ----------------------------------------------------
+
             print()
             print(
-                f"      [{index}/{len(methods)}] "
-                f"{method}"
+                "[5/6] Saving summary..."
             )
 
-            method_result = (
-                self._run_explanation(
-                    engine=engine,
-                    model=model,
-                    prediction=prediction,
-                    original_image=original_image,
-                    input_tensor=input_tensor,
-                    context=context,
-                    method=method,
+            comparison_csv = (
+                self._save_comparison_csv(
+                    explanations
                 )
             )
 
-            explanations[method] = method_result
-
-            print(
-                f"          Runtime: "
-                f"{method_result['runtime_ms']:.2f} ms"
-            )
-
-            if method_result["metrics"] is not None:
-                print(
-                    f"          Deletion AUC: "
-                    f"{method_result['metrics']['deletion_auc']:.4f}"
+            runtime_plot = (
+                self._save_runtime_plot(
+                    explanations
                 )
+            )
 
-                print(
-                    f"          Insertion AUC: "
-                    f"{method_result['metrics']['insertion_auc']:.4f}"
+            faithfulness_plot = (
+                self._save_faithfulness_plot(
+                    explanations
                 )
-
-        # --------------------------------------------------
-        # Summary
-        # --------------------------------------------------
-
-        print()
-        print("[5/6] Saving summary...")
-
-        comparison_csv = (
-            self._save_comparison_csv(
-                explanations
             )
-        )
 
-        runtime_plot = (
-            self._save_runtime_plot(
-                explanations
-            )
-        )
-
-        faithfulness_plot = (
-            self._save_faithfulness_plot(
-                explanations
-            )
-        )
-
-        result: dict[str, Any] = {
-            "experiment": self.config[
-                "experiment"
-            ]["name"],
-            "timestamp": datetime.now().isoformat(),
-            "device": str(self.device),
-            "model": {
-                "name": "resnet18",
-                "weights": "DEFAULT",
-            },
-            "input": {
-                "image_path": self.config[
-                    "image"
-                ]["path"],
-                "original_size": list(
-                    original_image.size
+            prediction_json: dict[
+                str,
+                Any,
+            ] = {
+                "class_id": (
+                    prediction.class_id
                 ),
-            },
-            "prediction": {
-                "class_id": prediction.class_id,
-                "class_name": predicted_class,
-                "confidence": prediction.confidence,
-                "top5": [
+                "confidence": (
+                    prediction.confidence
+                ),
+                "task": (
+                    prediction.task
+                ),
+            }
+
+            if task == "classification":
+
+                prediction_json[
+                    "class_name"
+                ] = predicted_class
+
+                prediction_json[
+                    "top5"
+                ] = [
                     {
-                        "class_id": int(index),
-                        "class_name": categories[
-                            int(index)
-                        ],
+                        "class_id": int(
+                            index
+                        ),
+                        "class_name": (
+                            categories[
+                                int(index)
+                            ]
+                        ),
                         "confidence": float(
                             prediction.probabilities[
                                 index
@@ -934,63 +1840,185 @@ class ExperimentRunner:
                         prediction.probabilities
                         .argsort()[::-1][:5]
                     )
-                ],
-            },
-            "explanations": explanations,
-            "artifacts": {
-                "comparison_csv": comparison_csv.name,
-                "runtime_comparison": runtime_plot.name,
-                "faithfulness_comparison": faithfulness_plot.name,
-            },
-        }
+                ]
 
-        result_path = (
-            output_dir / "result.json"
-        )
+            else:
 
-        with result_path.open(
-            "w",
-            encoding="utf-8",
-        ) as file:
-            json.dump(
-                result,
-                file,
-                indent=2,
-                ensure_ascii=False,
-                default=_json_default,
+                prediction_json[
+                    "detections"
+                ] = [
+                    {
+                        "class_id": (
+                            detection.class_id
+                        ),
+                        "class_name": (
+                            detection.class_name
+                        ),
+                        "confidence": (
+                            detection.confidence
+                        ),
+                        "bbox": (
+                            detection.bbox
+                        ),
+                    }
+                    for detection in (
+                        prediction.detections
+                        or []
+                    )
+                ]
+
+            result: dict[
+                str,
+                Any,
+            ] = {
+                "experiment": (
+                    self.config[
+                        "experiment"
+                    ][
+                        "name"
+                    ]
+                ),
+                "timestamp": (
+                    datetime.now().isoformat()
+                ),
+                "device": str(
+                    self.device
+                ),
+                "model": {
+                    "name": (
+                        model_name
+                    ),
+                    "task": task,
+                    "weights": (
+                        "DEFAULT"
+                        if weights is not None
+                        else self.config[
+                            "model"
+                        ].get(
+                            "weights"
+                        )
+                    ),
+                },
+                "input": {
+                    "image_path": (
+                        self.config[
+                            "image"
+                        ][
+                            "path"
+                        ]
+                    ),
+                    "original_size": list(
+                        original_image.size
+                    ),
+                },
+                "prediction": (
+                    prediction_json
+                ),
+                "target": {
+                    "task": (
+                        xai_target.task
+                    ),
+                    "class_id": (
+                        xai_target.class_id
+                    ),
+                    "score": (
+                        xai_target.score
+                    ),
+                    "detection_index": (
+                        xai_target.detection_index
+                    ),
+                    "bbox": (
+                        xai_target.bbox
+                    ),
+                },
+                "explanations": (
+                    explanations
+                ),
+                "artifacts": {
+                    "comparison_csv": (
+                        comparison_csv.name
+                    ),
+                    "runtime_comparison": (
+                        runtime_plot.name
+                    ),
+                    "faithfulness_comparison": (
+                        faithfulness_plot.name
+                    ),
+                },
+            }
+
+            if letterbox is not None:
+
+                result[
+                    "xai_preprocessing"
+                ] = {
+                    "letterbox": (
+                        letterbox
+                    )
+                }
+
+            result_path = (
+                output_dir
+                / "result.json"
             )
 
-        print(
-            f"      Result: {result_path}"
-        )
-        print(
-            f"      Comparison: {comparison_csv}"
-        )
+            with result_path.open(
+                "w",
+                encoding="utf-8",
+            ) as file:
 
-        print(
-            f"      Runtime plot: {runtime_plot}"
-        )
+                json.dump(
+                    result,
+                    file,
+                    indent=2,
+                    ensure_ascii=False,
+                    default=_json_default,
+                )
 
-        print(
-            f"      Faithfulness plot: "
-            f"{faithfulness_plot}"
-        )
+            print(
+                f"      Result: "
+                f"{result_path}"
+            )
 
-        # --------------------------------------------------
-        # Final
-        # --------------------------------------------------
+            print(
+                f"      Comparison: "
+                f"{comparison_csv}"
+            )
 
-        print()
-        print("[6/6] Experiment complete")
+            print(
+                f"      Runtime plot: "
+                f"{runtime_plot}"
+            )
 
-        print("=" * 60)
-        print("EXPERIMENT COMPLETE")
-        print("=" * 60)
+            print(
+                f"      Faithfulness plot: "
+                f"{faithfulness_plot}"
+            )
 
-        print(
-            f"Result: {result_path}"
-        )
+            # ----------------------------------------------------
+            # 6. Final
+            # ----------------------------------------------------
 
-        engine.close()
+            print()
+            print(
+                "[6/6] Experiment complete"
+            )
 
-        return result
+            print("=" * 60)
+
+            print(
+                "EXPERIMENT COMPLETE"
+            )
+
+            print("=" * 60)
+
+            print(
+                f"Result: "
+                f"{result_path}"
+            )
+
+            return result
+
+        finally:
+
+            engine.close()

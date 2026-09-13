@@ -1,8 +1,10 @@
+import inspect
 from typing import Any
 
 from .base import Explainer
 from .registry import ExplainerRegistry
 from .result import ExplanationResult
+from .target import XAITarget
 
 
 class XAIEngine:
@@ -85,10 +87,7 @@ class XAIEngine:
             )
         )
 
-        # Cached explainers may own resources,
-        # for example PyTorch hooks.
         if not spec.cache_instance:
-
             return spec.explainer_cls(
                 **constructor_kwargs
             )
@@ -103,8 +102,10 @@ class XAIEngine:
             resource_key,
         )
 
-        if cache_key not in self._explainer_instances:
-
+        if (
+            cache_key
+            not in self._explainer_instances
+        ):
             self._explainer_instances[
                 cache_key
             ] = spec.explainer_cls(
@@ -115,31 +116,56 @@ class XAIEngine:
             cache_key
         ]
 
+    def _resolve_method_target(
+        self,
+        target: int | str | XAITarget | None,
+    ) -> int | str | XAITarget | None:
+        """
+        Convert classification XAITarget into the primitive
+        class-id representation expected by legacy classification
+        explainers.
+
+        Detection targets remain structured XAITarget objects.
+        """
+
+        if isinstance(
+            target,
+            XAITarget,
+        ):
+            if target.task == "classification":
+                return target.class_id
+
+        return target
+
     def explain(
         self,
         input_type: str,
         method: str,
         model: Any,
         input_data: Any,
-        target: int | str | None = None,
+        target: int | str | XAITarget | None = None,
         context: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> ExplanationResult:
         """
         Generate an explanation using a registered method.
 
-        ``context`` contains shared experiment information,
-        while additional keyword arguments remain supported
-        for backward compatibility and are merged into the
-        explainer context.
+        `context` contains shared experiment information.
+
+        Additional keyword arguments are merged into context
+        for backward compatibility.
         """
 
         merged_context: dict[str, Any] = {}
 
         if context is not None:
-            merged_context.update(context)
+            merged_context.update(
+                context
+            )
 
-        merged_context.update(kwargs)
+        merged_context.update(
+            kwargs
+        )
 
         merged_context.setdefault(
             "model",
@@ -156,29 +182,73 @@ class XAIEngine:
             target,
         )
 
+        # --------------------------------------------------------
+        # Resolve explainer.
+        # --------------------------------------------------------
+
         explainer = self._get_instance(
             input_type=input_type,
             method=method,
             context=merged_context,
         )
 
-        resolved_input = self.registry.build_input_data(
-            input_type=input_type,
-            method=method,
-            context=merged_context,
-            default_input=input_data,
+        # --------------------------------------------------------
+        # Resolve explainer-specific input.
+        # --------------------------------------------------------
+
+        resolved_input = (
+            self.registry.build_input_data(
+                input_type=input_type,
+                method=method,
+                context=merged_context,
+                default_input=input_data,
+            )
         )
 
+        # --------------------------------------------------------
+        # Adapt universal target to the target format expected
+        # by the selected explainer.
+        # --------------------------------------------------------
+
+        method_target = (
+            self._resolve_method_target(
+                target
+            )
+        )
+
+        # --------------------------------------------------------
+        # Preserve compatibility with explainers that don't
+        # declare a `context` parameter.
+        # --------------------------------------------------------
+
+        explain_kwargs: dict[
+            str,
+            Any,
+        ] = {
+            "model": model,
+            "input_data": resolved_input,
+            "target": method_target,
+        }
+
+        signature = inspect.signature(
+            explainer.explain
+        )
+
+        if "context" in signature.parameters:
+            explain_kwargs[
+                "context"
+            ] = merged_context
+
         return explainer.explain(
-            model=model,
-            input_data=resolved_input,
-            target=target,
+            **explain_kwargs
         )
 
     def close(self) -> None:
+
         for explainer in (
             self._explainer_instances.values()
         ):
+
             close_method = getattr(
                 explainer,
                 "close",

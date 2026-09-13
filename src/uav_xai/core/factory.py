@@ -13,10 +13,19 @@ from ..methods import (
     LrpImageExplainer,
 )
 
-
 def _grad_cam_kwargs(
     context: dict[str, Any],
 ) -> dict[str, Any]:
+
+    target_layers = context.get(
+        "target_layers"
+    )
+
+    if target_layers:
+        return {
+            "target_layer": target_layers,
+        }
+
     target_layer = context.get(
         "target_layer"
     )
@@ -33,16 +42,31 @@ def _grad_cam_kwargs(
 def _grad_cam_input(
     context: dict[str, Any],
 ) -> Any:
-    input_tensor = context.get(
-        "input_tensor"
+    """
+    Resolve Grad-CAM input.
+
+    Prefer explicit xai_input when a runner provides
+    a model-specific XAI representation. Otherwise fall
+    back to the generic input_data.
+    """
+
+    xai_input = context.get(
+        "xai_input"
     )
 
-    if input_tensor is None:
-        raise ValueError(
-            "Grad-CAM requires input_tensor."
-        )
+    if xai_input is not None:
+        return xai_input
 
-    return input_tensor
+    input_data = context.get(
+        "input_data"
+    )
+
+    if input_data is not None:
+        return input_data
+
+    raise ValueError(
+        "Grad-CAM requires xai_input or input_data."
+    )
 
 
 def _lime_image_input(
