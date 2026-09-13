@@ -23,7 +23,9 @@ target:
   index: 0
 
 metrics:
-  enabled: false
+  enabled: true
+  steps: 20
+  baseline_value: 0.0
 
 output:
   root: results
