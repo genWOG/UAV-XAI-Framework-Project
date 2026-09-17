@@ -1,0 +1,1698 @@
+[
+  {
+    "timestamp": "2026-09-05T12:40:19.090311",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lime",
+    "runtime_ms": 21.598,
+    "attribution": [
+      -0.018512209125242693,
+      4.271736627249261e-05,
+      0.053387327955386546,
+      0.02242844608798144,
+      0.003408326423923719,
+      0.018708577289808882,
+      0.04331894771137501,
+      -0.022904641325103607,
+      0.0005166087713709435,
+      -0.004082201521229062
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.3,
+      "is_anomaly": false,
+      "reasons": [
+        "Опасная низкая высота"
+      ],
+      "level": "warning"
+    },
+    "lime_details": [
+      [
+        "obstacle_dist > 75.29",
+        0.053387327955386546
+      ],
+      [
+        "-2.82 < roll <= 13.25",
+        0.04331894771137501
+      ],
+      [
+        "-1.17 < pitch <= 13.37",
+        -0.022904641325103607
+      ],
+      [
+        "battery > 79.28",
+        0.02242844608798144
+      ],
+      [
+        "-74.13 < yaw <= 7.86",
+        0.018708577289808882
+      ],
+      [
+        "altitude <= 8.27",
+        -0.018512209125242693
+      ],
+      [
+        "-7.71 < angle_to_target <= 80.45",
+        -0.004082201521229062
+      ],
+      [
+        "obstacle_density <= 0.23",
+        0.003408326423923719
+      ],
+      [
+        "251.74 < distance_to_target <= 382.63",
+        0.0005166087713709435
+      ],
+      [
+        "speed <= 4.34",
+        4.271736627249261e-05
+      ]
+    ],
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.053)\n • roll: 0.00 (способствует, вес: +0.043)\n • pitch: 0.00 (препятствует, вес: -0.023)"
+  },
+  {
+    "timestamp": "2026-09-05T12:40:20.985731",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "shap",
+    "runtime_ms": 41.58,
+    "attribution": [
+      -0.05187139999758042,
+      0.01662202772279695,
+      0.0761400546220547,
+      -0.01147559893203369,
+      0.0038707321953427402,
+      0.008168505186627194,
+      0.0044129051658445525,
+      0.0006658166534668636,
+      0.003091989653371013,
+      0.0015749677301095631
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "shap_details": "SHAP values for class 1",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.076)\n • altitude: 1.89 (препятствует, вес: -0.052)\n • speed: 0.00 (способствует, вес: +0.017)"
+  },
+  {
+    "timestamp": "2026-09-05T12:40:23.039667",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lrp",
+    "runtime_ms": 0.9990000000000001,
+    "attribution": [
+      -0.044538725167512894,
+      0.04110533744096756,
+      42.732330322265625,
+      -2.7820000648498535,
+      -0.0,
+      -0.004543906543403864,
+      0.0013517594197764993,
+      -0.001952831051312387,
+      -0.9377910494804382,
+      0.010499926283955574
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.3,
+      "is_anomaly": false,
+      "reasons": [
+        "Опасная низкая высота"
+      ],
+      "level": "warning"
+    },
+    "lrp_details": "Attributions via InputXGradient (Captum)",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +42.732)\n • battery: 100.00 (препятствует, вес: -2.782)\n • distance_to_target: 359.33 (препятствует, вес: -0.938)"
+  },
+  {
+    "timestamp": "2026-09-05T12:40:25.658789",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lime",
+    "runtime_ms": 15.172,
+    "attribution": [
+      -0.010361395229439503,
+      0.002071559400098842,
+      0.10530311188672284,
+      -0.03461450322867834,
+      0.030612659098366708,
+      -0.027179990451703103,
+      -0.00844648473385486,
+      0.007327180482842692,
+      0.0046861927364745095,
+      0.03893678315744573
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.3,
+      "is_anomaly": false,
+      "reasons": [
+        "Опасная низкая высота"
+      ],
+      "level": "warning"
+    },
+    "lime_details": [
+      [
+        "obstacle_dist > 75.29",
+        0.10530311188672284
+      ],
+      [
+        "-7.71 < angle_to_target <= 80.45",
+        0.03893678315744573
+      ],
+      [
+        "battery > 79.28",
+        -0.03461450322867834
+      ],
+      [
+        "obstacle_density <= 0.23",
+        0.030612659098366708
+      ],
+      [
+        "-74.13 < yaw <= 7.86",
+        -0.027179990451703103
+      ],
+      [
+        "altitude <= 8.27",
+        -0.010361395229439503
+      ],
+      [
+        "-2.82 < roll <= 13.25",
+        -0.00844648473385486
+      ],
+      [
+        "-1.17 < pitch <= 13.37",
+        0.007327180482842692
+      ],
+      [
+        "251.74 < distance_to_target <= 382.63",
+        0.0046861927364745095
+      ],
+      [
+        "speed <= 4.34",
+        0.002071559400098842
+      ]
+    ],
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.105)\n • angle_to_target: -0.80 (способствует, вес: +0.039)\n • battery: 100.00 (препятствует, вес: -0.035)"
+  },
+  {
+    "timestamp": "2026-09-05T12:40:27.745053",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "shap",
+    "runtime_ms": 35.062999999999995,
+    "attribution": [
+      -0.047237805749615495,
+      0.015484176834893492,
+      0.07283901388719617,
+      -0.010224526676275953,
+      0.010140815705926204,
+      0.0036004585488259716,
+      0.004179957428084405,
+      -0.001732106375031272,
+      0.0029496187267811402,
+      0.0012003976692147983
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "shap_details": "SHAP values for class 1",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.073)\n • altitude: 1.76 (препятствует, вес: -0.047)\n • speed: 0.78 (способствует, вес: +0.015)"
+  },
+  {
+    "timestamp": "2026-09-05T12:40:29.798020",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lrp",
+    "runtime_ms": 0.0,
+    "attribution": [
+      -0.047026921063661575,
+      0.07516174763441086,
+      42.732330322265625,
+      -2.7820000648498535,
+      -0.0,
+      -0.004527038428932428,
+      0.001218108576722443,
+      0.00043690978782251477,
+      -0.9414036870002747,
+      0.009722317568957806
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "lrp_details": "Attributions via InputXGradient (Captum)",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +42.732)\n • battery: 100.00 (препятствует, вес: -2.782)\n • distance_to_target: 360.71 (препятствует, вес: -0.941)"
+  },
+  {
+    "timestamp": "2026-09-05T12:40:32.275206",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lime",
+    "runtime_ms": 15.374,
+    "attribution": [
+      -0.02713485937809686,
+      0.007428575879057401,
+      0.09203808147067538,
+      -0.005539921885376298,
+      -0.021115116951022292,
+      -0.026028811932469104,
+      -0.010659530480850275,
+      -0.0026588857054442357,
+      -0.01574120058049923,
+      0.042905628891539635
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "lime_details": [
+      [
+        "obstacle_dist > 75.29",
+        0.09203808147067538
+      ],
+      [
+        "-7.71 < angle_to_target <= 80.45",
+        0.042905628891539635
+      ],
+      [
+        "altitude <= 8.27",
+        -0.02713485937809686
+      ],
+      [
+        "-74.13 < yaw <= 7.86",
+        -0.026028811932469104
+      ],
+      [
+        "obstacle_density <= 0.23",
+        -0.021115116951022292
+      ],
+      [
+        "251.74 < distance_to_target <= 382.63",
+        -0.01574120058049923
+      ],
+      [
+        "-2.82 < roll <= 13.25",
+        -0.010659530480850275
+      ],
+      [
+        "speed <= 4.34",
+        0.007428575879057401
+      ],
+      [
+        "battery > 79.28",
+        -0.005539921885376298
+      ],
+      [
+        "-1.17 < pitch <= 13.37",
+        -0.0026588857054442357
+      ]
+    ],
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.092)\n • angle_to_target: -0.50 (способствует, вес: +0.043)\n • altitude: 1.76 (препятствует, вес: -0.027)"
+  },
+  {
+    "timestamp": "2026-09-05T12:40:34.368908",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "shap",
+    "runtime_ms": 39.773,
+    "attribution": [
+      -0.051378049986845066,
+      0.01946773579258955,
+      0.07613767121656856,
+      -0.009061498529518342,
+      0.0066680190228675445,
+      0.007372020172374314,
+      0.00020308061102950609,
+      0.0024052466216156906,
+      -0.001591637640485966,
+      0.0009774127198036702
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "shap_details": "SHAP values for class 1",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.076)\n • altitude: 1.76 (препятствует, вес: -0.051)\n • speed: 0.87 (способствует, вес: +0.019)"
+  },
+  {
+    "timestamp": "2026-09-05T12:40:36.425103",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lrp",
+    "runtime_ms": 0.963,
+    "attribution": [
+      -0.04703496769070625,
+      0.08331888914108276,
+      42.732330322265625,
+      -2.7820000648498535,
+      -0.0,
+      -0.004479279275983572,
+      -0.0003739448729902506,
+      0.0015410560881718993,
+      -0.9437484741210938,
+      0.0007984393741935492
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "lrp_details": "Attributions via InputXGradient (Captum)",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +42.732)\n • battery: 100.00 (препятствует, вес: -2.782)\n • distance_to_target: 361.61 (препятствует, вес: -0.944)"
+  },
+  {
+    "timestamp": "2026-09-05T12:40:38.904276",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lime",
+    "runtime_ms": 14.477,
+    "attribution": [
+      -0.016279508001154002,
+      -0.039317205510026355,
+      0.06679903032610796,
+      -0.022632291621594944,
+      0.010434279822282662,
+      0.018694327689968586,
+      0.00432817840146391,
+      -0.0010973532296112037,
+      0.011803577681343564,
+      0.021015823114692703
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "lime_details": [
+      [
+        "obstacle_dist > 75.29",
+        0.06679903032610796
+      ],
+      [
+        "speed <= 4.34",
+        -0.039317205510026355
+      ],
+      [
+        "battery > 79.28",
+        -0.022632291621594944
+      ],
+      [
+        "-7.71 < angle_to_target <= 80.45",
+        0.021015823114692703
+      ],
+      [
+        "-74.13 < yaw <= 7.86",
+        0.018694327689968586
+      ],
+      [
+        "altitude <= 8.27",
+        -0.016279508001154002
+      ],
+      [
+        "251.74 < distance_to_target <= 382.63",
+        0.011803577681343564
+      ],
+      [
+        "obstacle_density <= 0.23",
+        0.010434279822282662
+      ],
+      [
+        "-2.82 < roll <= 13.25",
+        0.00432817840146391
+      ],
+      [
+        "-1.17 < pitch <= 13.37",
+        -0.0010973532296112037
+      ]
+    ],
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.067)\n • speed: 0.93 (препятствует, вес: -0.039)\n • battery: 100.00 (препятствует, вес: -0.023)"
+  },
+  {
+    "timestamp": "2026-09-05T12:40:40.994498",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "shap",
+    "runtime_ms": 35.628,
+    "attribution": [
+      -0.055835999023238686,
+      0.01828564633380026,
+      0.07585339026225747,
+      -0.01209352271541389,
+      0.0021288201691072386,
+      0.008970335939428621,
+      0.002914963861740573,
+      0.0011324738301221656,
+      0.003915076868325076,
+      0.005928814473870633
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "shap_details": "SHAP values for class 1",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.076)\n • altitude: 1.76 (препятствует, вес: -0.056)\n • speed: 0.96 (способствует, вес: +0.018)"
+  },
+  {
+    "timestamp": "2026-09-05T12:40:43.047911",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lrp",
+    "runtime_ms": 0.506,
+    "attribution": [
+      -0.04703908786177635,
+      0.09153873473405838,
+      42.732330322265625,
+      -2.7820000648498535,
+      -0.0,
+      -0.004429531749337912,
+      -0.001583508332259953,
+      -0.000271536031505093,
+      -0.9402298927307129,
+      -0.007884389720857143
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "lrp_details": "Attributions via InputXGradient (Captum)",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +42.732)\n • battery: 100.00 (препятствует, вес: -2.782)\n • distance_to_target: 360.26 (препятствует, вес: -0.940)"
+  },
+  {
+    "timestamp": "2026-09-05T12:40:45.524095",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lime",
+    "runtime_ms": 14.056000000000001,
+    "attribution": [
+      0.016436125487437652,
+      0.014945248447810701,
+      0.0767429628576084,
+      0.019406142725016378,
+      -0.034790543299865584,
+      -0.0005628948205718921,
+      0.030158760029445262,
+      -0.01124752683466722,
+      -0.005974935473273673,
+      -0.02149035211532333
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "lime_details": [
+      [
+        "obstacle_dist > 75.29",
+        0.0767429628576084
+      ],
+      [
+        "obstacle_density <= 0.23",
+        -0.034790543299865584
+      ],
+      [
+        "-2.82 < roll <= 13.25",
+        0.030158760029445262
+      ],
+      [
+        "-7.71 < angle_to_target <= 80.45",
+        -0.02149035211532333
+      ],
+      [
+        "battery > 79.28",
+        0.019406142725016378
+      ],
+      [
+        "altitude <= 8.27",
+        0.016436125487437652
+      ],
+      [
+        "speed <= 4.34",
+        0.014945248447810701
+      ],
+      [
+        "-1.17 < pitch <= 13.37",
+        -0.01124752683466722
+      ],
+      [
+        "251.74 < distance_to_target <= 382.63",
+        -0.005974935473273673
+      ],
+      [
+        "-74.13 < yaw <= 7.86",
+        -0.0005628948205718921
+      ]
+    ],
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.077)\n • obstacle_density: 0.00 (препятствует, вес: -0.035)\n • roll: -0.01 (способствует, вес: +0.030)"
+  },
+  {
+    "timestamp": "2026-09-05T12:40:47.608931",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "shap",
+    "runtime_ms": 33.409,
+    "attribution": [
+      -0.05193514135258915,
+      0.017667045602343955,
+      0.07589737458519961,
+      -0.01067274553316533,
+      0.0033876862072331837,
+      0.004650475693852333,
+      0.0034195107204926245,
+      0.0031676131491822,
+      0.0016214891194091842,
+      0.003996691808040856
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "shap_details": "SHAP values for class 1",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.076)\n • altitude: 1.76 (препятствует, вес: -0.052)\n • speed: 1.04 (способствует, вес: +0.018)"
+  },
+  {
+    "timestamp": "2026-09-05T12:40:49.669932",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lrp",
+    "runtime_ms": 0.653,
+    "attribution": [
+      -0.047042712569236755,
+      0.09916771203279495,
+      42.732330322265625,
+      -2.7820000648498535,
+      -0.0,
+      -0.00436009606346488,
+      -5.72696553717833e-05,
+      -0.0019583723042160273,
+      -0.9368793368339539,
+      -0.01533416099846363
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "lrp_details": "Attributions via InputXGradient (Captum)",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +42.732)\n • battery: 100.00 (препятствует, вес: -2.782)\n • distance_to_target: 358.98 (препятствует, вес: -0.937)"
+  },
+  {
+    "timestamp": "2026-09-05T12:40:52.194613",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lime",
+    "runtime_ms": 17.054,
+    "attribution": [
+      -0.011271117718685112,
+      -0.014571265968130444,
+      0.09956146487280758,
+      0.026229635911446076,
+      0.04172291995379155,
+      -0.006433145076127499,
+      -0.031753943928010925,
+      -0.010584862143703837,
+      -0.004301031077308352,
+      0.031996149306392614
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "lime_details": [
+      [
+        "obstacle_dist > 75.29",
+        0.09956146487280758
+      ],
+      [
+        "obstacle_density <= 0.23",
+        0.04172291995379155
+      ],
+      [
+        "-7.71 < angle_to_target <= 80.45",
+        0.031996149306392614
+      ],
+      [
+        "-2.82 < roll <= 13.25",
+        -0.031753943928010925
+      ],
+      [
+        "battery > 79.28",
+        0.026229635911446076
+      ],
+      [
+        "speed <= 4.34",
+        -0.014571265968130444
+      ],
+      [
+        "altitude <= 8.27",
+        -0.011271117718685112
+      ],
+      [
+        "-1.17 < pitch <= 13.37",
+        -0.010584862143703837
+      ],
+      [
+        "-74.13 < yaw <= 7.86",
+        -0.006433145076127499
+      ],
+      [
+        "251.74 < distance_to_target <= 382.63",
+        -0.004301031077308352
+      ]
+    ],
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.100)\n • obstacle_density: 0.00 (способствует, вес: +0.042)\n • angle_to_target: 2.04 (способствует, вес: +0.032)"
+  },
+  {
+    "timestamp": "2026-09-05T12:40:54.269936",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "shap",
+    "runtime_ms": 25.096,
+    "attribution": [
+      -0.049426688128152076,
+      0.016118209891220987,
+      0.07604772181067625,
+      -0.008355256997810425,
+      0.003787258737912214,
+      0.00601616947022499,
+      0.001844231739719833,
+      0.0014486847090909266,
+      0.0010393835620652464,
+      0.0026802852050515254
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "shap_details": "SHAP values for class 1",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.076)\n • altitude: 1.76 (препятствует, вес: -0.049)\n • speed: 1.12 (способствует, вес: +0.016)"
+  },
+  {
+    "timestamp": "2026-09-05T12:40:56.324259",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lrp",
+    "runtime_ms": 1.508,
+    "attribution": [
+      -0.047043196856975555,
+      0.10573156177997589,
+      42.732330322265625,
+      -2.7820000648498535,
+      -0.0,
+      -0.004270161502063274,
+      0.0017964410362765193,
+      -0.0007381655159406364,
+      -0.9390134215354919,
+      -0.025106504559516907
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "lrp_details": "Attributions via InputXGradient (Captum)",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +42.732)\n • battery: 100.00 (препятствует, вес: -2.782)\n • distance_to_target: 359.79 (препятствует, вес: -0.939)"
+  },
+  {
+    "timestamp": "2026-09-05T12:40:58.826435",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lime",
+    "runtime_ms": 23.556,
+    "attribution": [
+      -0.011312995707415846,
+      -0.014376316357870863,
+      0.0951129354940876,
+      -0.019206263145817404,
+      0.024216365456193784,
+      0.029033174905631037,
+      0.01989432195475854,
+      -0.02723443764295264,
+      -0.016788733144685285,
+      0.05705062360571667
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "lime_details": [
+      [
+        "obstacle_dist > 75.29",
+        0.0951129354940876
+      ],
+      [
+        "-7.71 < angle_to_target <= 80.45",
+        0.05705062360571667
+      ],
+      [
+        "-74.13 < yaw <= 7.86",
+        0.029033174905631037
+      ],
+      [
+        "-1.17 < pitch <= 13.37",
+        -0.02723443764295264
+      ],
+      [
+        "obstacle_density <= 0.23",
+        0.024216365456193784
+      ],
+      [
+        "-2.82 < roll <= 13.25",
+        0.01989432195475854
+      ],
+      [
+        "battery > 79.28",
+        -0.019206263145817404
+      ],
+      [
+        "251.74 < distance_to_target <= 382.63",
+        -0.016788733144685285
+      ],
+      [
+        "speed <= 4.34",
+        -0.014376316357870863
+      ],
+      [
+        "altitude <= 8.27",
+        -0.011312995707415846
+      ]
+    ],
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.095)\n • angle_to_target: 2.93 (способствует, вес: +0.057)\n • yaw: 0.93 (способствует, вес: +0.029)"
+  },
+  {
+    "timestamp": "2026-09-05T12:41:00.920266",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "shap",
+    "runtime_ms": 30.684,
+    "attribution": [
+      -0.05099204230808774,
+      0.01582743371987812,
+      0.0764313443821956,
+      -0.008817533384942214,
+      0.0031614142650474753,
+      0.008234598484246252,
+      0.00523531504729333,
+      -0.002838134223460756,
+      0.0014684226592506567,
+      0.003489181358578736
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "shap_details": "SHAP values for class 1",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.076)\n • altitude: 1.76 (препятствует, вес: -0.051)\n • speed: 1.17 (способствует, вес: +0.016)"
+  },
+  {
+    "timestamp": "2026-09-05T12:41:02.974087",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lrp",
+    "runtime_ms": 0.9990000000000001,
+    "attribution": [
+      -0.04703532159328461,
+      0.10991724580526352,
+      42.732330322265625,
+      -2.7820000648498535,
+      -0.0,
+      -0.004186376929283142,
+      0.0014567975886166096,
+      0.0015913416864350438,
+      -0.9431449770927429,
+      -0.03699793666601181
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "lrp_details": "Attributions via InputXGradient (Captum)",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +42.732)\n • battery: 100.00 (препятствует, вес: -2.782)\n • distance_to_target: 361.38 (препятствует, вес: -0.943)"
+  },
+  {
+    "timestamp": "2026-09-05T12:41:05.502397",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lime",
+    "runtime_ms": 26.087,
+    "attribution": [
+      0.017396527859694037,
+      -0.006807589228670193,
+      0.0841672968095932,
+      0.0073362569914928065,
+      -0.0028237349382375125,
+      -0.013335312911547052,
+      0.016366342219554412,
+      0.011914552573447413,
+      0.03571080319861623,
+      0.0038387278484419197
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "lime_details": [
+      [
+        "obstacle_dist > 75.29",
+        0.0841672968095932
+      ],
+      [
+        "251.74 < distance_to_target <= 382.63",
+        0.03571080319861623
+      ],
+      [
+        "altitude <= 8.27",
+        0.017396527859694037
+      ],
+      [
+        "-2.82 < roll <= 13.25",
+        0.016366342219554412
+      ],
+      [
+        "-74.13 < yaw <= 7.86",
+        -0.013335312911547052
+      ],
+      [
+        "-1.17 < pitch <= 13.37",
+        0.011914552573447413
+      ],
+      [
+        "battery > 79.28",
+        0.0073362569914928065
+      ],
+      [
+        "speed <= 4.34",
+        -0.006807589228670193
+      ],
+      [
+        "-7.71 < angle_to_target <= 80.45",
+        0.0038387278484419197
+      ],
+      [
+        "obstacle_density <= 0.23",
+        -0.0028237349382375125
+      ]
+    ],
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.084)\n • distance_to_target: 358.97 (способствует, вес: +0.036)\n • altitude: 1.76 (способствует, вес: +0.017)"
+  },
+  {
+    "timestamp": "2026-09-05T12:41:07.584013",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "shap",
+    "runtime_ms": 27.567999999999998,
+    "attribution": [
+      -0.048010294047004014,
+      0.015949875719048125,
+      0.07775499467872753,
+      -0.012457285840513527,
+      0.0053862973628074524,
+      0.005803670817612732,
+      0.0017902110233727275,
+      -0.0007402021034360676,
+      0.00168020974009981,
+      0.004042522649284709
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "shap_details": "SHAP values for class 1",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.078)\n • altitude: 1.76 (препятствует, вес: -0.048)\n • speed: 1.19 (способствует, вес: +0.016)"
+  },
+  {
+    "timestamp": "2026-09-05T12:41:09.640768",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lrp",
+    "runtime_ms": 1.0070000000000001,
+    "attribution": [
+      -0.04701647907495499,
+      0.11053711920976639,
+      42.732330322265625,
+      -2.7820000648498535,
+      -0.0,
+      -0.004058432765305042,
+      -0.0004220833070576191,
+      0.0023155654780566692,
+      -0.9444185495376587,
+      -0.05684858560562134
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "lrp_details": "Attributions via InputXGradient (Captum)",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +42.732)\n • battery: 100.00 (препятствует, вес: -2.782)\n • distance_to_target: 361.87 (препятствует, вес: -0.944)"
+  },
+  {
+    "timestamp": "2026-09-05T12:41:12.091094",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lime",
+    "runtime_ms": 15.562,
+    "attribution": [
+      -0.009419924539205845,
+      -0.006282057527145776,
+      0.09545930783846529,
+      -0.017379233770232747,
+      0.038733400243174836,
+      0.00721855578699688,
+      0.006363471663876759,
+      -0.035717730229490235,
+      -0.0632599614010888,
+      0.007192195987231769
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "lime_details": [
+      [
+        "obstacle_dist > 75.29",
+        0.09545930783846529
+      ],
+      [
+        "251.74 < distance_to_target <= 382.63",
+        -0.0632599614010888
+      ],
+      [
+        "obstacle_density <= 0.23",
+        0.038733400243174836
+      ],
+      [
+        "-1.17 < pitch <= 13.37",
+        -0.035717730229490235
+      ],
+      [
+        "battery > 79.28",
+        -0.017379233770232747
+      ],
+      [
+        "altitude <= 8.27",
+        -0.009419924539205845
+      ],
+      [
+        "-74.13 < yaw <= 7.86",
+        0.00721855578699688
+      ],
+      [
+        "-7.71 < angle_to_target <= 80.45",
+        0.007192195987231769
+      ],
+      [
+        "-2.82 < roll <= 13.25",
+        0.006363471663876759
+      ],
+      [
+        "speed <= 4.34",
+        -0.006282057527145776
+      ]
+    ],
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.095)\n • distance_to_target: 359.97 (препятствует, вес: -0.063)\n • obstacle_density: 0.00 (способствует, вес: +0.039)"
+  },
+  {
+    "timestamp": "2026-09-05T12:41:14.165550",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "shap",
+    "runtime_ms": 24.709,
+    "attribution": [
+      -0.05067054479579166,
+      0.018024734218073702,
+      0.07702257117798492,
+      -0.010405720547741547,
+      0.00567031240751193,
+      0.0066193221424523585,
+      0.0011757360315740456,
+      -0.0016055962058172518,
+      0.0009095095696817064,
+      0.004459676002071263
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "shap_details": "SHAP values for class 1",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.077)\n • altitude: 1.76 (препятствует, вес: -0.051)\n • speed: 1.17 (способствует, вес: +0.018)"
+  },
+  {
+    "timestamp": "2026-09-05T12:41:16.220916",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lrp",
+    "runtime_ms": 1.038,
+    "attribution": [
+      -0.047005943953990936,
+      0.10743874311447144,
+      42.732330322265625,
+      -2.7820000648498535,
+      -0.0,
+      -0.003934728447347879,
+      -0.0018762502586469054,
+      0.0010770207736641169,
+      -0.9425670504570007,
+      -0.07558872550725937
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "lrp_details": "Attributions via InputXGradient (Captum)",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +42.732)\n • battery: 100.00 (препятствует, вес: -2.782)\n • distance_to_target: 361.16 (препятствует, вес: -0.943)"
+  },
+  {
+    "timestamp": "2026-09-05T12:41:18.675962",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lime",
+    "runtime_ms": 17.025,
+    "attribution": [
+      0.027632018024072537,
+      0.04779620115012078,
+      0.09816379362642551,
+      0.029403028182363997,
+      0.02725459726391273,
+      0.0006887734402131523,
+      -0.0364840308540698,
+      -0.003043994132105736,
+      -0.007320655750893645,
+      0.0031364149800768015
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "lime_details": [
+      [
+        "obstacle_dist > 75.29",
+        0.09816379362642551
+      ],
+      [
+        "speed <= 4.34",
+        0.04779620115012078
+      ],
+      [
+        "-2.82 < roll <= 13.25",
+        -0.0364840308540698
+      ],
+      [
+        "battery > 79.28",
+        0.029403028182363997
+      ],
+      [
+        "altitude <= 8.27",
+        0.027632018024072537
+      ],
+      [
+        "obstacle_density <= 0.23",
+        0.02725459726391273
+      ],
+      [
+        "251.74 < distance_to_target <= 382.63",
+        -0.007320655750893645
+      ],
+      [
+        "-7.71 < angle_to_target <= 80.45",
+        0.0031364149800768015
+      ],
+      [
+        "-1.17 < pitch <= 13.37",
+        -0.003043994132105736
+      ],
+      [
+        "-74.13 < yaw <= 7.86",
+        0.0006887734402131523
+      ]
+    ],
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.098)\n • speed: 1.13 (способствует, вес: +0.048)\n • roll: -0.08 (препятствует, вес: -0.036)"
+  },
+  {
+    "timestamp": "2026-09-05T12:41:20.754470",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "shap",
+    "runtime_ms": 26.688,
+    "attribution": [
+      -0.05144215569312511,
+      0.012603835904283829,
+      0.07950198065675082,
+      -0.008945123002159867,
+      0.0038201890242985257,
+      0.007695059477436841,
+      0.0029485153313383626,
+      -0.0010111761363218869,
+      0.0011656065072430072,
+      0.004863267930254948
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.6,
+      "is_anomaly": true,
+      "reasons": [
+        "Опасная низкая высота",
+        "Дрон завис на месте"
+      ],
+      "level": "warning"
+    },
+    "shap_details": "SHAP values for class 1",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +0.080)\n • altitude: 1.76 (препятствует, вес: -0.051)\n • speed: 1.11 (способствует, вес: +0.013)"
+  },
+  {
+    "timestamp": "2026-09-05T12:41:22.810890",
+    "action": 1,
+    "action_name": "Продолжить",
+    "confidence": 0.85,
+    "method": "lrp",
+    "runtime_ms": 1.009,
+    "attribution": [
+      -0.00639495812356472,
+      0.07602261006832123,
+      42.732330322265625,
+      -2.7820000648498535,
+      -0.0,
+      -0.0018036196706816554,
+      -2.0490335816969463e-10,
+      0.0036019906401634216,
+      -0.9409887194633484,
+      -0.3672849237918854
+    ],
+    "feature_names": [
+      "altitude",
+      "speed",
+      "obstacle_dist",
+      "battery",
+      "obstacle_density",
+      "yaw",
+      "roll",
+      "pitch",
+      "distance_to_target",
+      "angle_to_target"
+    ],
+    "is_anomaly": {
+      "score": 0.3,
+      "is_anomaly": false,
+      "reasons": [
+        "Опасная низкая высота"
+      ],
+      "level": "warning"
+    },
+    "lrp_details": "Attributions via InputXGradient (Captum)",
+    "explanation_text": "Решение: ПРОДОЛЖИТЬ\nВлияющие факторы:\n • obstacle_dist: 100.00 (способствует, вес: +42.732)\n • battery: 100.00 (препятствует, вес: -2.782)\n • distance_to_target: 360.55 (препятствует, вес: -0.941)"
+  }
+]

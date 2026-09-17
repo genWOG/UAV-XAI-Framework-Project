@@ -1,86 +1,85 @@
 """
 Модуль детекции препятствий для БПЛА.
-Использует данные с сенсоров и позицию для определения препятствий.
+
+Использует встроенную систему коллизий AirSim + карту мира.
 """
 
 import time
-import math
 
 class ObstacleDetector:
-    """
-    Детектор препятствий на основе данных с сенсоров.
-    """
+    """Детектор препятствий на основе состояния БПЛА."""
 
-    def __init__(self, log_manager=None):
+    def __init__(self, log_manager=None, world_scanner=None):
         self.log = log_manager
+        self.world_scanner = world_scanner
         self.last_detection = None
         self.detection_history = []
         self.obstacle_positions = {}
-        self.last_altitude = 0
-        self.altitude_change_counter = 0
+        
+        # 👉 СПИСОК ОБЪЕКТОВ, КОТОРЫЕ ВСЕГДА ИГНОРИРУЕМ
+        self.always_ignore = [
+            'landscape', 'ground', 'floor', 'terrain',
+            'sky', 'cloud', 'background', 'grass',
+            'road', 'street', 'sidewalk', 'path'
+        ]
 
     def detect(self, state):
         """
         Детекция препятствий на основе состояния БПЛА.
+        Использует collision_info из AirSim.
         """
         sensors = state.get('sensors', {})
         pos = state.get('position', {})
-        
-        # 👉 РЕАЛЬНАЯ ВЫСОТА
-        real_altitude = abs(pos.get('z', 0))
-        
-        # 👉 1. ПРОВЕРКА СТОЛКНОВЕНИЯ
+
+        # 👉 1. ПРОВЕРКА КОЛЛИЗИИ (ГЛАВНЫЙ ИСТОЧНИК!)
         if sensors.get('collision', False):
             object_name = sensors.get('object_name', 'неизвестно')
             distance = sensors.get('obstacle_distance', 0.0)
+
+            # 👉 ПРОВЕРЯЕМ, НУЖНО ЛИ ИГНОРИРОВАТЬ
+            if self._should_ignore(object_name):
+                self._log(f"ℹ️ Игнорируем: {object_name}", level='debug')
+                return None
+
+            # Переводим имя на русский
             object_name = self._translate_object_name(object_name)
-            
+
+            # Игнорируем деревья (если они не коллизионные)
             if 'дерево' in object_name.lower() or 'tree' in object_name.lower():
                 return None
-            
+
             result = {
                 'type': 'collision',
                 'object': object_name,
                 'distance': distance,
                 'density': 0.0,
                 'position': pos,
-                'altitude': real_altitude
+                'is_obstacle': True
             }
+
             self._log(f"🚨 СТОЛКНОВЕНИЕ с {object_name}!", level='error')
             self._save_detection(result)
             return result
 
-        # 👉 2. ПОЛУЧАЕМ ДАННЫЕ С СЕНСОРОВ
+        # 👉 2. ЕСЛИ НЕТ КОЛЛИЗИИ, ПРОВЕРЯЕМ DISTANCE SENSOR (FALLBACK)
         distance = sensors.get('obstacle_distance', 100.0)
         density = sensors.get('obstacle_density', 0.0)
         object_name = sensors.get('object_name', None)
-        
+
         if object_name:
+            # 👉 ПРОВЕРКА НА ИГНОРИРОВАНИЕ
+            if self._should_ignore(object_name):
+                return None
             object_name = self._translate_object_name(object_name)
         else:
             object_name = 'неизвестно'
 
-        # 👉 ИГНОРИРУЕМ ДЕРЕВЬЯ
+        # Игнорируем деревья
         if 'дерево' in object_name.lower() or 'tree' in object_name.lower():
             return None
 
-        # 👉 3. АНАЛИЗ ИЗМЕНЕНИЯ ВЫСОТЫ (признак обхода)
-        altitude_change = real_altitude - self.last_altitude
-        self.last_altitude = real_altitude
-        
-        # Если высота резко меняется — возможно, обходит препятствие
-        if abs(altitude_change) > 5:
-            self.altitude_change_counter += 1
-            if self.altitude_change_counter > 3:
-                self._log(f"📈 Обнаружено изменение высоты: {altitude_change:.1f} м", level='debug')
-                # Это не препятствие, а обход
-                return None
-        else:
-            self.altitude_change_counter = 0
-
-        # 👉 4. ПРОВЕРКА ПО РАССТОЯНИЮ (используем DistanceSensor)
-        if distance < 50.0:
-            # Определяем тип по расстоянию
+        # Если расстояние меньше 30 метров --- это препятствие
+        if distance < 30.0:
             if distance < 5.0:
                 result_type = 'collision'
                 log_level = 'error'
@@ -89,61 +88,45 @@ class ObstacleDetector:
                 result_type = 'large'
                 log_level = 'warn'
                 log_msg = f"⚠️ ОПАСНОЕ ПРЕПЯТСТВИЕ! {object_name} на {distance:.1f} м!"
-            elif distance < 30.0:
-                result_type = 'medium'
-                log_level = 'info'
-                log_msg = f"ℹ️ ПРЕПЯТСТВИЕ {object_name} на {distance:.1f} м"
             else:
                 result_type = 'small'
                 log_level = 'info'
                 log_msg = f"ℹ️ {object_name} на расстоянии {distance:.1f} м"
-            
+
             # Если объект неизвестен, пытаемся угадать
             if object_name == 'неизвестно' or object_name == 'Unknown':
-                guess = self._guess_object_type(distance, density, real_altitude)
+                guess = self._guess_object_type(distance, density)
                 object_name = guess
                 log_msg = f"🔍 ПРЕДПОЛОЖЕНИЕ: {guess} ({distance:.1f} м)"
-            
+
             result = {
                 'type': result_type,
                 'object': object_name,
                 'distance': distance,
                 'density': density,
                 'position': pos,
-                'altitude': real_altitude
+                'is_obstacle': True
             }
-            
+
             self._log(log_msg, level=log_level)
             self._save_detection(result)
             self.last_detection = result
             return result
 
-        # 👉 5. ПРОВЕРКА ПО ПЛОТНОСТИ
-        if density > 0.5:
-            result = {
-                'type': 'large',
-                'object': 'скопление объектов',
-                'distance': distance,
-                'density': density,
-                'position': pos,
-                'altitude': real_altitude
-            }
-            self._log(f"⚠️ СКОПЛЕНИЕ ПРЕПЯТСТВИЙ! Плотность {density:.0%}", level='warn')
-            self._save_detection(result)
-            self.last_detection = result
-            return result
-
-        # 👉 6. ПРОВЕРКА ПО ИСТОРИИ
+        # 👉 3. ПРОВЕРКА ПО ИСТОРИИ (если уже видели препятствие в этом месте)
         pos_key = (round(pos.get('x', 0), 1), round(pos.get('y', 0), 1))
         if pos_key in self.obstacle_positions:
             old_obj = self.obstacle_positions[pos_key]
+            # Проверяем, не игнорируется ли этот объект
+            if self._should_ignore(old_obj):
+                return None
             result = {
                 'type': 'small',
                 'object': old_obj,
                 'distance': 30.0,
                 'density': 0.3,
                 'position': pos,
-                'altitude': real_altitude
+                'is_obstacle': True
             }
             self._log(f"ℹ️ Вспоминаем {old_obj} в этой точке", level='debug')
             self._save_detection(result)
@@ -153,11 +136,27 @@ class ObstacleDetector:
         self.last_detection = None
         return None
 
-    def _guess_object_type(self, distance, density, altitude):
+    def _should_ignore(self, object_name):
+        """Проверяет, нужно ли игнорировать объект."""
+        if not object_name:
+            return True
+        
+        object_lower = object_name.lower()
+        
+        # Проверяем по списку всегда игнорируемых
+        for pattern in self.always_ignore:
+            if pattern in object_lower:
+                return True
+        
+        # Если есть сканер мира, используем его
+        if self.world_scanner:
+            return self.world_scanner.should_ignore(object_name)
+        
+        return False
+
+    def _guess_object_type(self, distance, density):
         """Угадывает тип объекта по характеристикам."""
         if distance < 5.0:
-            if altitude > 10:
-                return 'здание/сооружение'
             return 'здание/стена'
         elif distance < 15.0 and density > 0.3:
             return 'крупный объект'
@@ -174,8 +173,9 @@ class ObstacleDetector:
         """Переводит имя объекта с английского на русский."""
         if not name:
             return 'неизвестно'
-        
+
         name_lower = name.lower()
+
         translation_map = {
             'building': 'здание',
             'house': 'здание',
@@ -211,15 +211,21 @@ class ObstacleDetector:
             'cable': 'провод',
             'powerline': 'провод',
             'electric': 'провод',
-            'apartment_square_tower2_107': 'здание',
-            'npcvehiclemanager_20': 'автобус',
-            'CityEnviron_TrafficLight59_3058': 'светофор',
             'unknown': 'неизвестно'
         }
-        
+
+        # 👉 ОБРАБОТКА СПЕЦИАЛЬНЫХ ШАБЛОНОВ
+        if 'templatefloor' in name_lower:
+            return 'здание'
+        if 'cube' in name_lower and 'landscape' not in name_lower:
+            return 'препятствие'
+        if 'landscape' in name_lower:
+            return 'ландшафт'  # будет проигнорирован
+
         for eng, rus in translation_map.items():
             if eng in name_lower:
                 return rus
+
         return name
 
     def _log(self, message, level='info'):
@@ -240,51 +246,51 @@ class ObstacleDetector:
             'timestamp': time.time(),
             'detection': detection
         })
+
         if len(self.detection_history) > 1000:
             self.detection_history = self.detection_history[-1000:]
-        
+
         # Запоминаем позицию
         pos = detection.get('position', {})
         if pos:
             pos_key = (round(pos.get('x', 0), 1), round(pos.get('y', 0), 1))
             self.obstacle_positions[pos_key] = detection.get('object', 'препятствие')
 
+    def set_world_scanner(self, scanner):
+        """Устанавливает сканер мира для фильтрации объектов."""
+        self.world_scanner = scanner
+
     def get_summary(self):
         if not self.detection_history:
             return "Препятствий не обнаружено"
-        
+
         total = len(self.detection_history)
-        collision_count = sum(1 for d in self.detection_history 
-                            if d.get('detection', {}).get('type') == 'collision')
-        large_count = sum(1 for d in self.detection_history 
-                        if d.get('detection', {}).get('type') == 'large')
-        medium_count = sum(1 for d in self.detection_history 
-                          if d.get('detection', {}).get('type') == 'medium')
-        small_count = sum(1 for d in self.detection_history 
-                         if d.get('detection', {}).get('type') == 'small')
-        
+        collision_count = sum(1 for d in self.detection_history
+                              if d.get('detection', {}).get('type') == 'collision')
+        large_count = sum(1 for d in self.detection_history
+                          if d.get('detection', {}).get('type') == 'large')
+        small_count = sum(1 for d in self.detection_history
+                          if d.get('detection', {}).get('type') == 'small')
+
         object_counts = {}
         for d in self.detection_history:
             obj = d.get('detection', {}).get('object', 'неизвестно')
             object_counts[obj] = object_counts.get(obj, 0) + 1
-        
+
         top_objects = sorted(object_counts.items(), key=lambda x: x[1], reverse=True)[:3]
         top_objects_str = ', '.join([f"{obj}: {count}" for obj, count in top_objects])
-        
+
         return {
             'total_detections': total,
             'collision_count': collision_count,
             'large_count': large_count,
-            'medium_count': medium_count,
             'small_count': small_count,
             'top_objects': top_objects,
             'summary': f"Всего: {total}, Столкновений: {collision_count}, "
-                      f"Опасных: {large_count}, Средних: {medium_count}, "
-                      f"Маленьких: {small_count}, Топ-3: {top_objects_str}"
+                       f"Опасных: {large_count}, Маленьких: {small_count}, Топ-3: {top_objects_str}"
         }
 
     def clear_history(self):
         self.detection_history = []
         self.last_detection = None
         self.obstacle_positions = {}
-        self.altitude_change_counter = 0

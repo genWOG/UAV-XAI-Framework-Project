@@ -1,7 +1,7 @@
 """
 Главный модуль мониторинга полёта с XAI интеграцией
 
-Версия 12.2 — асинхронное движение + корректное завершение
+Версия 14.3 — ограничение высоты + GPS
 """
 
 import sys
@@ -14,7 +14,7 @@ import numpy as np
 from datetime import datetime
 
 # ========================================
-# 🔧 ФИКС КОДИРОВКИ ДЛЯ ПОДДЕРЖКИ ЭМОДЗИ В WINDOWS
+# ФИКС КОДИРОВКИ ДЛЯ ПОДДЕРЖКИ ЭМОДЗИ В WINDOWS
 # ========================================
 if sys.platform == "win32":
     os.system("chcp 65001 > nul")
@@ -34,6 +34,7 @@ from modules.obstacle_detector import ObstacleDetector
 from modules.telemetry_parser import TelemetryParser
 from modules.route_planner import RoutePlanner
 from modules.airsim_adapter import AirSimAdapter
+from modules.world_scanner import WorldScanner
 
 # XAI Bridge
 try:
@@ -68,10 +69,8 @@ def generate_training_data(n_samples=300):
             label = 0
         else:
             label = 1
-
         data.append([altitude, speed, obstacle_dist, battery, density, yaw, roll, pitch, dist_to_target, angle_to_target])
         labels.append(label)
-
     return np.array(data), np.array(labels)
 
 def train_xai_model(X, y):
@@ -181,18 +180,38 @@ def calculate_new_target(pos, obstacle_width, current_target_x, current_target_y
 # ИНИЦИАЛИЗАЦИЯ
 # ========================================
 
-print("\n" + "="*60)
-print("🚁 СИСТЕМА МОНИТОРИНГА ПОЛЁТА БПЛА v12.2 (Асинхронная)")
-print("="*60 + "\n")
+print("\n" + "=" * 60)
+print("🚁 СИСТЕМА МОНИТОРИНГА ПОЛЁТА БПЛА v14.3 (Высота + GPS)")
+print("=" * 60 + "\n")
 
 log = LogManager(log_dir="data/logs")
 adapter = AirSimAdapter(log, use_simulation=False)
-obstacle = ObstacleDetector(log)
+
+# СКАНЕР МИРА
+world_scanner = WorldScanner(adapter.client, log)
+world_scanner.scan_world()
+
+# Выводим статистику
+types = world_scanner.get_obstacle_types()
+log.system("📊 Препятствия в мире:")
+for obj_type, count in types.items():
+    log.system(f"  {obj_type}: {count}")
+
+# Сохраняем карту мира
+world_scanner.save_to_file("data/world_objects.json")
+
+obstacle = ObstacleDetector(log, world_scanner=world_scanner)
 telemetry = TelemetryParser(log)
 route = RoutePlanner(log)
 
+# Цель
+target_x, target_y = 200, 300
+altitude = -5
+speed = 12
+
 # Генерируем данные для XAI
 training_data, training_labels = generate_training_data(300)
+
 feature_names = [
     'altitude', 'speed', 'obstacle_dist', 'battery',
     'obstacle_density', 'yaw', 'roll', 'pitch',
@@ -202,7 +221,6 @@ feature_names = [
 # Обучаем модели
 xai_model = train_xai_model(training_data, training_labels)
 print("✅ XAI sklearn модель обучена")
-
 torch_model = train_torch_model(training_data, training_labels)
 print("✅ XAI torch модель обучена")
 
@@ -216,12 +234,8 @@ log.system("Запуск системы...")
 log.system("Дрон: X-1000, версия 3.2")
 log.system(f"Время старта: {datetime.now().strftime('%H:%M:%S')}")
 log.system("XAI: АКТИВИРОВАН (авто-чередование: LIME/SHAP/LRP)")
-log.system("Навигация: АСИНХРОННАЯ + ДЕТЕКЦИЯ ТУПИКА")
+log.system("Навигация: СКАНЕР МИРА + КОНТРОЛЬ ВЫСОТЫ")
 
-# Цель
-target_x, target_y = 200, 300
-altitude = -5
-speed = 12
 route.plan(0, 0, target_x, target_y, altitude)
 
 # ========================================
@@ -240,13 +254,18 @@ adapter.move_to(target_x, target_y, altitude, speed)
 # ПАРАМЕТРЫ
 # ========================================
 
+MAX_FLIGHT_TIME = 600  # 10 минут
+
+# 👈 ОГРАНИЧЕНИЕ ВЫСОТЫ
+MAX_ALTITUDE = 10   # максимальная высота (метров)
+MIN_ALTITUDE = 3    # минимальная высота (метров)
+
 COLLISION_TIMEOUT = 10
 collision_start_time = None
 is_collision_mode = False
 collision_attempts = 0
 MAX_COLLISION_ATTEMPTS = 5
 OBSTACLE_DETECTION_DISTANCE = 30.0
-MAX_FLIGHT_TIME = 600
 
 BASE_SPEED = 12
 MIN_SPEED = 4
@@ -258,7 +277,10 @@ MAX_STUCK_TIME = 10
 position_history = []
 stuck_time = 0
 MAX_AVOID_ATTEMPTS = 5
-avoid_attempts = {}
+
+# Счётчик попыток взлёта
+takeoff_attempts = 0
+MAX_TAKEOFF_ATTEMPTS = 5
 
 # Память
 obstacle_memory = {}
@@ -275,6 +297,13 @@ MAX_DANGER_ZONE_VISITS = 3
 xai_call_count = 0
 xai_method_stats = {'lime': 0, 'shap': 0, 'lrp': 0, 'fallback': 0}
 
+# Для проверки движения
+last_position = None
+move_check_counter = 0
+
+# GPS данные
+gps_data = None
+
 # ========================================
 # ОСНОВНОЙ ЦИКЛ
 # ========================================
@@ -287,10 +316,10 @@ xai_explanations = []
 
 collision_stats = {
     'здание': 0, 'автобус': 0, 'дерево': 0, 'столб': 0,
-    'машина': 0, 'человек': 0, 'светофор': 0, 'провод': 0, 'неизвестно': 0
+    'машина': 0, 'человек': 0, 'светофор': 0, 'провод': 0,
+    'неизвестно': 0
 }
 
-last_position = None
 current_target_x = target_x
 current_target_y = target_y
 successful_avoidance = 0
@@ -309,6 +338,59 @@ try:
         pos = state['position']
         sensors = state.get('sensors', {})
         real_altitude = abs(pos['z'])
+
+        # 👉 ПОЛУЧАЕМ GPS
+        gps_data = adapter.get_gps_data()
+        if gps_data and abs(gps_data['latitude']) > 0.01:
+            log.drone(f"🌍 GPS: {gps_data['latitude']:.6f}, {gps_data['longitude']:.6f}")
+
+        # 👈 КОНТРОЛЬ ВЫСОТЫ
+        if real_altitude > MAX_ALTITUDE + 1:
+            log.warn(f"⚠️ Слишком высоко! {real_altitude:.1f} м > {MAX_ALTITUDE} м")
+            log.drone(f"📉 Снижаюсь до {MAX_ALTITUDE} м")
+            adapter.move_to(pos['x'], pos['y'], -MAX_ALTITUDE, speed)
+            time.sleep(0.5)
+            continue
+
+        if real_altitude < MIN_ALTITUDE and flight_time > 10:
+            log.warn(f"⚠️ Слишком низко! {real_altitude:.1f} м < {MIN_ALTITUDE} м")
+            log.drone(f"📈 Поднимаюсь до {MIN_ALTITUDE} м")
+            adapter.move_to(pos['x'], pos['y'], -MIN_ALTITUDE, speed)
+            time.sleep(0.5)
+            continue
+
+        # 👉 ПРОВЕРКА: ДРОН НА ЗЕМЛЕ?
+        if real_altitude < 2.0 and flight_time > 5:
+            takeoff_attempts += 1
+            if takeoff_attempts <= MAX_TAKEOFF_ATTEMPTS:
+                log.warn(f"⚠️ Дрон слишком низко ({real_altitude:.1f} м)! Попытка взлёта #{takeoff_attempts}...")
+                try:
+                    adapter.client.takeoffAsync()
+                    time.sleep(2)
+                    adapter.client.moveToPositionAsync(pos['x'], pos['y'], -MIN_ALTITUDE, 5.0, timeout_sec=3.0).join()
+                    time.sleep(1)
+                    continue
+                except Exception as e:
+                    log.error(f"❌ Ошибка принудительного взлёта: {e}")
+                    continue
+            else:
+                log.error(f"❌ Не удалось взлететь после {MAX_TAKEOFF_ATTEMPTS} попыток!")
+                crash_detected = True
+                break
+
+        # Проверка движения (каждые 5 секунд)
+        if flight_time % 5 == 0 and flight_time > 10:
+            if last_position is not None:
+                dx = pos['x'] - last_position[0]
+                dy = pos['y'] - last_position[1]
+                dist_moved = (dx*dx + dy*dy) ** 0.5
+                if dist_moved < 0.5:
+                    log.warn(f"⚠️ Дрон не двигается! ({dist_moved:.2f} м за 5 сек)")
+                    log.drone("🔄 Повторная отправка команды движения...")
+                    adapter.move_to(target_x, target_y, -MIN_ALTITUDE, speed)
+                else:
+                    log.drone(f"✅ Дрон движется: {dist_moved:.2f} м за 5 сек")
+            last_position = (pos['x'], pos['y'])
 
         # Адаптивная скорость
         if ADAPTIVE_SPEED:
@@ -336,15 +418,15 @@ try:
                     log.error("❌ Дрон зациклился! Кардинальная смена маршрута!")
                     new_x = pos['x'] + random.randint(50, 150) * (1 if random.random() > 0.5 else -1)
                     new_y = pos['y'] + random.randint(50, 150) * (1 if random.random() > 0.5 else -1)
-                    log.drone(f"🔄 Новая цель: ({new_x:.0f}, {new_y:.0f})")
-                    current_target_x = new_x
-                    current_target_y = new_y
-                    adapter.move_to(current_target_x, current_target_y, altitude, current_speed, force=True)
+                    adapter.move_to(new_x, new_y, -MIN_ALTITUDE, current_speed)
                     stuck_time = 0
                     position_history = []
                     continue
             else:
                 stuck_time = max(0, stuck_time - 1)
+
+        # Расстояние до цели
+        distance_to_target = ((pos['x'] - target_x)**2 + (pos['y'] - target_y)**2) ** 0.5
 
         # Статус
         total_collisions = sum(collision_stats.values())
@@ -352,69 +434,30 @@ try:
             log.drone("🟢 Лечу! Движение свободное")
         else:
             max_object = max(collision_stats, key=collision_stats.get)
-            if collision_stats[max_object] > 0:
-                log.drone(f"🟡 Лечу! Впереди: {max_object.upper()} (коллизий: {collision_stats[max_object]})")
+            log.drone(f"🟡 Лечу! Впереди: {max_object.upper()} (коллизий: {collision_stats[max_object]})")
 
         # Телеметрия
-        gps = sensors.get('gps', {})
-        log.drone(f"📡 GPS: {gps.get('lat', 0):.6f}, {gps.get('lon', 0):.6f}")
         log.drone(f"📡 Высота: {real_altitude:.1f} м")
-
-        # DistanceSensor
-        dist_sensor = sensors.get('distance_sensor_distance', 100.0)
-        if sensors.get('distance_sensor_available', False) and dist_sensor < 50:
-            log.drone(f"📡 DistanceSensor: {dist_sensor:.1f} м")
-
-        distance_to_target = ((pos['x'] - current_target_x)**2 + (pos['y'] - current_target_y)**2) ** 0.5
-
-        # Ограничение высоты
-        if real_altitude > adapter.max_altitude + 2:
-            log.warn(f"⚠️ Слишком высоко! {real_altitude:.1f} м, снижаюсь до {adapter.max_altitude} м")
-            adapter.move_to(pos['x'], pos['y'], -adapter.max_altitude, current_speed, force=True)
-            time.sleep(0.3)
-            continue
-
-        # Коррекция маршрута
-        if distance_to_target > 30 and flight_time > 10 and not is_collision_mode and flight_time % 15 == 0:
-            log.drone(f"🔄 Коррекция маршрута: цель ({current_target_x:.0f}, {current_target_y:.0f})")
-            adapter.move_to(current_target_x, current_target_y, altitude, current_speed, force=True)
-            time.sleep(0.3)
+        log.drone(f"📡 До цели: {distance_to_target:.1f} м")
 
         # Проверка цели
-        if distance_to_target < 2.0 and not target_reached:
-            if abs(current_target_x - target_x) > 0.1 or abs(current_target_y - target_y) > 0.1:
-                log.drone(f"📍 Достигнута промежуточная цель! Двигаюсь к основной: ({target_x}, {target_y})")
-                current_target_x = target_x
-                current_target_y = target_y
-                adapter.move_to(current_target_x, current_target_y, altitude, current_speed, force=True)
-                continue
-            else:
-                target_reached = True
-                log.ok(f"🎯 Цель достигнута! Обходов: {successful_avoidance}")
-                break
+        if distance_to_target < 2.0:
+            target_reached = True
+            log.ok(f"🎯 Цель достигнута! Обходов: {successful_avoidance}")
+            break
 
-        # Детекция препятствий
-        detected = None
+        # ========================================
+        # ДЕТЕКЦИЯ ПРЕПЯТСТВИЙ
+        # ========================================
 
-        if sensors.get('distance_sensor_available', False):
-            dist = sensors.get('distance_sensor_distance', 100.0)
-            if dist < 30:
-                detected = {
-                    'type': 'large' if dist < 15 else 'small',
-                    'object': 'препятствие (DistanceSensor)',
-                    'distance': dist,
-                    'density': 0.3,
-                    'position': pos
-                }
-                log.obstacle(f"🔭 DistanceSensor: препятствие на {dist:.1f} м!")
-
-        if detected is None:
-            detected = obstacle.detect(state)
+        detected = obstacle.detect(state)
 
         if detected:
             obstacle_count += 1
             object_name = detected.get('object', 'неизвестно')
             distance = detected.get('distance', 100.0)
+
+            world_scanner.update_from_log(object_name)
 
             if object_name in collision_stats:
                 collision_stats[object_name] += 1
@@ -425,9 +468,6 @@ try:
 
             if obstacle_key in avoided_buildings:
                 log.warn(f"⚠️ Здание {obstacle_key} уже обойдено, пропускаю!")
-                current_target_x = target_x
-                current_target_y = target_y
-                adapter.move_to(current_target_x, current_target_y, altitude, current_speed, force=True)
                 continue
 
             if obstacle_key not in obstacle_memory:
@@ -451,6 +491,7 @@ try:
                     })
                     log.warn(f"⚠️ Добавлена опасная зона: {object_name} в ({pos['x']:.1f}, {pos['y']:.1f})")
 
+            # ОБХОД
             if distance < OBSTACLE_DETECTION_DISTANCE and not is_collision_mode:
                 obstacle_width = estimate_obstacle_size(sensors)
                 obj_class = classify_object(distance, obstacle_width, 0)
@@ -467,16 +508,12 @@ try:
                     log.warn("➡️ КАРДИНАЛЬНАЯ СМЕНА МАРШРУТА!")
                     new_x = pos['x'] + random.randint(100, 300) * (1 if random.random() > 0.5 else -1)
                     new_y = pos['y'] + random.randint(100, 300) * (1 if random.random() > 0.5 else -1)
-                    log.drone(f"🔄 Новая цель: ({new_x:.0f}, {new_y:.0f})")
-                    current_target_x = new_x
-                    current_target_y = new_y
-                    adapter.move_to(current_target_x, current_target_y, altitude, current_speed, force=True)
+                    adapter.move_to(new_x, new_y, -MIN_ALTITUDE, current_speed)
                     obstacle_attempts[obstacle_key] = 0
                     time.sleep(0.3)
                     continue
 
                 log.drone(f"🔄 Начинаю обход {object_name} (попытка {attempt+1})...")
-
                 try:
                     collision_attempts += 1
                     offset_multiplier = 1 + (attempt * 0.5)
@@ -485,30 +522,30 @@ try:
                     if avoidance_side == 0:
                         offset_x = min_offset
                         offset_y = 30 + (attempt * 12)
-                        log.drone(f" ➡️ Обход СПРАВА (смещение {offset_x:.0f} м)")
                         avoidance_side = 1
                     else:
                         offset_x = -min_offset
                         offset_y = 30 + (attempt * 12)
-                        log.drone(f" ⬅️ Обход СЛЕВА (смещение {offset_x:.0f} м)")
                         avoidance_side = 0
 
-                    log.drone(f" ✈️ Облёт препятствия...")
-                    adapter.move_to(pos['x'] + offset_x, pos['y'] + offset_y, altitude, current_speed)
+                    # 👈 ОБХОД С ОГРАНИЧЕНИЕМ ВЫСОТЫ
+                    current_z = -MIN_ALTITUDE
+                    # Если препятствие большое, поднимаемся выше
+                    if obstacle_width > 20:
+                        current_z = -MAX_ALTITUDE
+                        log.drone(f"📈 Большое препятствие! Поднимаюсь до {MAX_ALTITUDE} м")
+
+                    adapter.move_to(pos['x'] + offset_x, pos['y'] + offset_y, current_z, current_speed)
                     time.sleep(0.3)
 
-                    new_x, new_y = calculate_new_target(pos, obstacle_width, current_target_x, current_target_y, attempt + 1)
-                    log.drone(f" 🎯 Новая цель: ({new_x:.0f}, {new_y:.0f})")
-                    current_target_x = new_x
-                    current_target_y = new_y
-                    adapter.move_to(current_target_x, current_target_y, altitude, current_speed, force=True)
+                    adapter.move_to(target_x, target_y, -MIN_ALTITUDE, current_speed)
 
                     obstacle_attempts[obstacle_key] = attempt + 1
                     obstacle_avoid_count[obstacle_key] = avoid_count + 1
                     obstacle_avoided.add(obstacle_key)
                     successful_avoidance += 1
-
                     avoided_buildings.add(obstacle_key)
+
                     if len(avoided_buildings) > MAX_AVOIDED_BUILDINGS:
                         avoided_buildings.pop()
 
@@ -522,7 +559,6 @@ try:
                     log.error(f"❌ Ошибка обхода {object_name}: {e}")
                     crash_detected = True
                     break
-                continue
 
         # ========================================
         # XAI ОБЪЯСНЕНИЕ
@@ -540,6 +576,12 @@ try:
                 xai_call_count += 1
                 state['target_x'] = target_x
                 state['target_y'] = target_y
+                
+                # 👈 ДОБАВЛЯЕМ GPS В СОСТОЯНИЕ ДЛЯ XAI
+                if gps_data:
+                    state['gps_lat'] = gps_data['latitude']
+                    state['gps_lon'] = gps_data['longitude']
+                    state['gps_alt'] = gps_data['altitude']
 
                 explanation = xai.explain_decision(
                     state=state,
@@ -558,36 +600,35 @@ try:
                     log.info(f"📊 Решение: {explanation.get('action_name')} (уверенность: {explanation.get('confidence', 0):.2f})")
                     log.info(f" 📊 Метод: {explanation.get('method')} ({explanation.get('runtime_ms', 0):.1f} мс)")
 
-                    if explanation.get('attribution') and flight_time % 30 == 0:
-                        try:
-                            import matplotlib.pyplot as plt
-                            feature_names = explanation.get('feature_names', [])
-                            attribution = np.array(explanation.get('attribution', []))
-                            method_name = explanation.get('method', 'unknown')
+                if explanation and explanation.get('attribution') and flight_time % 30 == 0:
+                    try:
+                        import matplotlib.pyplot as plt
+                        feature_names = explanation.get('feature_names', [])
+                        attribution = np.array(explanation.get('attribution', []))
+                        method_name = explanation.get('method', 'unknown')
 
-                            if len(feature_names) == len(attribution):
-                                plt.figure(figsize=(10, 6))
-                                colors = ['green' if v > 0 else 'red' for v in attribution]
-                                plt.barh(feature_names, attribution, color=colors, alpha=0.7)
-                                plt.title(f'XAI Важность признаков ({method_name.upper()}, шаг {flight_time})')
-                                plt.xlabel('Вклад в решение')
-                                plt.axvline(0, color='black', linestyle='-', linewidth=0.5)
-                                plt.tight_layout()
-
-                                plot_dir = "results/xai_plots"
-                                os.makedirs(plot_dir, exist_ok=True)
-                                plot_path = os.path.join(plot_dir, f"xai_{method_name}_step_{flight_time:03d}.png")
-                                plt.savefig(plot_path, dpi=150)
-                                plt.close()
-                                log.info(f" 📊 График: {plot_path}")
-                        except Exception as e:
-                            log.warn(f" ⚠️ Ошибка визуализации: {e}")
+                        if len(feature_names) == len(attribution):
+                            plt.figure(figsize=(10, 6))
+                            colors = ['green' if v > 0 else 'red' for v in attribution]
+                            plt.barh(feature_names, attribution, color=colors, alpha=0.7)
+                            plt.title(f'XAI Важность признаков ({method_name.upper()}, шаг {flight_time})')
+                            plt.xlabel('Вклад в решение')
+                            plt.axvline(0, color='black', linestyle='-', linewidth=0.5)
+                            plt.tight_layout()
+                            plot_dir = "results/xai_plots"
+                            os.makedirs(plot_dir, exist_ok=True)
+                            plot_path = os.path.join(plot_dir, f"xai_{method_name}_step_{flight_time:03d}.png")
+                            plt.savefig(plot_path, dpi=150)
+                            plt.close()
+                            log.info(f" 📊 График: {plot_path}")
+                    except Exception as e:
+                        log.warn(f" ⚠️ Ошибка визуализации: {e}")
 
             except Exception as e:
                 log.error(f"❌ XAI ошибка: {e}")
 
         # ========================================
-        # КООРДИНАТЫ (каждые 5 сек)
+        # КООРДИНАТЫ
         # ========================================
 
         if flight_time % 5 == 0:
@@ -599,36 +640,26 @@ try:
 
 except KeyboardInterrupt:
     log.warn("⏹️ Полёт прерван пользователем (Ctrl+C)")
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("📊 СОХРАНЕНИЕ ДАННЫХ...")
-    print("="*60)
-    
-    # Сохраняем логи
+    print("=" * 60)
     log.save()
-    
-    # Сохраняем XAI объяснения
     try:
         xai_path = f"data/logs/xai_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         xai.save_explanations(xai_path)
         print(f"✅ XAI сохранены: {xai_path}")
-    except Exception as e:
-        print(f"⚠️ Ошибка сохранения XAI: {e}")
-    
-    # Сажаем дрон
+    except:
+        pass
     try:
-        log.drone("🛬 Аварийная посадка...")
         adapter.land()
     except:
         pass
-    
-    # Отключаемся
     try:
         adapter.disconnect()
     except:
         pass
-    
     print("\n✅ Аварийное завершение, данные сохранены!")
-    print("="*60)
+    print("=" * 60)
     sys.exit(0)
 
 except Exception as e:
@@ -650,9 +681,9 @@ else:
 # ОТЧЁТ
 # ========================================
 
-print("\n" + "="*60)
+print("\n" + "=" * 60)
 print("📊 ИТОГОВЫЙ ОТЧЁТ")
-print("="*60)
+print("=" * 60)
 
 if crash_detected:
     log.error("СТАТУС: АВАРИЙНАЯ ОСТАНОВКА")
@@ -663,15 +694,58 @@ else:
 
 log.info(f"⏱️ Длительность: {flight_time} сек")
 log.info(f"🚧 Всего препятствий: {obstacle_count}")
-log.info(f"📝 Запомнено препятствий: {len(obstacle_memory)}")
-log.info(f"🔄 Обойдено препятствий: {len(obstacle_avoided)}")
 log.info(f"🏆 Успешных обходов: {successful_avoidance}")
-log.info(f"🏷️ В чёрном списке: {len(avoided_buildings)} зданий")
+
+# 👈 GPS В ОТЧЁТЕ
+if gps_data and gps_data['latitude'] != 0:
+    log.info(f"🌍 GPS: {gps_data['latitude']:.6f}, {gps_data['longitude']:.6f}")
+else:
+    log.warn("⚠️ GPS данные отсутствуют")
+
+# Статистика по объектам
+print("\n" + "=" * 60)
+print("📊 СТАТИСТИКА КОЛЛИЗИЙ ПО ОБЪЕКТАМ")
+print("=" * 60)
+
+total_collisions = sum(collision_stats.values())
+for obj, count in collision_stats.items():
+    if count > 0:
+        pct = (count / total_collisions * 100) if total_collisions > 0 else 0
+        log.info(f" {obj.upper()}: {count} ({pct:.1f}%)")
+
+log.info(f"📊 Всего коллизий: {total_collisions}")
+
+if total_collisions > 0:
+    sorted_objects = sorted(collision_stats.items(), key=lambda x: x[1], reverse=True)
+    print("\n🏆 ТОП-3 ОБЪЕКТА-ПРЕПЯТСТВИЯ:")
+    for i, (obj, count) in enumerate(sorted_objects[:3], 1):
+        if count > 0:
+            log.info(f" {i}. {obj.upper()}: {count} раз")
+
+# Запомненные препятствия
+if obstacle_memory:
+    print("\n" + "=" * 60)
+    print("📝 ЗАПОМНЕННЫЕ ПРЕПЯТСТВИЯ")
+    print("=" * 60)
+    unique_obstacles = {}
+    for (x, y), obj in obstacle_memory.items():
+        if obj not in unique_obstacles:
+            unique_obstacles[obj] = (x, y)
+    for obj, (x, y) in list(unique_obstacles.items())[:5]:
+        log.info(f" {obj} в ({x}, {y})")
+
+# СТАТИСТИКА МИРА
+print("\n" + "=" * 60)
+print("📊 СТАТИСТИКА МИРА")
+print("=" * 60)
+types = world_scanner.get_obstacle_types()
+for obj_type, count in types.items():
+    log.info(f" {obj_type}: {count} объектов")
 
 # XAI ОТЧЁТ
-print("\n" + "="*60)
+print("\n" + "=" * 60)
 print("📊 XAI ОТЧЁТ")
-print("="*60)
+print("=" * 60)
 
 if xai_enabled:
     xai_summary = xai.get_summary()
@@ -680,9 +754,9 @@ if xai_enabled:
     log.info(f"Доля: {xai_summary.get('anomaly_rate', 0):.1%}")
     log.info(f"Использованные методы: {xai_summary.get('methods_used', [])}")
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("📊 СТАТИСТИКА XAI МЕТОДОВ")
-    print("="*60)
+    print("=" * 60)
 
     for method, count in xai_method_stats.items():
         if count > 0:
@@ -692,17 +766,6 @@ if xai_enabled:
     xai_path = f"data/logs/xai_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
     xai.save_explanations(xai_path)
     log.info(f"XAI сохранены: {xai_path}")
-
-    if xai_explanations:
-        local_path = f"data/logs/xai_local_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        try:
-            with open(local_path, 'w', encoding='utf-8') as f:
-                json.dump(xai_explanations, f, indent=2, default=str, ensure_ascii=False)
-            log.info(f"XAI локально: {local_path}")
-        except Exception as e:
-            log.warn(f"⚠️ Ошибка сохранения локальной копии: {e}")
-else:
-    log.info("XAI не включён")
 
 log.save()
 adapter.disconnect()
