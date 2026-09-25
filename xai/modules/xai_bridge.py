@@ -376,9 +376,9 @@ class XAIBridge:
         reasons = []
         altitude, speed, obstacle_dist, battery = features[0], features[1], features[2], features[3]
 
-        if altitude < 5:
+        if altitude < 2.0:
             anomaly_score += 0.3
-            reasons.append("Опасная низкая высота")
+            reasons.append("Критически низкая высота")
         if obstacle_dist < 3:
             anomaly_score += 0.4
             reasons.append("Критическое приближение к препятствию")
