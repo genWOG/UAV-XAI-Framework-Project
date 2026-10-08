@@ -1,17 +1,25 @@
 """
 Главный модуль мониторинга полёта с XAI интеграцией
 
-Версия 18.0 — исправлен счётчик XAI (реальное время)
-- XAI вызывается раз в 5 секунд РЕАЛЬНОГО времени
-- XAI вызывается в НАЧАЛЕ цикла (до всех continue)
-- Сохранение кадров с камеры (1080p)
+Версия 19.1
+- async_move_to защищён lock'ом: одна команда движения в момент времени
+- angle_to_target нормализуется в [-180, 180]
+- жёсткий потолок высоты (MAX_ALTITUDE)
+- обучение XAI-моделей ДО подключения к PX4
+- CUDA отключена (GTX 1050 Ti не поддерживается текущим torch)
+- реальный выход модели (predict_proba) для каждого отсчёта
+- запись логов для post-hoc XAI-модуля (modules/incident_logger.py)
 """
 
 import sys
 import os
+
+# Отключаем CUDA ДО любого импорта torch
+os.environ.setdefault("CUDA_VISIBLE_DEVICES", "")
 import time
 import math
 import random
+import threading
 import numpy as np
 from datetime import datetime
 
@@ -29,7 +37,37 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'xai', 'modules'))
 
 from modules.log_manager import LogManager
 from modules.px4_adapter import PX4Adapter
-from modules.camera_reader import CameraReader
+from modules.incident_logger import IncidentLogger
+# from modules.camera_reader import CameraReader  # Отключено — камера отдельно
+
+
+# ========================================
+# Неблокирующий move_to (защищённый lock'ом)
+# ========================================
+_move_lock = threading.Lock()
+
+
+def async_move_to(adapter, x, y, z, speed=3.0):
+    """Отправляет команду движения в фоне.
+
+    Гарантирует, что одновременно работает только один move_to.
+    Если во время движения приходит новая команда — она игнорируется
+    (не сбиваем PX4 противоречивыми set_position_ned).
+    """
+    def _worker():
+        # blocking=False: если кто-то уже двигается — пропускаем
+        if not _move_lock.acquire(blocking=False):
+            return
+        try:
+            adapter.move_to(x, y, z, speed)
+        except Exception as e:
+            # логирование ошибок делает сам адаптер
+            pass
+        finally:
+            _move_lock.release()
+
+    threading.Thread(target=_worker, daemon=True).start()
+
 
 try:
     from xai.modules.xai_bridge import XAIBridge
@@ -123,6 +161,7 @@ def pick_random_target(cx, cy, r_min=15.0, r_max=40.0, avoid_angle=None):
 # ========================================
 
 TOTAL_FLIGHT_SECONDS = 180
+LOOP_SLEEP_SECONDS = 0.2   # цикл ~5 Гц
 XAI_INTERVAL_SECONDS = 5
 PLOT_INTERVAL_SECONDS = 30
 FRAME_SAVE_INTERVAL = 10
@@ -144,16 +183,12 @@ FLIGHT_SPEED = 2.5
 # ========================================
 
 print("\n" + "=" * 60)
-print(f"🚁 ИССЛЕДОВАТЕЛЬ v18.0 ({TOTAL_FLIGHT_SECONDS} сек) + КАМЕРА")
+print(f"🚁 ИССЛЕДОВАТЕЛЬ v19.1 ({TOTAL_FLIGHT_SECONDS} сек) + КАМЕРА")
 print("=" * 60 + "\n")
 
 log = LogManager(log_dir="data/logs")
 
-adapter = PX4Adapter(log)
-if not adapter.connect():
-    log.error("❌ Не удалось подключиться к PX4")
-    sys.exit(1)
-
+# --- Тяжёлая часть (torch, обучение) ДО подключения к PX4 ---
 training_data, training_labels = generate_training_data(500)
 feature_names = [
     'altitude', 'speed', 'obstacle_dist', 'battery',
@@ -161,7 +196,7 @@ feature_names = [
     'distance_to_target', 'angle_to_target'
 ]
 
-print("🎓 Обучение XAI-моделей...")
+print("🎓 Обучение XAI-моделей (до подключения к PX4)...")
 xai_model = train_xai_model(training_data, training_labels)
 torch_model = train_torch_model(training_data, training_labels)
 print("✅ Модели обучены")
@@ -171,17 +206,34 @@ xai.set_model(xai_model)
 xai.set_torch_model(torch_model)
 xai_enabled = True
 
+# --- Подключение к PX4 ---
+adapter = PX4Adapter(log)
+if not adapter.connect():
+    log.error("❌ Не удалось подключиться к PX4")
+    sys.exit(1)
+
+# --- Логгер инцидентов ---
+incident = IncidentLogger(
+    root="data/incidents",
+    meta={
+        "script": "flight_monitor.py v19.1",
+        "world": "uav_test_world",
+        "flight_seconds": TOTAL_FLIGHT_SECONDS,
+        "loop_sleep_seconds": LOOP_SLEEP_SECONDS,
+        "feature_names": feature_names,
+        "decision_model": "RandomForest(50), обучен на синтетике (временная заглушка)",
+        "action_names": {"0": "Остановка", "1": "Продолжить"},
+    },
+)
+log.system(f"📁 Логи инцидентов: {incident.dir}")
+
 # ========================================
 # КАМЕРА
 # ========================================
 
-camera = CameraReader(log, save_dir='results/frames')
-camera_enabled = camera.start()
-
-if camera_enabled:
-    log.system("📷 Камера подключена")
-else:
-    log.warn("⚠️ Камера не подключена, продолжаем без неё")
+camera = None
+camera_enabled = False
+log.system("📷 Камера работает в отдельном процессе (camera_recorder.py)")
 
 log.system("Запуск исследователя...")
 log.system(f"Время старта: {datetime.now().strftime('%H:%M:%S')}")
@@ -198,6 +250,7 @@ total_targets_reached = 0
 total_stuck_events = 0
 total_altitude_events = 0
 total_speed_events = 0
+total_ceiling_events = 0
 total_frames_saved = 0
 
 
@@ -208,8 +261,12 @@ total_frames_saved = 0
 log.ok("🚀 Разрешение на взлёт")
 if not adapter.takeoff():
     log.error("❌ Не удалось взлететь")
-    camera.stop()
+    incident.event("takeoff_failed")
+    incident.close(summary={"result": "takeoff_failed"})
+    if camera is not None:
+        camera.stop()
     sys.exit(1)
+incident.event("takeoff")
 time.sleep(3)
 
 state = adapter.get_state()
@@ -217,14 +274,14 @@ pos = state['position']
 target_x, target_y = pick_random_target(pos['x'], pos['y'])
 
 log.drone(f"🎯 Первая цель: ({target_x:.1f}, {target_y:.1f})")
-adapter.move_to(target_x, target_y, FLIGHT_ALTITUDE, FLIGHT_SPEED)
+async_move_to(adapter, target_x, target_y, FLIGHT_ALTITUDE, FLIGHT_SPEED)
 
 # ========================================
 # Счётчики РЕАЛЬНОГО времени
 # ========================================
 
-last_xai_real_time = 0.0       # 👈 XAI по реальному времени
-last_plot_real_time = 0.0      # 👈 График по реальному времени
+last_xai_real_time = 0.0
+last_plot_real_time = 0.0
 last_status_time = time.time()
 last_frame_time = time.time()
 
@@ -241,7 +298,7 @@ last_speed_event_time = 0
 
 try:
     while (time.time() - session_start) < TOTAL_FLIGHT_SECONDS:
-        time.sleep(0.5)
+        time.sleep(LOOP_SLEEP_SECONDS)
 
         state = adapter.get_state()
         if state is None:
@@ -255,22 +312,68 @@ try:
         cur_speed = math.sqrt(vel['x']**2 + vel['y']**2 + vel['z']**2)
 
         # ========================================
-        # 👇 XAI В НАЧАЛЕ ЦИКЛА (раз в 5 сек реального времени)
+        # Жёсткий потолок высоты
         # ========================================
-        if xai_enabled and (now - last_xai_real_time) >= XAI_INTERVAL_SECONDS:
+        if cur_altitude > MAX_ALTITUDE + 0.5:
+            total_ceiling_events += 1
+            log.warn(f"⚠️ Потолок: {cur_altitude:.1f} м > {MAX_ALTITUDE} м — принудительно вниз")
+            incident.event("altitude_ceiling",
+                           altitude=cur_altitude,
+                           max_altitude=MAX_ALTITUDE,
+                           position=[pos['x'], pos['y'], pos['z']])
+            async_move_to(adapter, pos['x'], pos['y'], -MAX_ALTITUDE, FLIGHT_SPEED)
+            last_move_time = now
+            hover_start = None
+            continue
+
+        # ========================================
+        # Признаки цели + РЕАЛЬНЫЙ выход модели (каждый проход)
+        # ========================================
+        model_action, model_conf, model_proba, model_features = None, None, None, None
+        try:
+            dx_t = target_x - pos['x']
+            dy_t = target_y - pos['y']
+            dist_t = math.sqrt(dx_t * dx_t + dy_t * dy_t)
+            yaw = state['orientation'].get('yaw', 0)
+
+            # Нормализация угла в [-180, 180] (ФИКС)
+            angle_t = math.degrees(math.atan2(dy_t, dx_t)) - yaw
+            angle_t = (angle_t + 180.0) % 360.0 - 180.0
+
+            state['target_x'] = target_x
+            state['target_y'] = target_y
+            state['distance_to_target'] = dist_t
+            state['angle_to_target'] = angle_t
+
+            model_features = xai._extract_features(state)
+            model_proba = xai_model.predict_proba(model_features.reshape(1, -1))[0]
+            model_action = int(np.argmax(model_proba))
+            model_conf = float(model_proba[model_action])
+
+            incident.model_output(
+                model="random_forest_synthetic",
+                feature_names=feature_names,
+                features=model_features,
+                proba=model_proba,
+                action=model_action,
+                confidence=model_conf,
+            )
+        except Exception as e:
+            log.error(f"❌ Ошибка модели решений: {e}")
+
+        # Телеметрия с таймстемпом
+        incident.telemetry(state, extra={
+            "target": [target_x, target_y],
+            "distance_to_target": state.get('distance_to_target'),
+        })
+
+        # ========================================
+        # XAI (раз в XAI_INTERVAL_SECONDS реального времени)
+        # ========================================
+        if xai_enabled and model_action is not None and \
+           (now - last_xai_real_time) >= XAI_INTERVAL_SECONDS:
             last_xai_real_time = now
             try:
-                dx_t = target_x - pos['x']
-                dy_t = target_y - pos['y']
-                dist_t = math.sqrt(dx_t * dx_t + dy_t * dy_t)
-                yaw = state['orientation'].get('yaw', 0)
-                angle_t = math.degrees(math.atan2(dy_t, dx_t)) - yaw
-
-                state['target_x'] = target_x
-                state['target_y'] = target_y
-                state['distance_to_target'] = dist_t
-                state['angle_to_target'] = angle_t
-
                 if camera_enabled:
                     frame = camera.get_latest_frame()
                     if frame is not None:
@@ -278,8 +381,8 @@ try:
                         state['frame_std'] = float(frame.std())
 
                 explanation = xai.explain_decision(
-                    state=state, action=1,
-                    confidence=0.85, method="auto"
+                    state=state, action=model_action,
+                    confidence=model_conf, method="auto"
                 )
 
                 if explanation:
@@ -314,11 +417,14 @@ try:
             hover_start = now
             total_targets_reached += 1
             log.ok(f"🎯 Цель #{total_targets_reached}. Висим {HOVER_AFTER_REACHED} сек")
+            incident.event("target_reached", n=total_targets_reached,
+                           position=[pos['x'], pos['y'], pos['z']])
 
         if hover_start is not None and (now - hover_start) >= HOVER_AFTER_REACHED:
             target_x, target_y = pick_random_target(pos['x'], pos['y'])
             log.drone(f"🎯 Новая цель: ({target_x:.1f}, {target_y:.1f})")
-            adapter.move_to(target_x, target_y, FLIGHT_ALTITUDE, FLIGHT_SPEED)
+            incident.event("new_target", target=[target_x, target_y])
+            async_move_to(adapter, target_x, target_y, FLIGHT_ALTITUDE, FLIGHT_SPEED)
             hover_start = None
             last_move_time = now
 
@@ -331,8 +437,11 @@ try:
             total_altitude_events += 1
             log.warn(f"⚠️ Просадка высоты: {cur_altitude:.1f} м "
                      f"— предполагаемое препятствие снизу #{total_altitude_events}")
+            incident.event("altitude_drop", altitude=cur_altitude,
+                           expected=target_altitude, position=[pos['x'], pos['y'], pos['z']],
+                           model_action=model_action, model_confidence=model_conf)
             target_x, target_y = pick_random_target(pos['x'], pos['y'])
-            adapter.move_to(target_x, target_y, FLIGHT_ALTITUDE - 2.0, FLIGHT_SPEED)
+            async_move_to(adapter, target_x, target_y, FLIGHT_ALTITUDE - 2.0, FLIGHT_SPEED)
             last_move_time = now
             hover_start = None
             continue
@@ -345,13 +454,16 @@ try:
             dx_t = target_x - pos['x']
             dy_t = target_y - pos['y']
             stuck_angle = math.atan2(dy_t, dx_t)
+            incident.event("speed_loss", speed=cur_speed, distance_to_target=dist_to_target,
+                           position=[pos['x'], pos['y'], pos['z']],
+                           model_action=model_action, model_confidence=model_conf)
             log.warn(f"⚠️ Скорость {cur_speed:.2f} м/с при расстоянии "
                      f"{dist_to_target:.1f} м — предполагаемое препятствие впереди "
                      f"#{total_speed_events}")
             target_x, target_y = pick_random_target(
                 pos['x'], pos['y'], avoid_angle=stuck_angle
             )
-            adapter.move_to(target_x, target_y, FLIGHT_ALTITUDE, FLIGHT_SPEED)
+            async_move_to(adapter, target_x, target_y, FLIGHT_ALTITUDE, FLIGHT_SPEED)
             last_move_time = now
             continue
 
@@ -362,26 +474,20 @@ try:
             dy_t = target_y - pos['y']
             stuck_angle = math.atan2(dy_t, dx_t)
             log.warn(f"⚠️ Застрял {stuck_seconds:.0f} сек #{total_stuck_events}")
+            incident.event("stuck", seconds=stuck_seconds,
+                           position=[pos['x'], pos['y'], pos['z']],
+                           model_action=model_action, model_confidence=model_conf)
             target_x, target_y = pick_random_target(
                 pos['x'], pos['y'], avoid_angle=stuck_angle
             )
-            adapter.move_to(target_x, target_y, FLIGHT_ALTITUDE, FLIGHT_SPEED)
+            async_move_to(adapter, target_x, target_y, FLIGHT_ALTITUDE, FLIGHT_SPEED)
             last_move_time = now
 
-        # === СОХРАНЕНИЕ КАДРА КАМЕРЫ ===
-        if camera_enabled and (now - last_frame_time) >= FRAME_SAVE_INTERVAL:
-            last_frame_time = now
-            saved = camera.save_frame()
-            if saved:
-                total_frames_saved += 1
-                frame = camera.get_latest_frame()
-                log.info(f"📷 Кадр #{total_frames_saved} сохранён: "
-                         f"{os.path.basename(saved)} "
-                         f"(shape={frame.shape if frame is not None else 'None'})")
-            else:
-                log.warn("⚠️ Не удалось сохранить кадр камеры")
+        # === СОХРАНЕНИЕ КАДРА КАМЕРЫ (отключено) ===
+        # if camera_enabled and (now - last_frame_time) >= FRAME_SAVE_INTERVAL:
+        #     ...
 
-        # === График (раз в 30 сек реального времени) ===
+        # === График (раз в PLOT_INTERVAL_SECONDS реального времени) ===
         if total_xai_explanations and (now - last_plot_real_time) >= PLOT_INTERVAL_SECONDS:
             last_plot_real_time = now
             try:
@@ -434,10 +540,13 @@ except Exception as e:
 # ========================================
 
 log.drone("🛬 Посадка...")
+incident.event("landing")
 adapter.land()
 time.sleep(5)
 
-camera.stop()
+if camera is not None:
+    camera.stop()
+
 
 # ========================================
 # Отчёт
@@ -453,6 +562,7 @@ log.info(f"🎯 Целей достигнуто: {total_targets_reached}")
 log.info(f"⏳ Застреваний: {total_stuck_events}")
 log.info(f"📉 Просадок высоты: {total_altitude_events}")
 log.info(f"🐢 Потерь скорости: {total_speed_events}")
+log.info(f"📈 Срабатываний потолка: {total_ceiling_events}")
 log.info(f"📷 Кадров сохранено: {total_frames_saved}")
 log.info(f"📊 XAI: {len(total_xai_explanations)}")
 
@@ -468,6 +578,17 @@ if total_xai_explanations:
         log.info(f"💾 XAI: {p}")
     except Exception as e:
         log.warn(f"⚠️ {e}")
+
+incident.close(summary={
+    "targets_reached": total_targets_reached,
+    "stuck_events": total_stuck_events,
+    "altitude_drop_events": total_altitude_events,
+    "speed_loss_events": total_speed_events,
+    "ceiling_events": total_ceiling_events,
+    "xai_explanations": len(total_xai_explanations),
+    "xai_method_stats": total_xai_method_stats,
+})
+log.info(f"📁 Инцидентные логи: {incident.dir}")
 
 log.save()
 adapter.disconnect()

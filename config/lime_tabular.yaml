@@ -1,0 +1,32 @@
+experiment:
+  name: "lime_tabular_smoke_test"
+
+output:
+  root: "results/tabular"
+
+data:
+  input_type: "tabular"
+  source: "synthetic"
+  n_samples: 500
+  seed: 42
+  feature_names:
+    - altitude
+    - speed
+    - obstacle_dist
+    - battery
+    - obstacle_density
+    - yaw
+    - roll
+    - pitch
+    - distance_to_target
+    - angle_to_target
+
+model:
+  name: "random_forest"
+  n_estimators: 50
+  random_state: 42
+
+xai:
+  method: "lime"
+  target: "predicted"
+  test_index: 0

@@ -28,7 +28,7 @@ class CameraReader:
     """
 
     def __init__(self, log_manager=None,
-                 topic='/world/ridge/model/x500_depth_0/link/camera_link/sensor/IMX214/image',
+                 topic='/world/uav_test_world/model/x500_depth_0/link/camera_link/sensor/IMX214/image',
                  save_dir='results/frames'):
         self.log = log_manager
         self.topic = topic

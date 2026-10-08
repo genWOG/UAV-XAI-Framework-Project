@@ -275,6 +275,7 @@ class XAIBridge:
                 'runtime_ms': runtime_ms,
                 'attribution': importance.tolist(),
                 'feature_names': self.feature_names,
+                'raw_state': features.tolist(),   # ← ДОБАВЛЕНО: сырые 10 признаков
                 'is_anomaly': anomaly,
                 'lime_details': exp.as_list(label=action),
                 'explanation_text': self._generate_text(features, importance, action)
@@ -320,8 +321,9 @@ class XAIBridge:
                 'confidence': confidence,
                 'method': 'shap',
                 'runtime_ms': runtime_ms,
-                'attribution': importance.tolist() if isinstance(importance, np.ndarray) else [float(importance)] * len(self.feature_names),
+                'attribution': importance.tolist(),
                 'feature_names': self.feature_names,
+                'raw_state': features.tolist(),
                 'is_anomaly': anomaly,
                 'shap_details': f"SHAP values for class {action}",
                 'explanation_text': self._generate_text(features, importance, action)
@@ -359,13 +361,14 @@ class XAIBridge:
                 'runtime_ms': runtime_ms,
                 'attribution': importance.tolist(),
                 'feature_names': self.feature_names,
+                'raw_state': features.tolist(),
                 'is_anomaly': anomaly,
                 'lrp_details': 'Attributions via InputXGradient (Captum)',
                 'explanation_text': self._generate_text(features, importance, action)
             }
         except Exception as e:
             self._log(f"❌ LRP ошибка: {e}", level='error')
-            return self._fallback_explanation(features, action, confidence)
+            return self._fallback_explanation(features, action, confidence) 
 
     # ========================================
     # ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
@@ -376,9 +379,9 @@ class XAIBridge:
         reasons = []
         altitude, speed, obstacle_dist, battery = features[0], features[1], features[2], features[3]
 
-        if altitude < 2.0:
+        if altitude < 5:
             anomaly_score += 0.3
-            reasons.append("Критически низкая высота")
+            reasons.append("Опасная низкая высота")
         if obstacle_dist < 3:
             anomaly_score += 0.4
             reasons.append("Критическое приближение к препятствию")
@@ -430,7 +433,8 @@ class XAIBridge:
             'attribution': [0.0] * len(self.feature_names),
             'feature_names': self.feature_names,
             'is_anomaly': {'is_anomaly': False, 'reasons': [], 'score': 0, 'level': 'warning'},
-            'explanation_text': 'XAI не доступен (используется fallback)'
+            'explanation_text': 'XAI не доступен (используется fallback)',
+            'raw_state': features.tolist() if hasattr(features, 'tolist') else None
         }
 
     # ========================================

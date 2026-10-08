@@ -22,8 +22,6 @@ from .target_resolver import TargetResolver
 from ..metrics import (
     compute_deletion,
     compute_insertion,
-    compute_detection_deletion,
-    compute_detection_insertion,
 )
 
 from ..utils import (
@@ -928,69 +926,86 @@ class ExperimentRunner:
                     True,
                 )
             )
+            and context["task"]
+            == "classification"
         )
 
         deletion_result = None
         insertion_result = None
         metrics_path = None
-        steps = int(
-            metrics_config.get(
-                "steps",
-                20,
-            )
-        )
 
-        baseline_value = float(
-            metrics_config.get(
-                "baseline_value",
-                0.0,
-            )
-        )
         if metrics_enabled:
 
-            if context["task"] == "classification":
-                deletion_result = compute_deletion(
+            steps = int(
+                metrics_config.get(
+                    "steps",
+                    20,
+                )
+            )
+
+            baseline_value = float(
+                metrics_config.get(
+                    "baseline_value",
+                    0.0,
+                )
+            )
+
+            deletion_result = (
+                compute_deletion(
                     model=model,
                     input_tensor=input_data,
-                    attribution=explanation.attribution,
+                    attribution=(
+                        explanation.attribution
+                    ),
                     target=prediction.class_id,
                     steps=steps,
-                    baseline_value=baseline_value,
+                    baseline_value=(
+                        baseline_value
+                    ),
                 )
+            )
 
-                insertion_result = compute_insertion(
+            insertion_result = (
+                compute_insertion(
                     model=model,
                     input_tensor=input_data,
-                    attribution=explanation.attribution,
+                    attribution=(
+                        explanation.attribution
+                    ),
                     target=prediction.class_id,
                     steps=steps,
-                    baseline_value=baseline_value,
-                )
-
-            else:
-                deletion_result = compute_detection_deletion(
-                    predictor=ModelPredictor(
-                        model=model,
-                        task="detection",
+                    baseline_value=(
+                        baseline_value
                     ),
-                    input_tensor=context["xai_input"],
-                    attribution=explanation.attribution,
-                    target=context["xai_target"],
-                    steps=steps,
-                    baseline_value=baseline_value,
                 )
+            )
 
-                insertion_result = compute_detection_insertion(
-                    predictor=ModelPredictor(
-                        model=model,
-                        task="detection",
-                    ),
-                    input_tensor=context["xai_input"],
-                    attribution=explanation.attribution,
-                    target=context["xai_target"],
-                    steps=steps,
-                    baseline_value=baseline_value,
-                )
+            metrics_path = (
+                self.output_dir
+                / f"{method}_faithfulness.png"
+            )
+
+            plot_faithfulness_curves(
+                deletion_fractions=(
+                    deletion_result.fractions
+                ),
+                deletion_confidences=(
+                    deletion_result.confidences
+                ),
+                deletion_auc=(
+                    deletion_result.auc
+                ),
+                insertion_fractions=(
+                    insertion_result.fractions
+                ),
+                insertion_confidences=(
+                    insertion_result.confidences
+                ),
+                insertion_auc=(
+                    insertion_result.auc
+                ),
+                output_path=metrics_path,
+            )
 
         result = {
             "method": explanation.method,
@@ -1013,17 +1028,23 @@ class ExperimentRunner:
             deletion_result is not None
             and insertion_result is not None
         ):
+
             result["metrics"] = {
-                "deletion_auc": deletion_result.auc,
-                "insertion_auc": insertion_result.auc,
+                "deletion_auc": (
+                    deletion_result.auc
+                ),
+                "insertion_auc": (
+                    insertion_result.auc
+                ),
                 "steps": steps,
-                "baseline_value": baseline_value,
+                "baseline_value": (
+                    baseline_value
+                ),
             }
 
-            if metrics_path is not None:
-                result["artifacts"][
-                    "faithfulness"
-                ] = metrics_path.name
+            result["artifacts"][
+                "faithfulness"
+            ] = metrics_path.name
 
         return result
 

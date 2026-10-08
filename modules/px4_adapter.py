@@ -1,18 +1,10 @@
 """
 Адаптер для PX4 SITL через MAVSDK (mavsdk_grpc).
 
-Внутри PX4 использует GPS-координаты (lat/lon/alt).
+PX4 использует GPS-координаты (lat/lon/alt).
 Мы пересчитываем их в локальные X/Y/Z (метры).
 
-Логика координат:
-- X=0, Y=0 — точка, где дрон стоял в момент ПОДКЛЮЧЕНИЯ скрипта.
-- Команда move_to(x, y) означает "лети в точку (x, y) относительно
-  точки подключения".
-
-⚠️ Порт зависит от модели PX4:
-- gz_x500, gz_x500_mono_cam: PX4 слушает на 14540
-- gz_x500_depth: PX4 слушает на 14580, отправляет на 14540
-- MAVSDK должен СЛУШАТЬ на порт, куда PX4 отправляет (udpin://)
+Совместим по интерфейсу с airsim_adapter.AirSimAdapter.
 """
 
 import asyncio
@@ -26,14 +18,12 @@ from mavsdk_grpc.offboard import OffboardError, PositionNedYaw
 # Константы для пересчёта градусов в метры
 LAT_METERS_PER_DEG = 111320.0
 
-# 👇 Порт, на котором MAVSDK СЛУШАЕТ.
-# Для gz_x500_depth PX4 отправляет на 14540 — слушаем там.
-PX4_PORT = 14540
-
 
 class PX4Adapter:
     """
     Адаптер PX4 <-> остальной проект.
+    Внутри держит постоянный asyncio-loop в отдельном потоке,
+    чтобы остальной код мог вызывать синхронные методы.
     """
 
     def __init__(self, log_manager=None, use_simulation=False):
@@ -41,21 +31,23 @@ class PX4Adapter:
         self.connected = False
         self.armed = False
 
+        # Начальная GPS-точка (нуль системы координат)
         self._origin_lat = None
         self._origin_lon = None
 
-        self._home_n_offset = None
-        self._home_e_offset = None
-
+        # Последнее состояние (обновляется фоновым потоком)
         self._last_state = self._empty_state()
 
-        self._target_ned = None
+        # Намерение движения (куда хотим лететь)
+        self._target_ned = None  # (north, east, down, yaw)
 
+        # Asyncio loop в отдельном потоке
         self._loop = None
         self._thread = None
         self._drone = None
         self._stop_flag = False
 
+        # Ограничения
         self.max_altitude = 10.0
         self.min_altitude = 3.0
 
@@ -119,8 +111,7 @@ class PX4Adapter:
             self._log("❌ Не удалось подключиться к PX4 за 15 секунд", 'error')
             return False
 
-        self._log("⏳ Ожидание первой GPS-позиции для фиксации origin...",
-                  'system')
+        self._log("⏳ Ожидание первой GPS-позиции для фиксации origin...", 'system')
         start = time.time()
         while self._origin_lat is None and time.time() - start < 10:
             time.sleep(0.2)
@@ -128,9 +119,11 @@ class PX4Adapter:
         if self._origin_lat is None:
             self._log("⚠️ Не удалось получить GPS-позицию", 'warn')
         else:
-            self._log(f"✅ Origin зафиксирован: "
-                      f"{self._origin_lat:.6f}, {self._origin_lon:.6f}",
-                      'system')
+            self._log(
+                f"✅ Origin зафиксирован: "
+                f"{self._origin_lat:.6f}, {self._origin_lon:.6f}",
+                'system'
+            )
 
         self._log("✅ Подключение к PX4 установлено!", 'system')
         return True
@@ -145,10 +138,8 @@ class PX4Adapter:
 
     async def _main(self):
         self._drone = System()
-
-        addr = f"udpin://0.0.0.0:{PX4_PORT}"
+        addr = "udpin://0.0.0.0:14540"
         self._log(f"🔌 Подключаемся к PX4: {addr}", 'system')
-
         await self._drone.connect(system_address=addr)
 
         async for state in self._drone.core.connection_state():
@@ -275,8 +266,7 @@ class PX4Adapter:
                     await self._drone.action.arm()
                     break
                 except Exception as e:
-                    self._log(f"⚠️ Arm попытка {attempt+1} не удалась: {e}",
-                              'warn')
+                    self._log(f"⚠️ Arm попытка {attempt+1} не удалась: {e}", 'warn')
                     await asyncio.sleep(2)
 
             self.armed = True
@@ -327,17 +317,16 @@ class PX4Adapter:
             cur_d = cur['z']
 
             self._log(
-                f"🧭 Движение: цель=({n:.1f}, {e:.1f}, {d:.1f}), "
+                f"🧭 Движение (position): цель=({n:.1f}, {e:.1f}, {d:.1f}), "
                 f"старт=({cur_n:.1f}, {cur_e:.1f}, {cur_d:.1f}), "
                 f"yaw={target_yaw_deg:.1f}°",
                 'debug'
             )
 
             await self._drone.offboard.set_position_ned(
-                PositionNedYaw(cur_n, cur_e, cur_d, target_yaw_deg)
+                PositionNedYaw(cur_n, cur_e, -4.5, target_yaw_deg)
             )
 
-            # 👇 РЕТРАЙ offboard.start() до 3 раз
             started = False
             for attempt in range(3):
                 try:
@@ -363,11 +352,15 @@ class PX4Adapter:
 
             while time.time() - start_time < max_wait:
                 now = time.time()
-                if now - last_send >= min_send_interval:
-                    await self._drone.offboard.set_position_ned(
-                        PositionNedYaw(n, e, d, target_yaw_deg)
-                    )
-                    last_send = now
+
+                # Проверка коллизии
+                if self._last_state['sensors'].get('collision', False):
+                    self._log("💥 Коллизия! Прерываю движение", 'warn')
+                    try:
+                        await self._drone.offboard.stop()
+                    except OffboardError:
+                        pass
+                    return False
 
                 cur = self._last_state['position']
                 dx = cur['x'] - n
@@ -382,6 +375,12 @@ class PX4Adapter:
                         'system'
                     )
                     break
+
+                if now - last_send >= min_send_interval:
+                    await self._drone.offboard.set_position_ned(
+                        PositionNedYaw(n, e, -4.5, target_yaw_deg)
+                    )
+                    last_send = now
 
                 await asyncio.sleep(0.05)
 
@@ -400,7 +399,6 @@ class PX4Adapter:
                 pass
 
             return arrived
-
         except Exception as e:
             self._log(f"❌ Ошибка движения: {e}", 'error')
             return False

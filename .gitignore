@@ -41,3 +41,5 @@ src/uav_xai.egg-info/
 
 data/logs/
 dist/
+
+data/incidents/
