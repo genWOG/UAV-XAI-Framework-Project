@@ -29,10 +29,12 @@ class FakeBoxes:
 class FakeYoloModel:
     def __init__(self, detections):
         self.detections = detections
+        self.batch_sizes = []
 
     def predict(self, source, conf, verbose):
         assert conf == 0.001
         assert verbose is False
+        self.batch_sizes.append(len(source))
 
         return [
             SimpleNamespace(
@@ -114,3 +116,70 @@ def test_lime_yolo_returns_zero_when_target_is_not_matched():
 
     assert scores[0, 1] == 0.0
     assert scores[0, 0] == 1.0
+    assert explainer.target_score_mode == "confidence_iou"
+
+
+def test_lime_yolo_detection_batches_vectorized_perturbations():
+    model = FakeYoloModel([
+        ([0, 0, 10, 10], 2, 0.72),
+    ])
+    target = XAITarget(
+        task="detection",
+        class_id=2,
+        score=0.85,
+        detection_index=0,
+        bbox=[0, 0, 10, 10],
+    )
+    explainer = LimeImageExplainer(
+        preprocess=None,
+        num_samples=10,
+        num_segments=4,
+        prediction_batch_size=4,
+    )
+    image = np.random.default_rng(7).integers(
+        0, 256, size=(16, 16, 3), dtype=np.uint8
+    )
+
+    result = explainer.explain(model=model, input_data=image, target=target)
+
+    assert result.attribution.shape == image.shape[:2]
+    assert np.isfinite(result.attribution).all()
+    assert result.metadata["prediction_batch_size"] == 4
+    # One call scores the unperturbed image; the 10 LIME samples use 4/4/2.
+    assert max(model.batch_sizes) <= 4
+    assert sorted(model.batch_sizes).count(4) >= 2
+    assert sum(model.batch_sizes) >= 11
+
+
+
+def test_lime_yolo_uses_continuous_confidence_iou_score_below_threshold():
+    model = FakeYoloModel([
+        ([5, 0, 15, 10], 2, 0.72),
+    ])
+    target = XAITarget(
+        task="detection",
+        class_id=2,
+        score=0.85,
+        detection_index=0,
+        bbox=[0, 0, 10, 10],
+    )
+    image = np.zeros((1, 32, 32, 3), dtype=np.uint8)
+
+    continuous = LimeImageExplainer(
+        preprocess=None,
+        num_samples=10,
+        target_iou_threshold=0.5,
+        target_score_mode="confidence_iou",
+    )._build_detection_predict_fn(model, target)(image)
+
+    # Shifted box IoU = 1/3, so score remains informative below IoU 0.5.
+    assert np.isclose(continuous[0, 1], 0.72 / 3.0, atol=1e-6)
+    assert np.isclose(continuous[0].sum(), 1.0, atol=1e-6)
+
+    thresholded = LimeImageExplainer(
+        preprocess=None,
+        num_samples=10,
+        target_iou_threshold=0.5,
+        target_score_mode="thresholded_confidence",
+    )._build_detection_predict_fn(model, target)(image)
+    assert thresholded[0, 1] == 0.0

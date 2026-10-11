@@ -950,6 +950,7 @@ class ExperimentRunner:
         deletion_result = None
         insertion_result = None
         metrics_path = None
+        detection_diagnostics_path = None
 
         if metrics_enabled:
 
@@ -1127,6 +1128,16 @@ class ExperimentRunner:
                 output_path=metrics_path,
             )
 
+            if context["task"] == "detection":
+                detection_diagnostics_path = self._save_detection_diagnostics_plot(
+                    deletion_result=deletion_result,
+                    insertion_result=insertion_result,
+                    iou_threshold=float(metrics_config.get("iou_threshold", 0.5)),
+                    output_path=(
+                        self.output_dir / f"{method}_detection_diagnostics.png"
+                    ),
+                )
+
         result = {
             "method": explanation.method,
             "target": explanation.target,
@@ -1162,6 +1173,12 @@ class ExperimentRunner:
                 ),
             }
 
+            if context["task"] == "detection":
+                result["metrics"]["deletion_curve"] = deletion_result.to_dict()
+                result["metrics"]["insertion_curve"] = insertion_result.to_dict()
+                result["metrics"]["deletion_localization_auc"] = deletion_result.localization_auc
+                result["metrics"]["insertion_localization_auc"] = insertion_result.localization_auc
+
             if metric_iou_threshold is not None:
                 result["metrics"]["iou_threshold"] = (
                     metric_iou_threshold
@@ -1170,6 +1187,11 @@ class ExperimentRunner:
             result["artifacts"][
                 "faithfulness"
             ] = metrics_path.name
+
+            if detection_diagnostics_path is not None:
+                result["artifacts"]["detection_diagnostics"] = (
+                    detection_diagnostics_path.name
+                )
 
         return result
 
@@ -1534,6 +1556,77 @@ class ExperimentRunner:
 
         plt.close()
 
+        return output_path
+
+    @staticmethod
+    def _save_detection_diagnostics_plot(
+        deletion_result: Any,
+        insertion_result: Any,
+        iou_threshold: float,
+        output_path: Path,
+    ) -> Path:
+        """Plot raw class confidence, legacy score and target IoU."""
+        fig, axes = plt.subplots(
+            2, 2, figsize=(12, 8), sharex=True
+        )
+
+        curves = (
+            ("Deletion", deletion_result),
+            ("Insertion", insertion_result),
+        )
+
+        for row, (name, curve) in enumerate(curves):
+            confidence_axis = axes[row, 0]
+            iou_axis = axes[row, 1]
+
+            confidence_axis.plot(
+                curve.fractions,
+                curve.class_confidences,
+                label="Max target-class confidence",
+            )
+            confidence_axis.plot(
+                curve.fractions,
+                curve.best_iou_candidate_confidences,
+                label="Best-IoU candidate confidence",
+            )
+            confidence_axis.plot(
+                curve.fractions,
+                curve.detection_scores,
+                label="Legacy IoU-gated score",
+            )
+            confidence_axis.plot(
+                curve.fractions,
+                curve.localization_scores,
+                label="Confidence x target IoU",
+            )
+            confidence_axis.set_title(f"{name}: confidence and score")
+            confidence_axis.set_ylabel("Confidence / score")
+            confidence_axis.set_ylim(0.0, 1.0)
+            confidence_axis.grid(True, alpha=0.3)
+            confidence_axis.legend(fontsize=8)
+
+            iou_axis.plot(
+                curve.fractions,
+                curve.ious,
+                label="Best same-class IoU",
+            )
+            iou_axis.axhline(
+                y=iou_threshold,
+                linestyle="--",
+                label=f"IoU threshold = {iou_threshold:g}",
+            )
+            iou_axis.set_title(f"{name}: target localization")
+            iou_axis.set_ylabel("IoU")
+            iou_axis.set_ylim(0.0, 1.0)
+            iou_axis.grid(True, alpha=0.3)
+            iou_axis.legend(fontsize=8)
+
+        axes[1, 0].set_xlabel("Perturbed fraction")
+        axes[1, 1].set_xlabel("Perturbed fraction")
+
+        fig.tight_layout()
+        fig.savefig(output_path, dpi=150)
+        plt.close(fig)
         return output_path
 
     # ============================================================

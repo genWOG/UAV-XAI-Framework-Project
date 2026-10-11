@@ -48,6 +48,8 @@ class ShapImageExplainer(Explainer):
         hide_color: int | float = 0,
         target_iou_threshold: float = 0.5,
         baseline_mode: str = "constant",
+        prediction_batch_size: int = 32,
+        target_score_mode: str = "confidence_iou",
     ) -> None:
 
         if nsamples < 1:
@@ -78,7 +80,13 @@ class ShapImageExplainer(Explainer):
         self.target_iou_threshold = target_iou_threshold
         if baseline_mode not in {"constant", "segment_mean"}:
             raise ValueError("baseline_mode must be 'constant' or 'segment_mean'.")
+        if prediction_batch_size < 1:
+            raise ValueError("prediction_batch_size must be >= 1.")
+        if target_score_mode not in {"confidence_iou", "thresholded_confidence"}:
+            raise ValueError("target_score_mode must be 'confidence_iou' or 'thresholded_confidence'.")
         self.baseline_mode = baseline_mode
+        self.prediction_batch_size = int(prediction_batch_size)
+        self.target_score_mode = target_score_mode
 
     def _validate_image(
         self,
@@ -301,7 +309,7 @@ class ShapImageExplainer(Explainer):
             rgb_images = [self._validate_image(image) for image in images]
             bgr_images = [image[:, :, ::-1].copy() for image in rgb_images]
             results = []
-            prediction_batch_size = 8
+            prediction_batch_size = self.prediction_batch_size
             for batch_start in range(0, len(bgr_images), prediction_batch_size):
                 results.extend(
                     model.predict(
@@ -329,11 +337,19 @@ class ShapImageExplainer(Explainer):
                         if iou > best_iou:
                             best_iou = iou
                             best_confidence = float(confidence)
-                score = (
-                    best_confidence
-                    if best_iou >= self.target_iou_threshold
-                    else 0.0
-                )
+                if self.target_score_mode == "confidence_iou":
+                    # Continuous target-object signal; a sub-threshold
+                    # box still contributes in proportion to its IoU.
+                    score = float(
+                        np.clip(best_confidence, 0.0, 1.0)
+                        * np.clip(best_iou, 0.0, 1.0)
+                    )
+                else:
+                    score = (
+                        best_confidence
+                        if best_iou >= self.target_iou_threshold
+                        else 0.0
+                    )
                 # Kernel SHAP expects a fixed-width model output.
                 output_scores.append([1.0 - score, score])
 
@@ -377,15 +393,23 @@ class ShapImageExplainer(Explainer):
                 raise ValueError(
                     "SHAP masks must have shape [samples, number_of_segments]."
                 )
-            perturbed_images = []
-            for mask in masks:
-                perturbed = baseline.copy()
-                for segment_id in range(n_segments):
-                    if mask[segment_id] > 0.5:
-                        selected = segments == segment_id
-                        perturbed[selected] = image[selected]
-                perturbed_images.append(perturbed)
-            return detection_predict(np.asarray(perturbed_images))
+            # Vectorize mask-to-image projection. The previous nested
+            # mask x segment loops repeatedly compared each segment against
+            # the full-resolution image, dominating Kernel SHAP runtime.
+            score_batches = []
+            for batch_start in range(0, len(masks), self.prediction_batch_size):
+                mask_batch = masks[batch_start:batch_start + self.prediction_batch_size]
+                visible_pixels = mask_batch[:, segments] > 0.5
+                perturbed_batch = np.where(
+                    visible_pixels[..., np.newaxis],
+                    image[np.newaxis, ...],
+                    baseline[np.newaxis, ...],
+                )
+                score_batches.append(detection_predict(perturbed_batch))
+
+            if not score_batches:
+                return np.empty((0, 2), dtype=np.float32)
+            return np.concatenate(score_batches, axis=0)
 
         all_on = np.ones((1, n_segments), dtype=np.float32)
         original_scores = predict_fn(all_on)
@@ -426,6 +450,8 @@ class ShapImageExplainer(Explainer):
                 "bbox": list(target.bbox),
                 "target_iou_threshold": self.target_iou_threshold,
                 "baseline_mode": self.baseline_mode,
+                "prediction_batch_size": self.prediction_batch_size,
+                "target_score_mode": self.target_score_mode,
             },
         )
 

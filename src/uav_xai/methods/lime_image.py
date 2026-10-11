@@ -6,6 +6,7 @@ import torch
 from skimage.segmentation import slic
 from lime import lime_image
 from skimage.segmentation import mark_boundaries
+from sklearn.metrics import pairwise_distances
 
 from ..core.base import Explainer
 from ..core.target import XAITarget
@@ -40,6 +41,8 @@ class LimeImageExplainer(Explainer):
         target_iou_threshold: float = 0.5,
         num_segments: int = 100,
         compactness: float = 10.0,
+        prediction_batch_size: int = 32,
+        target_score_mode: str = "confidence_iou",
     ) -> None:
 
         if num_samples < 1:
@@ -54,6 +57,10 @@ class LimeImageExplainer(Explainer):
             raise ValueError("num_segments must be >= 2.")
         if compactness <= 0:
             raise ValueError("compactness must be > 0.")
+        if prediction_batch_size < 1:
+            raise ValueError("prediction_batch_size must be >= 1.")
+        if target_score_mode not in {"confidence_iou", "thresholded_confidence"}:
+            raise ValueError("target_score_mode must be 'confidence_iou' or 'thresholded_confidence'.")
 
         self.preprocess = preprocess
         self.num_samples = num_samples
@@ -61,6 +68,8 @@ class LimeImageExplainer(Explainer):
         self.target_iou_threshold = target_iou_threshold
         self.num_segments = int(num_segments)
         self.compactness = float(compactness)
+        self.prediction_batch_size = int(prediction_batch_size)
+        self.target_score_mode = target_score_mode
 
         self._explainer = lime_image.LimeImageExplainer(
             random_state=42,
@@ -343,10 +352,19 @@ class LimeImageExplainer(Explainer):
                             best_iou = iou
                             best_confidence = float(confidence)
 
-                if best_iou < self.target_iou_threshold:
-                    score = 0.0
+                if self.target_score_mode == "confidence_iou":
+                    # Continuous target-object signal; a sub-threshold
+                    # box still contributes in proportion to its IoU.
+                    score = float(
+                        np.clip(best_confidence, 0.0, 1.0)
+                        * np.clip(best_iou, 0.0, 1.0)
+                    )
                 else:
-                    score = best_confidence
+                    score = (
+                        best_confidence
+                        if best_iou >= self.target_iou_threshold
+                        else 0.0
+                    )
 
                 # LIME expects a probability-like matrix.
                 # Column 1 represents the selected detection's score.
@@ -395,23 +413,65 @@ class LimeImageExplainer(Explainer):
 
         lime_target = 1
 
-        explanation = self._explainer.explain_instance(
-            image=image,
-            classifier_fn=predict_fn,
-            top_labels=None,
-            labels=[lime_target],
-            hide_color=self.hide_color,
-            num_samples=self.num_samples,
-            segmentation_fn=(
-                self._segmentation_fn
-                if self._segmentation_fn is not None
-                else self._segment_detection
-            ),
-            batch_size=10,
+        # Reproduce LIME's binary superpixel neighbourhood, but generate
+        # perturbed images vectorially instead of looping over every segment
+        # for every sample. The weighted local regression remains LIME's own.
+        segmentation_fn = (
+            self._segmentation_fn
+            if self._segmentation_fn is not None
+            else self._segment_detection
         )
+        segments = np.asarray(segmentation_fn(image))
+        if segments.shape != image.shape[:2]:
+            raise ValueError(
+                "segmentation_fn must return an array with shape [H, W]."
+            )
+        _, segments = np.unique(segments, return_inverse=True)
+        segments = segments.reshape(image.shape[:2]).astype(np.int32, copy=False)
+        n_segments = int(segments.max()) + 1
 
-        local_exp = explanation.local_exp[lime_target]
-        segments = explanation.segments
+        # Match lime-image's fudged-image semantics.
+        if self.hide_color is None:
+            fudged_image = image.copy()
+            for segment_id in range(n_segments):
+                selected = segments == segment_id
+                mean_color = image[selected].mean(axis=0)
+                fudged_image[selected] = mean_color.astype(image.dtype)
+        else:
+            fudged_image = np.broadcast_to(
+                np.asarray(self.hide_color), image.shape
+            ).astype(image.dtype, copy=True)
+
+        data = self._explainer.random_state.randint(
+            0, 2, self.num_samples * n_segments
+        ).reshape(self.num_samples, n_segments)
+        data[0, :] = 1
+
+        label_batches = []
+        for batch_start in range(0, self.num_samples, self.prediction_batch_size):
+            mask_batch = data[batch_start:batch_start + self.prediction_batch_size]
+            visible_pixels = mask_batch[:, segments] > 0
+            perturbed_batch = np.where(
+                visible_pixels[..., np.newaxis],
+                image[np.newaxis, ...],
+                fudged_image[np.newaxis, ...],
+            )
+            label_batches.append(predict_fn(perturbed_batch))
+        labels = np.concatenate(label_batches, axis=0)
+
+        distances = pairwise_distances(
+            data, data[0].reshape(1, -1), metric="cosine"
+        ).ravel()
+        _, local_exp, local_fit_score, local_prediction = (
+            self._explainer.base.explain_instance_with_data(
+                data,
+                labels,
+                distances,
+                lime_target,
+                n_segments,
+                feature_selection=self._explainer.feature_selection,
+            )
+        )
 
         attribution = np.zeros(
             segments.shape,
@@ -440,15 +500,17 @@ class LimeImageExplainer(Explainer):
             metadata={
                 "explainer": "lime_image_detection",
                 "num_samples": self.num_samples,
-                "num_segments": int(
-                    len(np.unique(segments))
-                ),
+                "num_segments": n_segments,
+                "prediction_batch_size": self.prediction_batch_size,
+                "local_fit_score": float(local_fit_score),
+                "local_prediction": float(np.asarray(local_prediction).reshape(-1)[0]),
                 "image_shape": list(image.shape),
                 "target_task": "detection",
                 "target_class_id": target.class_id,
                 "detection_index": target.detection_index,
                 "bbox": list(target.bbox),
                 "target_iou_threshold": self.target_iou_threshold,
+                "target_score_mode": self.target_score_mode,
             },
         )
 
