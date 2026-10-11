@@ -17,11 +17,14 @@ from torchvision.models import (
 
 from .config import load_config
 from .predictor import ModelPredictor
+from .target import XAITarget
 from .target_resolver import TargetResolver
 
 from ..metrics import (
     compute_deletion,
     compute_insertion,
+    compute_detection_deletion,
+    compute_detection_insertion,
 )
 
 from ..utils import (
@@ -865,6 +868,11 @@ class ExperimentRunner:
             / f"{method}.png"
         )
 
+        # Keep CAM in model-input coordinates for metrics.
+        metric_attribution = np.asarray(
+            explanation.attribution
+        ).copy()
+
         heatmap = (
             explanation.attribution
         )
@@ -926,8 +934,10 @@ class ExperimentRunner:
                     True,
                 )
             )
-            and context["task"]
-            == "classification"
+            and context["task"] in {
+                "classification",
+                "detection",
+            }
         )
 
         deletion_result = None
@@ -950,35 +960,94 @@ class ExperimentRunner:
                 )
             )
 
-            deletion_result = (
-                compute_deletion(
-                    model=model,
-                    input_tensor=input_data,
-                    attribution=(
-                        explanation.attribution
-                    ),
-                    target=prediction.class_id,
-                    steps=steps,
-                    baseline_value=(
-                        baseline_value
-                    ),
-                )
-            )
+            attribution = metric_attribution
+            metric_iou_threshold = None
 
-            insertion_result = (
-                compute_insertion(
+            if context["task"] == "detection":
+
+                metric_predictor = ModelPredictor(
+                    model=model,
+                    task="detection",
+                )
+
+                metric_input_tensor = (
+                    context["xai_input"].detach()
+                )
+
+                original_target = context["xai_target"]
+                original_bbox = original_target.bbox
+
+                if original_bbox is None:
+                    raise ValueError(
+                        "Detection metrics require a target bbox."
+                    )
+
+                letterbox = context["letterbox"]
+                scale = float(letterbox["scale"])
+                pad_x = float(letterbox["pad_x"])
+                pad_y = float(letterbox["pad_y"])
+
+                x1, y1, x2, y2 = original_bbox
+
+                metric_target = XAITarget(
+                    task="detection",
+                    class_id=original_target.class_id,
+                    score=original_target.score,
+                    detection_index=original_target.detection_index,
+                    bbox=[
+                        x1 * scale + pad_x,
+                        y1 * scale + pad_y,
+                        x2 * scale + pad_x,
+                        y2 * scale + pad_y,
+                    ],
+                )
+
+                metric_iou_threshold = float(
+                    metrics_config.get(
+                        "iou_threshold",
+                        0.5,
+                    )
+                )
+
+                deletion_result = compute_detection_deletion(
+                    predictor=metric_predictor,
+                    input_tensor=metric_input_tensor,
+                    attribution=attribution,
+                    target=metric_target,
+                    steps=steps,
+                    baseline_value=baseline_value,
+                    iou_threshold=metric_iou_threshold,
+                )
+
+                insertion_result = compute_detection_insertion(
+                    predictor=metric_predictor,
+                    input_tensor=metric_input_tensor,
+                    attribution=attribution,
+                    target=metric_target,
+                    steps=steps,
+                    baseline_value=baseline_value,
+                    iou_threshold=metric_iou_threshold,
+                )
+
+            else:
+
+                deletion_result = compute_deletion(
                     model=model,
                     input_tensor=input_data,
-                    attribution=(
-                        explanation.attribution
-                    ),
+                    attribution=attribution,
                     target=prediction.class_id,
                     steps=steps,
-                    baseline_value=(
-                        baseline_value
-                    ),
+                    baseline_value=baseline_value,
                 )
-            )
+
+                insertion_result = compute_insertion(
+                    model=model,
+                    input_tensor=input_data,
+                    attribution=attribution,
+                    target=prediction.class_id,
+                    steps=steps,
+                    baseline_value=baseline_value,
+                )
 
             metrics_path = (
                 self.output_dir
@@ -1041,6 +1110,11 @@ class ExperimentRunner:
                     baseline_value
                 ),
             }
+
+            if metric_iou_threshold is not None:
+                result["metrics"]["iou_threshold"] = (
+                    metric_iou_threshold
+                )
 
             result["artifacts"][
                 "faithfulness"

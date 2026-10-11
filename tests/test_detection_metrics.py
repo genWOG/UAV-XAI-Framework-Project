@@ -129,3 +129,69 @@ def test_detection_deletion_and_insertion():
 
     assert np.isfinite(deletion.auc)
     assert np.isfinite(insertion.auc)
+
+def test_match_target_detection_rejects_low_iou():
+    prediction = PredictionResult(
+        class_id=2,
+        confidence=0.95,
+        task="detection",
+        detections=[
+            DetectionResult(
+                class_id=2,
+                class_name="car",
+                confidence=0.95,
+                bbox=[9.0, 9.0, 19.0, 19.0],
+            ),
+        ],
+    )
+
+    target = XAITarget(
+        task="detection",
+        class_id=2,
+        score=0.9,
+        bbox=[0.0, 0.0, 10.0, 10.0],
+    )
+
+    confidence, iou = match_target_detection(
+        prediction,
+        target,
+    )
+
+    assert 0.0 < iou < 0.5
+    assert confidence == 0.0
+
+def test_match_target_detection_selects_target_by_iou():
+    prediction = PredictionResult(
+        class_id=2,
+        confidence=0.99,
+        task="detection",
+        detections=[
+            DetectionResult(
+                class_id=2,
+                class_name="car",
+                confidence=0.99,
+                bbox=[50.0, 50.0, 60.0, 60.0],
+            ),
+            DetectionResult(
+                class_id=2,
+                class_name="car",
+                confidence=0.72,
+                bbox=[0.0, 0.0, 10.0, 10.0],
+            ),
+        ],
+    )
+
+    target = XAITarget(
+        task="detection",
+        class_id=2,
+        score=0.85,
+        bbox=[0.0, 0.0, 10.0, 10.0],
+    )
+
+    confidence, iou = match_target_detection(
+        prediction,
+        target,
+    )
+
+    assert confidence == 0.72
+    assert iou == 1.0
