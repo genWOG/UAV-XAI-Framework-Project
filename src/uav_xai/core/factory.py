@@ -88,117 +88,86 @@ def _lime_image_input(
 def _lime_image_kwargs(
     context: dict[str, Any],
 ) -> dict[str, Any]:
-    preprocess = context.get(
-        "preprocess"
-    )
+    preprocess = context.get("preprocess")
+    xai_config = context.get("xai_config", {})
+    method_configs = xai_config.get("method_configs", {})
+    method_config = method_configs.get("lime", {}) if isinstance(method_configs, dict) else {}
 
-    if preprocess is None:
-        raise ValueError(
-            "LIME Image requires preprocess."
-        )
+    def value(name: str, default: Any) -> Any:
+        return method_config.get(name, xai_config.get(name, default))
 
-    xai_config = context.get(
-        "xai_config",
-        {},
-    )
-
-    return {
+    kwargs = {
         "preprocess": preprocess,
-        "num_samples": int(
-            xai_config.get(
-                "num_samples",
-                500,
-            )
-        ),
+        "num_samples": int(value("num_samples", 500)),
+        "num_segments": int(value("num_segments", 100)),
+        "compactness": float(value("compactness", 10.0)),
+        "hide_color": value("hide_color", 0),
     }
+    if context.get("task") == "detection":
+        kwargs["target_iou_threshold"] = float(
+            value("target_iou_threshold", xai_config.get("lime_iou_threshold", 0.5))
+        )
+    elif preprocess is None:
+        raise ValueError("LIME Image requires preprocess.")
+    return kwargs
+
 
 def _shap_image_kwargs(
     context: dict[str, Any],
 ) -> dict[str, Any]:
-    preprocess = context.get(
-        "preprocess"
-    )
+    preprocess = context.get("preprocess")
+    xai_config = context.get("xai_config", {})
+    method_configs = xai_config.get("method_configs", {})
+    method_config = method_configs.get("shap", {}) if isinstance(method_configs, dict) else {}
 
-    if preprocess is None:
-        raise ValueError(
-            "SHAP Image requires preprocess."
-        )
+    def value(name: str, default: Any) -> Any:
+        return method_config.get(name, xai_config.get(name, default))
 
-    xai_config = context.get(
-        "xai_config",
-        {},
-    )
-
-    return {
+    kwargs = {
         "preprocess": preprocess,
-        "nsamples": int(
-            xai_config.get(
-                "nsamples",
-                100,
-            )
-        ),
-        "num_segments": int(
-            xai_config.get(
-                "num_segments",
-                30,
-            )
-        ),
-        "compactness": float(
-            xai_config.get(
-                "compactness",
-                10.0,
-            )
-        ),
-        "hide_color": xai_config.get(
-            "hide_color",
-            0,
-        ),
+        "nsamples": int(value("nsamples", 100)),
+        "num_segments": int(value("num_segments", 30)),
+        "compactness": float(value("compactness", 10.0)),
+        "hide_color": value("hide_color", 0),
+        "baseline_mode": str(value("baseline_mode", "constant")),
     }
+    if context.get("task") == "detection":
+        kwargs["target_iou_threshold"] = float(
+            value(
+                "target_iou_threshold",
+                xai_config.get("shap_iou_threshold", xai_config.get("lime_iou_threshold", 0.5)),
+            )
+        )
+    elif preprocess is None:
+        raise ValueError("SHAP Image requires preprocess.")
+    return kwargs
+
 
 def _lrp_image_kwargs(
     context: dict[str, Any],
 ) -> dict[str, Any]:
-    preprocess = context.get(
-        "preprocess"
-    )
+    preprocess = context.get("preprocess")
+    if context.get("task") != "detection" and preprocess is None:
+        raise ValueError("LRP Image requires preprocess.")
 
-    if preprocess is None:
-        raise ValueError(
-            "LRP Image requires preprocess."
-        )
+    xai_config = context.get("xai_config", {})
+    method_configs = xai_config.get("method_configs", {})
+    method_config = method_configs.get("lrp", {}) if isinstance(method_configs, dict) else {}
 
-    xai_config = context.get(
-        "xai_config",
-        {},
-    )
+    def value(name: str, default: Any) -> Any:
+        return method_config.get(name, xai_config.get(name, default))
 
-    return {
+    kwargs = {
         "preprocess": preprocess,
-        "epsilon": float(
-            xai_config.get(
-                "epsilon",
-                1e-6,
-            )
-        ),
-        "gamma": float(
-            xai_config.get(
-                "gamma",
-                0.1,
-            )
-        ),
-        "low": float(
-            xai_config.get(
-                "low",
-                0.0,
-            )
-        ),
-        "high": float(
-            xai_config.get(
-                "high",
-                1.0,
-            )
-        ),
+        "epsilon": float(value("epsilon", 1e-6)),
+        "gamma": float(value("gamma", 0.1)),
+        "low": float(value("low", 0.0)),
+        "high": float(value("high", 1.0)),
     }
+    if context.get("task") == "detection":
+        kwargs["context"] = context
+    return kwargs
+
 
 def _lime_tabular_kwargs(
     context: dict[str, Any],

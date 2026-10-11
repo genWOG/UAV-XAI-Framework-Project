@@ -869,39 +869,46 @@ class ExperimentRunner:
         )
 
         # Keep CAM in model-input coordinates for metrics.
+        # Preserve the raw attribution for metric preprocessing.
         metric_attribution = np.asarray(
-            explanation.attribution
+            explanation.attribution,
+            dtype=np.float32,
         ).copy()
 
-        heatmap = (
-            explanation.attribution
-        )
+        heatmap = metric_attribution.copy()
 
-        # Grad-CAM generated on 640x640 is mapped from
-        # the model-input coordinate system back to the
-        # original image dimensions.
-        if (
-            context["task"]
-            == "detection"
-        ):
+        if context["task"] == "detection":
+            letterbox = context["letterbox"]
 
-            letterbox = context[
-                "letterbox"
-            ]
+            model_shape = (
+                int(letterbox["input_height"]),
+                int(letterbox["input_width"]),
+            )
+            original_shape = (
+                int(letterbox["original_height"]),
+                int(letterbox["original_width"]),
+            )
 
-            heatmap = (
-                self._restore_detection_heatmap(
+            if heatmap.shape == model_shape:
+                # Grad-CAM: model-input coordinates -> original image.
+                heatmap = self._restore_detection_heatmap(
                     heatmap=heatmap,
                     letterbox=letterbox,
-                    output_size=(
-                        original_image.size
-                    ),
+                    output_size=original_image.size,
                 )
-            )
+            elif heatmap.shape == original_shape:
+                # LIME/SHAP/LRP image maps are already in original-image
+                # coordinates. Do not letterbox them a second time.
+                pass
+            else:
+                raise ValueError(
+                    "Unexpected detection attribution shape "
+                    f"{heatmap.shape}; expected model shape "
+                    f"{model_shape} or original image shape "
+                    f"{original_shape}."
+                )
 
-            explanation.attribution = (
-                heatmap
-            )
+            explanation.attribution = heatmap
 
         visualization = (
             overlay_heatmap(
@@ -973,6 +980,50 @@ class ExperimentRunner:
                 metric_input_tensor = (
                     context["xai_input"].detach()
                 )
+
+                letterbox = context["letterbox"]
+
+                metric_shape = tuple(
+                    metric_input_tensor.shape[-2:]
+                )
+
+                original_shape = (
+                    int(letterbox["original_height"]),
+                    int(letterbox["original_width"]),
+                )
+
+                if metric_attribution.shape == original_shape:
+                    resized_attribution = cv2.resize(
+                        metric_attribution,
+                        (
+                            int(letterbox["resized_width"]),
+                            int(letterbox["resized_height"]),
+                        ),
+                        interpolation=cv2.INTER_LINEAR,
+                    )
+
+                    metric_attribution = np.zeros(
+                        metric_shape,
+                        dtype=np.float32,
+                    )
+
+                    pad_x = int(letterbox["pad_x"])
+                    pad_y = int(letterbox["pad_y"])
+                    resized_height, resized_width = (
+                        resized_attribution.shape
+                    )
+
+                    metric_attribution[
+                        pad_y:pad_y + resized_height,
+                        pad_x:pad_x + resized_width,
+                    ] = resized_attribution
+
+                elif metric_attribution.shape != metric_shape:
+                    raise ValueError(
+                        "Attribution shape does not match either "
+                        "the original image or model input: "
+                        f"{metric_attribution.shape}."
+                    )
 
                 original_target = context["xai_target"]
                 original_bbox = original_target.bbox

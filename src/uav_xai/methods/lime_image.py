@@ -3,10 +3,12 @@ from typing import Any, Callable
 
 import numpy as np
 import torch
+from skimage.segmentation import slic
 from lime import lime_image
 from skimage.segmentation import mark_boundaries
 
 from ..core.base import Explainer
+from ..core.target import XAITarget
 from ..core.result import ExplanationResult
 
 
@@ -31,20 +33,34 @@ class LimeImageExplainer(Explainer):
 
     def __init__(
         self,
-        preprocess: Callable[[np.ndarray], torch.Tensor],
+        preprocess: Callable[[np.ndarray], torch.Tensor] | None,
         num_samples: int = 1000,
-        hide_color: int | float = 0,
+        hide_color: int | float | None = 0,
         segmentation_fn: Callable | None = None,
+        target_iou_threshold: float = 0.5,
+        num_segments: int = 100,
+        compactness: float = 10.0,
     ) -> None:
 
         if num_samples < 1:
             raise ValueError(
                 "num_samples must be >= 1."
             )
+        if not 0.0 <= target_iou_threshold <= 1.0:
+            raise ValueError(
+                "target_iou_threshold must be between 0 and 1."
+            )
+        if num_segments < 2:
+            raise ValueError("num_segments must be >= 2.")
+        if compactness <= 0:
+            raise ValueError("compactness must be > 0.")
 
         self.preprocess = preprocess
         self.num_samples = num_samples
         self.hide_color = hide_color
+        self.target_iou_threshold = target_iou_threshold
+        self.num_segments = int(num_segments)
+        self.compactness = float(compactness)
 
         self._explainer = lime_image.LimeImageExplainer(
             random_state=42,
@@ -209,12 +225,251 @@ class LimeImageExplainer(Explainer):
 
         return predict_fn
 
+    @staticmethod
+    def _bbox_iou(
+        box_a: list[float],
+        box_b: list[float],
+    ) -> float:
+        ax1, ay1, ax2, ay2 = box_a
+        bx1, by1, bx2, by2 = box_b
+
+        ix1 = max(ax1, bx1)
+        iy1 = max(ay1, by1)
+        ix2 = min(ax2, bx2)
+        iy2 = min(ay2, by2)
+
+        intersection = (
+            max(0.0, ix2 - ix1)
+            * max(0.0, iy2 - iy1)
+        )
+
+        area_a = (
+            max(0.0, ax2 - ax1)
+            * max(0.0, ay2 - ay1)
+        )
+        area_b = (
+            max(0.0, bx2 - bx1)
+            * max(0.0, by2 - by1)
+        )
+
+        union = area_a + area_b - intersection
+        return intersection / union if union > 0.0 else 0.0
+
+    def _build_detection_predict_fn(
+        self,
+        model: Any,
+        target: XAITarget,
+    ) -> Callable[[np.ndarray], np.ndarray]:
+        if not hasattr(model, "predict"):
+            raise TypeError(
+                "Detection LIME requires a model with predict()."
+            )
+
+        if target.bbox is None:
+            raise ValueError(
+                "Detection LIME requires target.bbox."
+            )
+
+        target_bbox = [
+            float(value)
+            for value in target.bbox
+        ]
+
+        def predict_fn(
+            images: np.ndarray,
+        ) -> np.ndarray:
+            rgb_images = [
+                self._validate_image(image)
+                for image in images
+            ]
+
+            # Ultralytics expects OpenCV-style BGR arrays
+            # when numpy images are passed directly.
+            bgr_images = [
+                image[:, :, ::-1].copy()
+                for image in rgb_images
+            ]
+
+            results = model.predict(
+                source=bgr_images,
+                conf=0.001,
+                verbose=False,
+            )
+
+            if len(results) != len(rgb_images):
+                raise RuntimeError(
+                    "YOLO returned an unexpected number of results."
+                )
+
+            output_scores = []
+
+            for result in results:
+                best_iou = 0.0
+                best_confidence = 0.0
+                boxes = result.boxes
+
+                if boxes is not None and len(boxes) > 0:
+                    xyxy = (
+                        boxes.xyxy.detach()
+                        .cpu()
+                        .numpy()
+                    )
+                    class_ids = (
+                        boxes.cls.detach()
+                        .cpu()
+                        .numpy()
+                        .astype(int)
+                    )
+                    confidences = (
+                        boxes.conf.detach()
+                        .cpu()
+                        .numpy()
+                    )
+
+                    for bbox, class_id, confidence in zip(
+                        xyxy,
+                        class_ids,
+                        confidences,
+                    ):
+                        if int(class_id) != target.class_id:
+                            continue
+
+                        iou = self._bbox_iou(
+                            target_bbox,
+                            [float(v) for v in bbox],
+                        )
+
+                        if iou > best_iou:
+                            best_iou = iou
+                            best_confidence = float(confidence)
+
+                if best_iou < self.target_iou_threshold:
+                    score = 0.0
+                else:
+                    score = best_confidence
+
+                # LIME expects a probability-like matrix.
+                # Column 1 represents the selected detection's score.
+                output_scores.append(
+                    [1.0 - score, score]
+                )
+
+            return np.asarray(
+                output_scores,
+                dtype=np.float32,
+            )
+
+        return predict_fn
+
+    def _segment_detection(
+        self,
+        image: np.ndarray,
+    ) -> np.ndarray:
+        """Use spatially compact, reproducible superpixels for YOLO explanations."""
+        return slic(
+            image,
+            n_segments=self.num_segments,
+            compactness=self.compactness,
+            start_label=0,
+            channel_axis=-1,
+        )
+
+    def _explain_detection(
+        self,
+        model: Any,
+        input_data: Any,
+        target: XAITarget,
+    ) -> ExplanationResult:
+        start_time = time.perf_counter()
+
+        image = self._validate_image(input_data)
+
+        predict_fn = self._build_detection_predict_fn(
+            model,
+            target,
+        )
+
+        original_scores = predict_fn(
+            np.expand_dims(image, axis=0)
+        )
+
+        lime_target = 1
+
+        explanation = self._explainer.explain_instance(
+            image=image,
+            classifier_fn=predict_fn,
+            top_labels=None,
+            labels=[lime_target],
+            hide_color=self.hide_color,
+            num_samples=self.num_samples,
+            segmentation_fn=(
+                self._segmentation_fn
+                if self._segmentation_fn is not None
+                else self._segment_detection
+            ),
+            batch_size=10,
+        )
+
+        local_exp = explanation.local_exp[lime_target]
+        segments = explanation.segments
+
+        attribution = np.zeros(
+            segments.shape,
+            dtype=np.float32,
+        )
+
+        for segment_id, weight in local_exp:
+            attribution[segments == segment_id] = weight
+
+        confidence = float(
+            original_scores[0, lime_target]
+        )
+
+        runtime_ms = (
+            time.perf_counter() - start_time
+        ) * 1000.0
+
+        return ExplanationResult(
+            method="lime",
+            attribution=attribution,
+            target=target.class_id,
+            confidence=confidence,
+            runtime_ms=runtime_ms,
+            input_type="image",
+            feature_names=None,
+            metadata={
+                "explainer": "lime_image_detection",
+                "num_samples": self.num_samples,
+                "num_segments": int(
+                    len(np.unique(segments))
+                ),
+                "image_shape": list(image.shape),
+                "target_task": "detection",
+                "target_class_id": target.class_id,
+                "detection_index": target.detection_index,
+                "bbox": list(target.bbox),
+                "target_iou_threshold": self.target_iou_threshold,
+            },
+        )
+
     def explain(
         self,
         model: Any,
         input_data: Any,
         target: int | str | None = None,
     ) -> ExplanationResult:
+
+        if isinstance(target, XAITarget):
+            if target.task != "detection":
+                raise ValueError(
+                    "LIME received an unsupported XAI target."
+                )
+
+            return self._explain_detection(
+                model=model,
+                input_data=input_data,
+                target=target,
+            )
 
         start_time = time.perf_counter()
 

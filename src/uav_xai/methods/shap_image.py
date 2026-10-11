@@ -8,6 +8,7 @@ from skimage.segmentation import slic
 
 from ..core.base import Explainer
 from ..core.result import ExplanationResult
+from ..core.target import XAITarget
 
 
 class ShapImageExplainer(Explainer):
@@ -45,6 +46,8 @@ class ShapImageExplainer(Explainer):
         num_segments: int = 30,
         compactness: float = 10.0,
         hide_color: int | float = 0,
+        target_iou_threshold: float = 0.5,
+        baseline_mode: str = "constant",
     ) -> None:
 
         if nsamples < 1:
@@ -62,11 +65,20 @@ class ShapImageExplainer(Explainer):
                 "compactness must be > 0."
             )
 
+        if not 0.0 <= target_iou_threshold <= 1.0:
+            raise ValueError(
+                "target_iou_threshold must be between 0 and 1."
+            )
+
         self.preprocess = preprocess
         self.nsamples = nsamples
         self.num_segments = num_segments
         self.compactness = compactness
         self.hide_color = hide_color
+        self.target_iou_threshold = target_iou_threshold
+        if baseline_mode not in {"constant", "segment_mean"}:
+            raise ValueError("baseline_mode must be 'constant' or 'segment_mean'.")
+        self.baseline_mode = baseline_mode
 
     def _validate_image(
         self,
@@ -257,6 +269,167 @@ class ShapImageExplainer(Explainer):
         return predict_fn
 
     @staticmethod
+    def _bbox_iou(
+        box_a: list[float],
+        box_b: list[float],
+    ) -> float:
+        ax1, ay1, ax2, ay2 = box_a
+        bx1, by1, bx2, by2 = box_b
+        ix1 = max(ax1, bx1)
+        iy1 = max(ay1, by1)
+        ix2 = min(ax2, bx2)
+        iy2 = min(ay2, by2)
+        intersection = max(0.0, ix2 - ix1) * max(0.0, iy2 - iy1)
+        area_a = max(0.0, ax2 - ax1) * max(0.0, ay2 - ay1)
+        area_b = max(0.0, bx2 - bx1) * max(0.0, by2 - by1)
+        union = area_a + area_b - intersection
+        return intersection / union if union > 0.0 else 0.0
+
+    def _build_detection_predict_fn(
+        self,
+        model: Any,
+        target: XAITarget,
+    ) -> Callable[[np.ndarray], np.ndarray]:
+        if not hasattr(model, "predict"):
+            raise TypeError("Detection SHAP requires a model with predict().")
+        if target.bbox is None:
+            raise ValueError("Detection SHAP requires target.bbox.")
+
+        target_bbox = [float(value) for value in target.bbox]
+
+        def predict_images(images: np.ndarray) -> np.ndarray:
+            rgb_images = [self._validate_image(image) for image in images]
+            bgr_images = [image[:, :, ::-1].copy() for image in rgb_images]
+            results = []
+            prediction_batch_size = 8
+            for batch_start in range(0, len(bgr_images), prediction_batch_size):
+                results.extend(
+                    model.predict(
+                        source=bgr_images[batch_start:batch_start + prediction_batch_size],
+                        conf=0.001,
+                        verbose=False,
+                    )
+                )
+            if len(results) != len(rgb_images):
+                raise RuntimeError("YOLO returned an unexpected number of results.")
+
+            output_scores: list[list[float]] = []
+            for result in results:
+                boxes = getattr(result, "boxes", None)
+                best_iou = 0.0
+                best_confidence = 0.0
+                if boxes is not None and len(boxes) > 0:
+                    xyxy = boxes.xyxy.detach().cpu().numpy()
+                    classes = boxes.cls.detach().cpu().numpy().astype(int)
+                    confidences = boxes.conf.detach().cpu().numpy()
+                    for box, class_id, confidence in zip(xyxy, classes, confidences):
+                        if int(class_id) != int(target.class_id):
+                            continue
+                        iou = self._bbox_iou(target_bbox, [float(v) for v in box])
+                        if iou > best_iou:
+                            best_iou = iou
+                            best_confidence = float(confidence)
+                score = (
+                    best_confidence
+                    if best_iou >= self.target_iou_threshold
+                    else 0.0
+                )
+                # Kernel SHAP expects a fixed-width model output.
+                output_scores.append([1.0 - score, score])
+
+            return np.asarray(output_scores, dtype=np.float32)
+
+        return predict_images
+
+    def _explain_detection(
+        self,
+        model: Any,
+        input_data: Any,
+        target: XAITarget,
+    ) -> ExplanationResult:
+        start_time = time.perf_counter()
+        image = self._validate_image(input_data)
+        segments = slic(
+            image,
+            n_segments=self.num_segments,
+            compactness=self.compactness,
+            start_label=0,
+            channel_axis=-1,
+        )
+        n_segments = int(segments.max()) + 1
+        detection_predict = self._build_detection_predict_fn(model, target)
+        if self.baseline_mode == "segment_mean":
+            baseline = np.empty_like(image)
+            for segment_id in range(n_segments):
+                segment_mask = segments == segment_id
+                mean_color = np.rint(
+                    image[segment_mask].mean(axis=0)
+                ).clip(0, 255).astype(image.dtype)
+                baseline[segment_mask] = mean_color
+        else:
+            baseline = np.full_like(image, fill_value=self.hide_color)
+
+        def predict_fn(masks: np.ndarray) -> np.ndarray:
+            masks = np.asarray(masks, dtype=np.float32)
+            if masks.ndim == 1:
+                masks = masks.reshape(1, -1)
+            if masks.ndim != 2 or masks.shape[1] != n_segments:
+                raise ValueError(
+                    "SHAP masks must have shape [samples, number_of_segments]."
+                )
+            perturbed_images = []
+            for mask in masks:
+                perturbed = baseline.copy()
+                for segment_id in range(n_segments):
+                    if mask[segment_id] > 0.5:
+                        selected = segments == segment_id
+                        perturbed[selected] = image[selected]
+                perturbed_images.append(perturbed)
+            return detection_predict(np.asarray(perturbed_images))
+
+        all_on = np.ones((1, n_segments), dtype=np.float32)
+        original_scores = predict_fn(all_on)
+        background = np.zeros((1, n_segments), dtype=np.float32)
+        explainer = shap.KernelExplainer(predict_fn, background)
+        shap_values = explainer.shap_values(all_on, nsamples=self.nsamples)
+        segment_attribution = self._extract_target_values(
+            shap_values=shap_values,
+            target=1,
+            n_segments=n_segments,
+        )
+
+        attribution = np.zeros(segments.shape, dtype=np.float32)
+        for segment_id, value in enumerate(segment_attribution):
+            attribution[segments == segment_id] = value
+
+        confidence = float(original_scores[0, 1])
+        runtime_ms = (time.perf_counter() - start_time) * 1000.0
+        return ExplanationResult(
+            method="shap",
+            attribution=attribution,
+            target=target.class_id,
+            confidence=confidence,
+            runtime_ms=runtime_ms,
+            input_type="image",
+            feature_names=None,
+            metadata={
+                "nsamples": self.nsamples,
+                "num_segments": n_segments,
+                "compactness": self.compactness,
+                "image_shape": list(image.shape),
+                "explainer": "shap_image",
+                "segments": segments,
+                "segment_attribution": segment_attribution,
+                "target_task": "detection",
+                "target_class_id": target.class_id,
+                "detection_index": target.detection_index,
+                "bbox": list(target.bbox),
+                "target_iou_threshold": self.target_iou_threshold,
+                "baseline_mode": self.baseline_mode,
+            },
+        )
+
+    @staticmethod
     def _extract_target_values(
         shap_values: Any,
         target: int,
@@ -312,8 +485,13 @@ class ShapImageExplainer(Explainer):
         self,
         model: Any,
         input_data: Any,
-        target: int | str | None = None,
+        target: int | str | XAITarget | None = None,
     ) -> ExplanationResult:
+
+        if isinstance(target, XAITarget):
+            if target.task != "detection":
+                raise ValueError("SHAP received an unsupported XAI target.")
+            return self._explain_detection(model=model, input_data=input_data, target=target)
 
         start_time = time.perf_counter()
 
