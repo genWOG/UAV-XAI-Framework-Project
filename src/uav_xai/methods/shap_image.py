@@ -2,6 +2,7 @@ import time
 from typing import Any, Callable
 
 import numpy as np
+import cv2
 import shap
 import torch
 from skimage.segmentation import slic
@@ -50,6 +51,8 @@ class ShapImageExplainer(Explainer):
         baseline_mode: str = "constant",
         prediction_batch_size: int = 32,
         target_score_mode: str = "confidence_iou",
+        explanation_image_size: int | None = None,
+        algorithm: str = "kernel",
     ) -> None:
 
         if nsamples < 1:
@@ -87,6 +90,14 @@ class ShapImageExplainer(Explainer):
         self.baseline_mode = baseline_mode
         self.prediction_batch_size = int(prediction_batch_size)
         self.target_score_mode = target_score_mode
+        if explanation_image_size is not None and int(explanation_image_size) < 64:
+            raise ValueError("explanation_image_size must be None or >= 64.")
+        self.explanation_image_size = (
+            None if explanation_image_size is None else int(explanation_image_size)
+        )
+        if algorithm not in {"kernel", "partition"}:
+            raise ValueError("algorithm must be 'kernel' or 'partition'.")
+        self.algorithm = algorithm
 
     def _validate_image(
         self,
@@ -276,6 +287,16 @@ class ShapImageExplainer(Explainer):
 
         return predict_fn
 
+    def _resize_for_explanation(self, image: np.ndarray) -> np.ndarray:
+        """Downscale the perturbation workspace, preserving aspect ratio."""
+        limit = self.explanation_image_size
+        if limit is None or max(image.shape[:2]) <= limit:
+            return image
+        scale = limit / float(max(image.shape[:2]))
+        width = max(1, int(round(image.shape[1] * scale)))
+        height = max(1, int(round(image.shape[0] * scale)))
+        return cv2.resize(image, (width, height), interpolation=cv2.INTER_AREA)
+
     @staticmethod
     def _bbox_iou(
         box_a: list[float],
@@ -297,13 +318,18 @@ class ShapImageExplainer(Explainer):
         self,
         model: Any,
         target: XAITarget,
+        target_bbox: list[float] | None = None,
     ) -> Callable[[np.ndarray], np.ndarray]:
         if not hasattr(model, "predict"):
             raise TypeError("Detection SHAP requires a model with predict().")
         if target.bbox is None:
             raise ValueError("Detection SHAP requires target.bbox.")
 
-        target_bbox = [float(value) for value in target.bbox]
+        target_bbox = [
+            float(value) for value in (
+                target.bbox if target_bbox is None else target_bbox
+            )
+        ]
 
         from .yolo_fast_scorer import YoloDetectionScorer
         scorer = YoloDetectionScorer(
@@ -330,25 +356,36 @@ class ShapImageExplainer(Explainer):
     ) -> ExplanationResult:
         start_time = time.perf_counter()
         image = self._validate_image(input_data)
+        working_image = self._resize_for_explanation(image)
+        scale_x = working_image.shape[1] / image.shape[1]
+        scale_y = working_image.shape[0] / image.shape[0]
+        target_bbox = [
+            float(target.bbox[0]) * scale_x,
+            float(target.bbox[1]) * scale_y,
+            float(target.bbox[2]) * scale_x,
+            float(target.bbox[3]) * scale_y,
+        ]
         segments = slic(
-            image,
+            working_image,
             n_segments=self.num_segments,
             compactness=self.compactness,
             start_label=0,
             channel_axis=-1,
         )
         n_segments = int(segments.max()) + 1
-        detection_predict = self._build_detection_predict_fn(model, target)
+        detection_predict = self._build_detection_predict_fn(
+            model, target, target_bbox=target_bbox
+        )
         if self.baseline_mode == "segment_mean":
-            baseline = np.empty_like(image)
+            baseline = np.empty_like(working_image)
             for segment_id in range(n_segments):
                 segment_mask = segments == segment_id
                 mean_color = np.rint(
-                    image[segment_mask].mean(axis=0)
-                ).clip(0, 255).astype(image.dtype)
+                    working_image[segment_mask].mean(axis=0)
+                ).clip(0, 255).astype(working_image.dtype)
                 baseline[segment_mask] = mean_color
         else:
-            baseline = np.full_like(image, fill_value=self.hide_color)
+            baseline = np.full_like(working_image, fill_value=self.hide_color)
 
         def predict_fn(masks: np.ndarray) -> np.ndarray:
             masks = np.asarray(masks, dtype=np.float32)
@@ -358,20 +395,16 @@ class ShapImageExplainer(Explainer):
                 raise ValueError(
                     "SHAP masks must have shape [samples, number_of_segments]."
                 )
-            # Vectorize mask-to-image projection. The previous nested
-            # mask x segment loops repeatedly compared each segment against
-            # the full-resolution image, dominating Kernel SHAP runtime.
             score_batches = []
             for batch_start in range(0, len(masks), self.prediction_batch_size):
                 mask_batch = masks[batch_start:batch_start + self.prediction_batch_size]
                 visible_pixels = mask_batch[:, segments] > 0.5
                 perturbed_batch = np.where(
                     visible_pixels[..., np.newaxis],
-                    image[np.newaxis, ...],
+                    working_image[np.newaxis, ...],
                     baseline[np.newaxis, ...],
                 )
                 score_batches.append(detection_predict(perturbed_batch))
-
             if not score_batches:
                 return np.empty((0, 2), dtype=np.float32)
             return np.concatenate(score_batches, axis=0)
@@ -379,17 +412,52 @@ class ShapImageExplainer(Explainer):
         all_on = np.ones((1, n_segments), dtype=np.float32)
         original_scores = predict_fn(all_on)
         background = np.zeros((1, n_segments), dtype=np.float32)
-        explainer = shap.KernelExplainer(predict_fn, background)
-        shap_values = explainer.shap_values(all_on, nsamples=self.nsamples)
+        partition_max_evals = None
+        if self.algorithm == "partition":
+            from scipy.cluster.hierarchy import linkage
+
+            # Image-aware hierarchy over superpixels: spatial centroids plus mean RGB.
+            yy, xx = np.indices(segments.shape)
+            descriptors = []
+            for segment_id in range(n_segments):
+                selected = segments == segment_id
+                descriptors.append([
+                    float(xx[selected].mean()) / max(1, segments.shape[1] - 1),
+                    float(yy[selected].mean()) / max(1, segments.shape[0] - 1),
+                    *(working_image[selected].mean(axis=0).astype(np.float64) / 255.0),
+                ])
+            clustering = linkage(np.asarray(descriptors, dtype=np.float64), method="ward")
+            masker = shap.maskers.Partition(data=background, clustering=clustering)
+            explainer = shap.PartitionExplainer(predict_fn, masker)
+            partition_max_evals = max(self.nsamples, 2 * n_segments + 1)
+            shap_result = explainer(
+                all_on,
+                max_evals=partition_max_evals,
+                batch_size=self.prediction_batch_size,
+                fixed_context=0,
+                silent=True,
+            )
+            shap_values = shap_result.values
+        else:
+            explainer = shap.KernelExplainer(predict_fn, background)
+            shap_values = explainer.shap_values(all_on, nsamples=self.nsamples)
+
         segment_attribution = self._extract_target_values(
             shap_values=shap_values,
             target=1,
             n_segments=n_segments,
         )
-
-        attribution = np.zeros(segments.shape, dtype=np.float32)
+        attribution_work = np.zeros(segments.shape, dtype=np.float32)
         for segment_id, value in enumerate(segment_attribution):
-            attribution[segments == segment_id] = value
+            attribution_work[segments == segment_id] = value
+        if attribution_work.shape != image.shape[:2]:
+            attribution = cv2.resize(
+                attribution_work,
+                (image.shape[1], image.shape[0]),
+                interpolation=cv2.INTER_LINEAR,
+            ).astype(np.float32, copy=False)
+        else:
+            attribution = attribution_work
 
         confidence = float(original_scores[0, 1])
         runtime_ms = (time.perf_counter() - start_time) * 1000.0
@@ -406,7 +474,11 @@ class ShapImageExplainer(Explainer):
                 "num_segments": n_segments,
                 "compactness": self.compactness,
                 "image_shape": list(image.shape),
+                "explanation_image_shape": list(working_image.shape),
+                "explanation_image_size": self.explanation_image_size,
                 "explainer": "shap_image",
+                "algorithm": self.algorithm,
+                "partition_max_evals": partition_max_evals,
                 "segments": segments,
                 "segment_attribution": segment_attribution,
                 "target_task": "detection",
@@ -431,6 +503,9 @@ class ShapImageExplainer(Explainer):
         """
         Normalize SHAP output shapes across versions.
         """
+
+        if hasattr(shap_values, "values"):
+            shap_values = shap_values.values
 
         if isinstance(
             shap_values,

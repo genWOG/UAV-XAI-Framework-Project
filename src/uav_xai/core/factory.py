@@ -102,6 +102,10 @@ def _lime_image_kwargs(
         "num_segments": int(value("num_segments", 100)),
         "compactness": float(value("compactness", 10.0)),
         "hide_color": value("hide_color", 0),
+        "explanation_image_size": (
+            None if value("explanation_image_size", None) is None
+            else int(value("explanation_image_size", None))
+        ),
     }
     if context.get("task") == "detection":
         kwargs["target_iou_threshold"] = float(
@@ -130,6 +134,11 @@ def _shap_image_kwargs(
         "compactness": float(value("compactness", 10.0)),
         "hide_color": value("hide_color", 0),
         "baseline_mode": str(value("baseline_mode", "constant")),
+        "explanation_image_size": (
+            None if value("explanation_image_size", None) is None
+            else int(value("explanation_image_size", None))
+        ),
+        "algorithm": str(value("algorithm", "kernel")),
     }
     if context.get("task") == "detection":
         kwargs["target_iou_threshold"] = float(

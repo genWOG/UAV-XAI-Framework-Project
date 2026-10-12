@@ -976,6 +976,7 @@ class ExperimentRunner:
                 metric_predictor = ModelPredictor(
                     model=model,
                     task="detection",
+                    confidence_threshold=self.config.get("model", {}).get("prediction_confidence_threshold"),
                 )
 
                 metric_input_tensor = (
@@ -1734,6 +1735,7 @@ class ExperimentRunner:
         predictor = ModelPredictor(
             model=model,
             task=task,
+            confidence_threshold=self.config.get("model", {}).get("prediction_confidence_threshold"),
         )
 
         prediction = (

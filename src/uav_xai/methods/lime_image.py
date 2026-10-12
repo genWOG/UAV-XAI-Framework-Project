@@ -2,6 +2,7 @@ import time
 from typing import Any, Callable
 
 import numpy as np
+import cv2
 import torch
 from skimage.segmentation import slic
 from lime import lime_image
@@ -43,6 +44,7 @@ class LimeImageExplainer(Explainer):
         compactness: float = 10.0,
         prediction_batch_size: int = 32,
         target_score_mode: str = "confidence_iou",
+        explanation_image_size: int | None = None,
     ) -> None:
 
         if num_samples < 1:
@@ -70,6 +72,11 @@ class LimeImageExplainer(Explainer):
         self.compactness = float(compactness)
         self.prediction_batch_size = int(prediction_batch_size)
         self.target_score_mode = target_score_mode
+        if explanation_image_size is not None and int(explanation_image_size) < 64:
+            raise ValueError("explanation_image_size must be None or >= 64.")
+        self.explanation_image_size = (
+            None if explanation_image_size is None else int(explanation_image_size)
+        )
 
         self._explainer = lime_image.LimeImageExplainer(
             random_state=42,
@@ -234,6 +241,16 @@ class LimeImageExplainer(Explainer):
 
         return predict_fn
 
+    def _resize_for_explanation(self, image: np.ndarray) -> np.ndarray:
+        """Downscale the perturbation workspace, preserving aspect ratio."""
+        limit = self.explanation_image_size
+        if limit is None or max(image.shape[:2]) <= limit:
+            return image
+        scale = limit / float(max(image.shape[:2]))
+        width = max(1, int(round(image.shape[1] * scale)))
+        height = max(1, int(round(image.shape[0] * scale)))
+        return cv2.resize(image, (width, height), interpolation=cv2.INTER_AREA)
+
     @staticmethod
     def _bbox_iou(
         box_a: list[float],
@@ -268,6 +285,7 @@ class LimeImageExplainer(Explainer):
         self,
         model: Any,
         target: XAITarget,
+        target_bbox: list[float] | None = None,
     ) -> Callable[[np.ndarray], np.ndarray]:
         if not hasattr(model, "predict"):
             raise TypeError(
@@ -280,8 +298,9 @@ class LimeImageExplainer(Explainer):
             )
 
         target_bbox = [
-            float(value)
-            for value in target.bbox
+            float(value) for value in (
+                target.bbox if target_bbox is None else target_bbox
+            )
         ]
 
         from .yolo_fast_scorer import YoloDetectionScorer
@@ -321,48 +340,46 @@ class LimeImageExplainer(Explainer):
         target: XAITarget,
     ) -> ExplanationResult:
         start_time = time.perf_counter()
-
         image = self._validate_image(input_data)
-
+        working_image = self._resize_for_explanation(image)
+        scale_x = working_image.shape[1] / image.shape[1]
+        scale_y = working_image.shape[0] / image.shape[0]
+        target_bbox = [
+            float(target.bbox[0]) * scale_x,
+            float(target.bbox[1]) * scale_y,
+            float(target.bbox[2]) * scale_x,
+            float(target.bbox[3]) * scale_y,
+        ]
         predict_fn = self._build_detection_predict_fn(
-            model,
-            target,
+            model, target, target_bbox=target_bbox
         )
-
-        original_scores = predict_fn(
-            np.expand_dims(image, axis=0)
-        )
-
+        original_scores = predict_fn(np.expand_dims(working_image, axis=0))
         lime_target = 1
 
-        # Reproduce LIME's binary superpixel neighbourhood, but generate
-        # perturbed images vectorially instead of looping over every segment
-        # for every sample. The weighted local regression remains LIME's own.
         segmentation_fn = (
             self._segmentation_fn
             if self._segmentation_fn is not None
             else self._segment_detection
         )
-        segments = np.asarray(segmentation_fn(image))
-        if segments.shape != image.shape[:2]:
+        segments = np.asarray(segmentation_fn(working_image))
+        if segments.shape != working_image.shape[:2]:
             raise ValueError(
                 "segmentation_fn must return an array with shape [H, W]."
             )
         _, segments = np.unique(segments, return_inverse=True)
-        segments = segments.reshape(image.shape[:2]).astype(np.int32, copy=False)
+        segments = segments.reshape(working_image.shape[:2]).astype(np.int32, copy=False)
         n_segments = int(segments.max()) + 1
 
-        # Match lime-image's fudged-image semantics.
         if self.hide_color is None:
-            fudged_image = image.copy()
+            fudged_image = working_image.copy()
             for segment_id in range(n_segments):
                 selected = segments == segment_id
-                mean_color = image[selected].mean(axis=0)
-                fudged_image[selected] = mean_color.astype(image.dtype)
+                mean_color = working_image[selected].mean(axis=0)
+                fudged_image[selected] = mean_color.astype(working_image.dtype)
         else:
             fudged_image = np.broadcast_to(
-                np.asarray(self.hide_color), image.shape
-            ).astype(image.dtype, copy=True)
+                np.asarray(self.hide_color), working_image.shape
+            ).astype(working_image.dtype, copy=True)
 
         data = self._explainer.random_state.randint(
             0, 2, self.num_samples * n_segments
@@ -375,7 +392,7 @@ class LimeImageExplainer(Explainer):
             visible_pixels = mask_batch[:, segments] > 0
             perturbed_batch = np.where(
                 visible_pixels[..., np.newaxis],
-                image[np.newaxis, ...],
+                working_image[np.newaxis, ...],
                 fudged_image[np.newaxis, ...],
             )
             label_batches.append(predict_fn(perturbed_batch))
@@ -395,22 +412,20 @@ class LimeImageExplainer(Explainer):
             )
         )
 
-        attribution = np.zeros(
-            segments.shape,
-            dtype=np.float32,
-        )
-
+        attribution_work = np.zeros(segments.shape, dtype=np.float32)
         for segment_id, weight in local_exp:
-            attribution[segments == segment_id] = weight
+            attribution_work[segments == segment_id] = weight
+        if attribution_work.shape != image.shape[:2]:
+            attribution = cv2.resize(
+                attribution_work,
+                (image.shape[1], image.shape[0]),
+                interpolation=cv2.INTER_LINEAR,
+            ).astype(np.float32, copy=False)
+        else:
+            attribution = attribution_work
 
-        confidence = float(
-            original_scores[0, lime_target]
-        )
-
-        runtime_ms = (
-            time.perf_counter() - start_time
-        ) * 1000.0
-
+        confidence = float(original_scores[0, lime_target])
+        runtime_ms = (time.perf_counter() - start_time) * 1000.0
         return ExplanationResult(
             method="lime",
             attribution=attribution,
@@ -427,14 +442,16 @@ class LimeImageExplainer(Explainer):
                 "local_fit_score": float(local_fit_score),
                 "local_prediction": float(np.asarray(local_prediction).reshape(-1)[0]),
                 "image_shape": list(image.shape),
+                "explanation_image_shape": list(working_image.shape),
+                "explanation_image_size": self.explanation_image_size,
                 "target_task": "detection",
                 "target_class_id": target.class_id,
                 "detection_index": target.detection_index,
                 "bbox": list(target.bbox),
                 "target_iou_threshold": self.target_iou_threshold,
+                "target_score_mode": self.target_score_mode,
                 "prediction_backend": predict_fn.scorer.backend,
                 "fast_path_max_score_difference": predict_fn.scorer.max_score_difference,
-                "target_score_mode": self.target_score_mode,
             },
         )
 
