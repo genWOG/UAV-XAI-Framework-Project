@@ -77,3 +77,18 @@ LIME local fit score в последнем запуске: `0.5383` — каче
 2. Не менять samples, baseline и сегментацию вслепую. Сначала сравнить диагностические confidence/IoU-кривые и проверить качество локальной модели LIME.
 3. После стабилизации протокола проверить Grad-CAM prior и знаковую релевантность LRP, затем оценивать стабильность на нескольких изображениях.
 4. Любые новые изменения — только в review-worktree; тесты и diff review перед обсуждением коммита. **Никаких коммитов без явного согласия пользователя.**
+
+### Fast LIME/SHAP profile ? 2026-10-12
+
+- Added `src/uav_xai/methods/yolo_fast_scorer.py`: uses Ultralytics NMS-free inference when supported and retains the ordinary prediction fallback.
+- Updated `lime_image.py` and `shap_image.py` to use the scorer and expose backend/parity metadata.
+- Added `config/yolo_multi_method_one_image_fast.yaml` as a reduced-budget profile; added `tests/test_yolo_fast_scorer.py`.
+- Actual CPU run on `data/images/modern_ship.jpg`, YOLO26n, input 640:
+  - LIME: 11.34 s; deletion AUC 0.0641; insertion AUC 0.4878; local fit 0.6790.
+  - SHAP: 10.88 s; deletion AUC 0.1264; insertion AUC 0.5260.
+  - Grad-CAM: 0.33 s; LRP: 0.83 s.
+- Backend for LIME/SHAP: `ultralytics_predict_nms_free`; recorded initial score difference: 0.0.
+- Additional parity check compared regular and NMS-free results for six variants (original, several target occlusions and whole-image blur); maximum absolute target-score difference was 0.0 on this image.
+- Validation: full test suite 44 passed, 9 warnings; `git diff --check` passed.
+- These are single-image CPU measurements, not a dataset-wide quality claim or a real-time Gazebo latency guarantee. The fast profile reduces sample/segment budgets; attribution stability must be assessed for the intended integration workload.
+

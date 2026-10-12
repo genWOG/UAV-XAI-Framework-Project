@@ -284,99 +284,21 @@ class LimeImageExplainer(Explainer):
             for value in target.bbox
         ]
 
-        def predict_fn(
-            images: np.ndarray,
-        ) -> np.ndarray:
-            rgb_images = [
-                self._validate_image(image)
-                for image in images
-            ]
+        from .yolo_fast_scorer import YoloDetectionScorer
+        scorer = YoloDetectionScorer(
+            model=model,
+            target_bbox=target_bbox,
+            target_class_id=target.class_id,
+            score_mode=self.target_score_mode,
+            iou_threshold=self.target_iou_threshold,
+            confidence_threshold=0.001,
+        )
+        def predict_fn(images: np.ndarray) -> np.ndarray:
+            rgb_images = [self._validate_image(image) for image in images]
+            bgr_images = [image[:, :, ::-1].copy() for image in rgb_images]
+            return scorer(bgr_images)
 
-            # Ultralytics expects OpenCV-style BGR arrays
-            # when numpy images are passed directly.
-            bgr_images = [
-                image[:, :, ::-1].copy()
-                for image in rgb_images
-            ]
-
-            results = model.predict(
-                source=bgr_images,
-                conf=0.001,
-                verbose=False,
-            )
-
-            if len(results) != len(rgb_images):
-                raise RuntimeError(
-                    "YOLO returned an unexpected number of results."
-                )
-
-            output_scores = []
-
-            for result in results:
-                best_iou = 0.0
-                best_confidence = 0.0
-                boxes = result.boxes
-
-                if boxes is not None and len(boxes) > 0:
-                    xyxy = (
-                        boxes.xyxy.detach()
-                        .cpu()
-                        .numpy()
-                    )
-                    class_ids = (
-                        boxes.cls.detach()
-                        .cpu()
-                        .numpy()
-                        .astype(int)
-                    )
-                    confidences = (
-                        boxes.conf.detach()
-                        .cpu()
-                        .numpy()
-                    )
-
-                    for bbox, class_id, confidence in zip(
-                        xyxy,
-                        class_ids,
-                        confidences,
-                    ):
-                        if int(class_id) != target.class_id:
-                            continue
-
-                        iou = self._bbox_iou(
-                            target_bbox,
-                            [float(v) for v in bbox],
-                        )
-
-                        if iou > best_iou:
-                            best_iou = iou
-                            best_confidence = float(confidence)
-
-                if self.target_score_mode == "confidence_iou":
-                    # Continuous target-object signal; a sub-threshold
-                    # box still contributes in proportion to its IoU.
-                    score = float(
-                        np.clip(best_confidence, 0.0, 1.0)
-                        * np.clip(best_iou, 0.0, 1.0)
-                    )
-                else:
-                    score = (
-                        best_confidence
-                        if best_iou >= self.target_iou_threshold
-                        else 0.0
-                    )
-
-                # LIME expects a probability-like matrix.
-                # Column 1 represents the selected detection's score.
-                output_scores.append(
-                    [1.0 - score, score]
-                )
-
-            return np.asarray(
-                output_scores,
-                dtype=np.float32,
-            )
-
+        predict_fn.scorer = scorer
         return predict_fn
 
     def _segment_detection(
@@ -510,6 +432,8 @@ class LimeImageExplainer(Explainer):
                 "detection_index": target.detection_index,
                 "bbox": list(target.bbox),
                 "target_iou_threshold": self.target_iou_threshold,
+                "prediction_backend": predict_fn.scorer.backend,
+                "fast_path_max_score_difference": predict_fn.scorer.max_score_difference,
                 "target_score_mode": self.target_score_mode,
             },
         )

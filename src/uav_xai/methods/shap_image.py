@@ -305,56 +305,21 @@ class ShapImageExplainer(Explainer):
 
         target_bbox = [float(value) for value in target.bbox]
 
+        from .yolo_fast_scorer import YoloDetectionScorer
+        scorer = YoloDetectionScorer(
+            model=model,
+            target_bbox=target_bbox,
+            target_class_id=target.class_id,
+            score_mode=self.target_score_mode,
+            iou_threshold=self.target_iou_threshold,
+            confidence_threshold=0.001,
+        )
         def predict_images(images: np.ndarray) -> np.ndarray:
             rgb_images = [self._validate_image(image) for image in images]
             bgr_images = [image[:, :, ::-1].copy() for image in rgb_images]
-            results = []
-            prediction_batch_size = self.prediction_batch_size
-            for batch_start in range(0, len(bgr_images), prediction_batch_size):
-                results.extend(
-                    model.predict(
-                        source=bgr_images[batch_start:batch_start + prediction_batch_size],
-                        conf=0.001,
-                        verbose=False,
-                    )
-                )
-            if len(results) != len(rgb_images):
-                raise RuntimeError("YOLO returned an unexpected number of results.")
+            return scorer(bgr_images)
 
-            output_scores: list[list[float]] = []
-            for result in results:
-                boxes = getattr(result, "boxes", None)
-                best_iou = 0.0
-                best_confidence = 0.0
-                if boxes is not None and len(boxes) > 0:
-                    xyxy = boxes.xyxy.detach().cpu().numpy()
-                    classes = boxes.cls.detach().cpu().numpy().astype(int)
-                    confidences = boxes.conf.detach().cpu().numpy()
-                    for box, class_id, confidence in zip(xyxy, classes, confidences):
-                        if int(class_id) != int(target.class_id):
-                            continue
-                        iou = self._bbox_iou(target_bbox, [float(v) for v in box])
-                        if iou > best_iou:
-                            best_iou = iou
-                            best_confidence = float(confidence)
-                if self.target_score_mode == "confidence_iou":
-                    # Continuous target-object signal; a sub-threshold
-                    # box still contributes in proportion to its IoU.
-                    score = float(
-                        np.clip(best_confidence, 0.0, 1.0)
-                        * np.clip(best_iou, 0.0, 1.0)
-                    )
-                else:
-                    score = (
-                        best_confidence
-                        if best_iou >= self.target_iou_threshold
-                        else 0.0
-                    )
-                # Kernel SHAP expects a fixed-width model output.
-                output_scores.append([1.0 - score, score])
-
-            return np.asarray(output_scores, dtype=np.float32)
-
+        predict_images.scorer = scorer
         return predict_images
 
     def _explain_detection(
@@ -451,6 +416,8 @@ class ShapImageExplainer(Explainer):
                 "target_iou_threshold": self.target_iou_threshold,
                 "baseline_mode": self.baseline_mode,
                 "prediction_batch_size": self.prediction_batch_size,
+                "prediction_backend": detection_predict.scorer.backend,
+                "fast_path_max_score_difference": detection_predict.scorer.max_score_difference,
                 "target_score_mode": self.target_score_mode,
             },
         )
