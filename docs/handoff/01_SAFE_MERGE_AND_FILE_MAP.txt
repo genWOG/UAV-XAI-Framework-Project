@@ -1,0 +1,130 @@
+﻿UAV-XAI / YOLO — КАРТА ИЗМЕНЕНИЙ И БЕЗОПАСНОЕ ОБЪЕДИНЕНИЕ
+=========================================================
+
+Назначение: передача изменений другому разработчику и последующая интеграция в основную ветку без потери кода.
+Рабочая ветка: feature/yolo-detection-metrics
+Последний подтверждённый в рабочем контексте базовый коммит: 97add06 (97add062d46fd870a0bddce79d5559c69109dd5d).
+Важно: перед публикацией выполните git status --short и git log -1 --oneline: локальный worktree в этой сессии не был доступен напрямую, поэтому фактический текущий HEAD и успешный push здесь не подтверждены.
+
+1. ЧТО УЖЕ ЕСТЬ В ОПУБЛИКОВАННОЙ ВЕТКЕ
+======================================
+
+Следующие элементы уже входили в подтверждённый коммит 97add06:
+
+Файл — Назначение
+src/uav_xai/methods/yolo_fast_scorer.py — Быстрый scorer целевой YOLO-детекции для LIME/SHAP; пытается использовать путь Ultralytics с nms=False и имеет fallback. В метаданных фиксируется фактически использованный backend.
+config/yolo_multi_method_one_image_fast.yaml — Быстрый профиль эксперимента: уменьшенный бюджет LIME/SHAP ради скорости. Это отдельный профиль — он не должен подменять обычный конфиг по умолчанию.
+tests/test_yolo_fast_scorer.py — Тесты fast scorer и его поведения.
+
+Эти файлы важны даже если они не находятся в git status: при merge нельзя случайно удалить их или заменить старой версией.
+
+2. ПОСЛЕДНЕЕ ПОДТВЕРЖДЁННОЕ СОСТОЯНИЕ НЕЗАПУШЕННЫХ ИЗМЕНЕНИЙ
+============================================================
+
+По последнему зафиксированному состоянию рабочей копии были изменены/добавлены следующие восемь файлов:
+
+Файл — Что изменено — С чем должен объединяться
+src/uav_xai/core/factory.py — Передача новых параметров из YAML в конструкторы explainers. — Вместе с параметрами-конструкторами в lime_image.py и shap_image.py; иначе конфиг либо проигнорируется, либо вызовет ошибку аргумента.
+src/uav_xai/core/predictor.py — Необязательный model.prediction_confidence_threshold для настройки порога поиска предсказаний. — Вместе с передачей настройки из runner/factory и tests/test_prediction_confidence_threshold.py. Сохранить поведение по умолчанию, если параметр не задан.
+src/uav_xai/core/runner.py — Передача конфигурации в pipeline и сохранение результата/метаданных в выходные артефакты. — Вместе с методами, metadata и форматом result.json. Не удалять поля результата, которые уже использует downstream-код.
+src/uav_xai/methods/lime_image.py — Поддержка размера рабочего изображения для объяснения, ускоренный пакетный проход perturbations и метаданные explainer. — Вместе с factory.py, конфигом и тестами.
+src/uav_xai/methods/shap_image.py — Поддержка explanation_image_size, выбора algorithm (kernel/partition) и пакетного inference perturbations. — Вместе с factory.py, конфигом и тестами.
+config/yolo_explanation_resolution960_kernel.yaml — Экспериментальный профиль с размером объяснения до 960 px и Kernel SHAP. — Вместе с новой поддержкой этих параметров в фабрике и методах.
+tests/test_prediction_confidence_threshold.py — Проверки настраиваемого confidence threshold. — Вместе с predictor.py и передачей параметра в конфигурации.
+tests/test_resolution_partition_options.py — Проверки explanation_image_size и параметров SHAP Kernel/Partition. — Вместе с factory.py, lime_image.py, shap_image.py.
+
+Перед коммитом обязательно сравнить этот список с фактическим git status --short. Если там есть дополнительные изменения, не удаляйте и не откатывайте их. Проверьте, относятся ли они к текущей задаче. Скрипт публикации ниже добавляет только явно перечисленные файлы.
+
+3. КАК ОБЪЕДИНЯТЬ ФАЙЛЫ, ЧТОБЫ НЕ СЛОМАТЬ СОВМЕСТИМОСТЬ
+=======================================================
+
+Группа A — конфигурация explainers
+----------------------------------
+
+config/yolo_explanation_resolution960_kernel.yaml → factory.py → lime_image.py / shap_image.py.
+
+- При конфликте в factory.py объединяйте словари аргументов, не заменяйте их целиком более старой версией.
+- Если поле есть в YAML, factory должна передать его в правильный конструктор, а конструктор — проверить значение и использовать его.
+- explanation_image_size относится к LIME и SHAP; algorithm — к SHAP.
+- algorithm: kernel сохраняет протестированный Kernel SHAP; partition остаётся экспериментальным вариантом.
+- Отсутствие explanation_image_size должно сохранять прежний путь с исходным размером изображения.
+
+Группа B — порог предсказания
+-----------------------------
+
+model.prediction_confidence_threshold → predictor.py → тест test_prediction_confidence_threshold.py.
+
+- Значение опциональное. Если его нет, должен сохраняться прежний режим.
+- Низкий порог, например 0.001, нужен в бенчмарках, где требуется выбрать цель с низкой исходной confidence. Он увеличивает число кандидатов и сам по себе не улучшает модель.
+- Не меняйте глобальный default на 0.001 для всех сценариев без отдельного решения: это настройка профиля эксперимента, а не доказанное универсальное значение для эксплуатации.
+
+Группа C — результат pipeline
+-----------------------------
+
+runner.py должен сохранять основные метрики и metadata, не меняя смысл уже существующих полей. Удобный минимальный smoke-check — убедиться, что в result.json есть explanations.<method>, runtime_ms, metrics.deletion_auc, metrics.insertion_auc и metadata соответствующего метода.
+
+Что нельзя делать при merge
+---------------------------
+
+- Не копировать всю папку src/ поверх другой ветки.
+- Не cherry-pick'ать только factory.py или только один explainer без связанного теста и второго конца интерфейса.
+- Не заменять config/yolo_multi_method_one_image_fast.yaml новым профилем 960 px: это разные профили для разных сценариев.
+- Не добавлять в коммит папки results/, временные конфиги бенчмарков, виртуальное окружение или веса модели, если это отдельно не предусмотрено правилами репозитория.
+- Не выполнять git reset --hard, git push --force и не перезаписывать main.
+
+4. РЕКОМЕНДУЕМАЯ ПОСЛЕДОВАТЕЛЬНОСТЬ ИНТЕГРАЦИИ
+==============================================
+
+1. Работать именно в E:\UAV-XAI-Framework-Project-review, а не в соседней папке с виртуальным окружением.
+2. Проверить ветку, HEAD, staged-файлы и git status --short.
+3. Выполнить git diff --check и полный pytest в проектном venv.
+4. Просмотреть staged diff и только затем создать commit.
+5. Выполнить обычный push в origin/feature/yolo-detection-metrics. Если Git отклоняет push из-за non-fast-forward, остановиться и синхронизировать историю обычным merge/rebase; не использовать force.
+6. Влить ветку в целевую ветку через Pull Request. После merge снова выполнить тесты и smoke-run конфигов.
+
+Для интеграции в main предпочтителен Pull Request из feature/yolo-detection-metrics в целевую ветку с просмотром diff. Это даёт возможность увидеть конфликты и CI до попадания изменений в основную ветку.
+
+5. КОМАНДЫ РУЧНОЙ ПУБЛИКАЦИИ (POWERSHELL)
+=========================================
+
+Команды ниже предназначены для запуска из корня настоящего worktree. Сначала извлеките пакет handoff в корень проекта, чтобы три документа оказались в docs/handoff/.
+
+Set-Location 'E:\UAV-XAI-Framework-Project-review'
+git branch --show-current
+git log -1 --oneline
+git status --short
+git diff --check
+
+$env:PYTHONPATH = "$PWD\src"
+& 'E:\UAV-XAI-Framework-Project\.venv\Scripts\python.exe' -m pytest -q
+if ($LASTEXITCODE -ne 0) { throw 'pytest failed; do not commit/push.' }
+
+# First publish the code/config/tests, as a separate commit.
+git add -- `
+  src/uav_xai/core/factory.py `
+  src/uav_xai/core/predictor.py `
+  src/uav_xai/core/runner.py `
+  src/uav_xai/methods/lime_image.py `
+  src/uav_xai/methods/shap_image.py `
+  config/yolo_explanation_resolution960_kernel.yaml `
+  tests/test_prediction_confidence_threshold.py `
+  tests/test_resolution_partition_options.py
+
+git diff --cached --check
+git diff --cached --stat
+git diff --cached --name-only
+# Review the staged code diff above before committing.
+git commit -m "feat: configure YOLO explanation resolution and profiles"
+git push origin HEAD:feature/yolo-detection-metrics
+
+# Only after the code push succeeds, publish the handoff documentation.
+git add -- `
+  docs/handoff/01_SAFE_MERGE_AND_FILE_MAP.txt `
+  docs/handoff/02_IMPLEMENTATION_EXPERIMENTS_RESULTS.txt `
+  docs/handoff/03_CONFIG_AND_RESULT_INTERPRETATION.txt
+git diff --cached --check
+git diff --cached --stat
+git commit -m "docs: add UAV-XAI handoff guides"
+git push origin HEAD:feature/yolo-detection-metrics
+
+Убедитесь, что git branch --show-current выводит feature/yolo-detection-metrics. Команды не переключают ветку автоматически: так случайно не отправятся изменения в другую ветку. Если тесты или push завершаются ошибкой, не обходите её force-push'ем; локальный commit при ошибке push останется доступен для исправления.
