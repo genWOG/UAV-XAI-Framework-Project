@@ -23,7 +23,10 @@ target:
   index: 0
 
 metrics:
-  enabled: false
+  enabled: true
+  steps: 20
+  baseline_value: 0.0
+  iou_threshold: 0.5
 
 output:
   root: results

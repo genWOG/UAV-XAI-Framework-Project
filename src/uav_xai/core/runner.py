@@ -17,11 +17,14 @@ from torchvision.models import (
 
 from .config import load_config
 from .predictor import ModelPredictor
+from .target import XAITarget
 from .target_resolver import TargetResolver
 
 from ..metrics import (
     compute_deletion,
     compute_insertion,
+    compute_detection_deletion,
+    compute_detection_insertion,
 )
 
 from ..utils import (
@@ -865,35 +868,47 @@ class ExperimentRunner:
             / f"{method}.png"
         )
 
-        heatmap = (
-            explanation.attribution
-        )
+        # Keep CAM in model-input coordinates for metrics.
+        # Preserve the raw attribution for metric preprocessing.
+        metric_attribution = np.asarray(
+            explanation.attribution,
+            dtype=np.float32,
+        ).copy()
 
-        # Grad-CAM generated on 640x640 is mapped from
-        # the model-input coordinate system back to the
-        # original image dimensions.
-        if (
-            context["task"]
-            == "detection"
-        ):
+        heatmap = metric_attribution.copy()
 
-            letterbox = context[
-                "letterbox"
-            ]
+        if context["task"] == "detection":
+            letterbox = context["letterbox"]
 
-            heatmap = (
-                self._restore_detection_heatmap(
+            model_shape = (
+                int(letterbox["input_height"]),
+                int(letterbox["input_width"]),
+            )
+            original_shape = (
+                int(letterbox["original_height"]),
+                int(letterbox["original_width"]),
+            )
+
+            if heatmap.shape == model_shape:
+                # Grad-CAM: model-input coordinates -> original image.
+                heatmap = self._restore_detection_heatmap(
                     heatmap=heatmap,
                     letterbox=letterbox,
-                    output_size=(
-                        original_image.size
-                    ),
+                    output_size=original_image.size,
                 )
-            )
+            elif heatmap.shape == original_shape:
+                # LIME/SHAP/LRP image maps are already in original-image
+                # coordinates. Do not letterbox them a second time.
+                pass
+            else:
+                raise ValueError(
+                    "Unexpected detection attribution shape "
+                    f"{heatmap.shape}; expected model shape "
+                    f"{model_shape} or original image shape "
+                    f"{original_shape}."
+                )
 
-            explanation.attribution = (
-                heatmap
-            )
+            explanation.attribution = heatmap
 
         visualization = (
             overlay_heatmap(
@@ -926,13 +941,16 @@ class ExperimentRunner:
                     True,
                 )
             )
-            and context["task"]
-            == "classification"
+            and context["task"] in {
+                "classification",
+                "detection",
+            }
         )
 
         deletion_result = None
         insertion_result = None
         metrics_path = None
+        detection_diagnostics_path = None
 
         if metrics_enabled:
 
@@ -950,35 +968,139 @@ class ExperimentRunner:
                 )
             )
 
-            deletion_result = (
-                compute_deletion(
-                    model=model,
-                    input_tensor=input_data,
-                    attribution=(
-                        explanation.attribution
-                    ),
-                    target=prediction.class_id,
-                    steps=steps,
-                    baseline_value=(
-                        baseline_value
-                    ),
-                )
-            )
+            attribution = metric_attribution
+            metric_iou_threshold = None
 
-            insertion_result = (
-                compute_insertion(
+            if context["task"] == "detection":
+
+                metric_predictor = ModelPredictor(
+                    model=model,
+                    task="detection",
+                    confidence_threshold=self.config.get("model", {}).get("prediction_confidence_threshold"),
+                )
+
+                metric_input_tensor = (
+                    context["xai_input"].detach()
+                )
+
+                letterbox = context["letterbox"]
+
+                metric_shape = tuple(
+                    metric_input_tensor.shape[-2:]
+                )
+
+                original_shape = (
+                    int(letterbox["original_height"]),
+                    int(letterbox["original_width"]),
+                )
+
+                if metric_attribution.shape == original_shape:
+                    resized_attribution = cv2.resize(
+                        metric_attribution,
+                        (
+                            int(letterbox["resized_width"]),
+                            int(letterbox["resized_height"]),
+                        ),
+                        interpolation=cv2.INTER_LINEAR,
+                    )
+
+                    metric_attribution = np.zeros(
+                        metric_shape,
+                        dtype=np.float32,
+                    )
+
+                    pad_x = int(letterbox["pad_x"])
+                    pad_y = int(letterbox["pad_y"])
+                    resized_height, resized_width = (
+                        resized_attribution.shape
+                    )
+
+                    metric_attribution[
+                        pad_y:pad_y + resized_height,
+                        pad_x:pad_x + resized_width,
+                    ] = resized_attribution
+
+                elif metric_attribution.shape != metric_shape:
+                    raise ValueError(
+                        "Attribution shape does not match either "
+                        "the original image or model input: "
+                        f"{metric_attribution.shape}."
+                    )
+
+                original_target = context["xai_target"]
+                original_bbox = original_target.bbox
+
+                if original_bbox is None:
+                    raise ValueError(
+                        "Detection metrics require a target bbox."
+                    )
+
+                letterbox = context["letterbox"]
+                scale = float(letterbox["scale"])
+                pad_x = float(letterbox["pad_x"])
+                pad_y = float(letterbox["pad_y"])
+
+                x1, y1, x2, y2 = original_bbox
+
+                metric_target = XAITarget(
+                    task="detection",
+                    class_id=original_target.class_id,
+                    score=original_target.score,
+                    detection_index=original_target.detection_index,
+                    bbox=[
+                        x1 * scale + pad_x,
+                        y1 * scale + pad_y,
+                        x2 * scale + pad_x,
+                        y2 * scale + pad_y,
+                    ],
+                )
+
+                metric_iou_threshold = float(
+                    metrics_config.get(
+                        "iou_threshold",
+                        0.5,
+                    )
+                )
+
+                deletion_result = compute_detection_deletion(
+                    predictor=metric_predictor,
+                    input_tensor=metric_input_tensor,
+                    attribution=attribution,
+                    target=metric_target,
+                    steps=steps,
+                    baseline_value=baseline_value,
+                    iou_threshold=metric_iou_threshold,
+                )
+
+                insertion_result = compute_detection_insertion(
+                    predictor=metric_predictor,
+                    input_tensor=metric_input_tensor,
+                    attribution=attribution,
+                    target=metric_target,
+                    steps=steps,
+                    baseline_value=baseline_value,
+                    iou_threshold=metric_iou_threshold,
+                )
+
+            else:
+
+                deletion_result = compute_deletion(
                     model=model,
                     input_tensor=input_data,
-                    attribution=(
-                        explanation.attribution
-                    ),
+                    attribution=attribution,
                     target=prediction.class_id,
                     steps=steps,
-                    baseline_value=(
-                        baseline_value
-                    ),
+                    baseline_value=baseline_value,
                 )
-            )
+
+                insertion_result = compute_insertion(
+                    model=model,
+                    input_tensor=input_data,
+                    attribution=attribution,
+                    target=prediction.class_id,
+                    steps=steps,
+                    baseline_value=baseline_value,
+                )
 
             metrics_path = (
                 self.output_dir
@@ -1006,6 +1128,16 @@ class ExperimentRunner:
                 ),
                 output_path=metrics_path,
             )
+
+            if context["task"] == "detection":
+                detection_diagnostics_path = self._save_detection_diagnostics_plot(
+                    deletion_result=deletion_result,
+                    insertion_result=insertion_result,
+                    iou_threshold=float(metrics_config.get("iou_threshold", 0.5)),
+                    output_path=(
+                        self.output_dir / f"{method}_detection_diagnostics.png"
+                    ),
+                )
 
         result = {
             "method": explanation.method,
@@ -1042,9 +1174,25 @@ class ExperimentRunner:
                 ),
             }
 
+            if context["task"] == "detection":
+                result["metrics"]["deletion_curve"] = deletion_result.to_dict()
+                result["metrics"]["insertion_curve"] = insertion_result.to_dict()
+                result["metrics"]["deletion_localization_auc"] = deletion_result.localization_auc
+                result["metrics"]["insertion_localization_auc"] = insertion_result.localization_auc
+
+            if metric_iou_threshold is not None:
+                result["metrics"]["iou_threshold"] = (
+                    metric_iou_threshold
+                )
+
             result["artifacts"][
                 "faithfulness"
             ] = metrics_path.name
+
+            if detection_diagnostics_path is not None:
+                result["artifacts"]["detection_diagnostics"] = (
+                    detection_diagnostics_path.name
+                )
 
         return result
 
@@ -1411,6 +1559,77 @@ class ExperimentRunner:
 
         return output_path
 
+    @staticmethod
+    def _save_detection_diagnostics_plot(
+        deletion_result: Any,
+        insertion_result: Any,
+        iou_threshold: float,
+        output_path: Path,
+    ) -> Path:
+        """Plot raw class confidence, legacy score and target IoU."""
+        fig, axes = plt.subplots(
+            2, 2, figsize=(12, 8), sharex=True
+        )
+
+        curves = (
+            ("Deletion", deletion_result),
+            ("Insertion", insertion_result),
+        )
+
+        for row, (name, curve) in enumerate(curves):
+            confidence_axis = axes[row, 0]
+            iou_axis = axes[row, 1]
+
+            confidence_axis.plot(
+                curve.fractions,
+                curve.class_confidences,
+                label="Max target-class confidence",
+            )
+            confidence_axis.plot(
+                curve.fractions,
+                curve.best_iou_candidate_confidences,
+                label="Best-IoU candidate confidence",
+            )
+            confidence_axis.plot(
+                curve.fractions,
+                curve.detection_scores,
+                label="Legacy IoU-gated score",
+            )
+            confidence_axis.plot(
+                curve.fractions,
+                curve.localization_scores,
+                label="Confidence x target IoU",
+            )
+            confidence_axis.set_title(f"{name}: confidence and score")
+            confidence_axis.set_ylabel("Confidence / score")
+            confidence_axis.set_ylim(0.0, 1.0)
+            confidence_axis.grid(True, alpha=0.3)
+            confidence_axis.legend(fontsize=8)
+
+            iou_axis.plot(
+                curve.fractions,
+                curve.ious,
+                label="Best same-class IoU",
+            )
+            iou_axis.axhline(
+                y=iou_threshold,
+                linestyle="--",
+                label=f"IoU threshold = {iou_threshold:g}",
+            )
+            iou_axis.set_title(f"{name}: target localization")
+            iou_axis.set_ylabel("IoU")
+            iou_axis.set_ylim(0.0, 1.0)
+            iou_axis.grid(True, alpha=0.3)
+            iou_axis.legend(fontsize=8)
+
+        axes[1, 0].set_xlabel("Perturbed fraction")
+        axes[1, 1].set_xlabel("Perturbed fraction")
+
+        fig.tight_layout()
+        fig.savefig(output_path, dpi=150)
+        plt.close(fig)
+        return output_path
+
     # ============================================================
     # Main
     # ============================================================
@@ -1516,6 +1735,7 @@ class ExperimentRunner:
         predictor = ModelPredictor(
             model=model,
             task=task,
+            confidence_threshold=self.config.get("model", {}).get("prediction_confidence_threshold"),
         )
 
         prediction = (

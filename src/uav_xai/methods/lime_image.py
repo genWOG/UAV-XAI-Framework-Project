@@ -2,11 +2,15 @@ import time
 from typing import Any, Callable
 
 import numpy as np
+import cv2
 import torch
+from skimage.segmentation import slic
 from lime import lime_image
 from skimage.segmentation import mark_boundaries
+from sklearn.metrics import pairwise_distances
 
 from ..core.base import Explainer
+from ..core.target import XAITarget
 from ..core.result import ExplanationResult
 
 
@@ -31,20 +35,48 @@ class LimeImageExplainer(Explainer):
 
     def __init__(
         self,
-        preprocess: Callable[[np.ndarray], torch.Tensor],
+        preprocess: Callable[[np.ndarray], torch.Tensor] | None,
         num_samples: int = 1000,
-        hide_color: int | float = 0,
+        hide_color: int | float | None = 0,
         segmentation_fn: Callable | None = None,
+        target_iou_threshold: float = 0.5,
+        num_segments: int = 100,
+        compactness: float = 10.0,
+        prediction_batch_size: int = 32,
+        target_score_mode: str = "confidence_iou",
+        explanation_image_size: int | None = None,
     ) -> None:
 
         if num_samples < 1:
             raise ValueError(
                 "num_samples must be >= 1."
             )
+        if not 0.0 <= target_iou_threshold <= 1.0:
+            raise ValueError(
+                "target_iou_threshold must be between 0 and 1."
+            )
+        if num_segments < 2:
+            raise ValueError("num_segments must be >= 2.")
+        if compactness <= 0:
+            raise ValueError("compactness must be > 0.")
+        if prediction_batch_size < 1:
+            raise ValueError("prediction_batch_size must be >= 1.")
+        if target_score_mode not in {"confidence_iou", "thresholded_confidence"}:
+            raise ValueError("target_score_mode must be 'confidence_iou' or 'thresholded_confidence'.")
 
         self.preprocess = preprocess
         self.num_samples = num_samples
         self.hide_color = hide_color
+        self.target_iou_threshold = target_iou_threshold
+        self.num_segments = int(num_segments)
+        self.compactness = float(compactness)
+        self.prediction_batch_size = int(prediction_batch_size)
+        self.target_score_mode = target_score_mode
+        if explanation_image_size is not None and int(explanation_image_size) < 64:
+            raise ValueError("explanation_image_size must be None or >= 64.")
+        self.explanation_image_size = (
+            None if explanation_image_size is None else int(explanation_image_size)
+        )
 
         self._explainer = lime_image.LimeImageExplainer(
             random_state=42,
@@ -209,12 +241,238 @@ class LimeImageExplainer(Explainer):
 
         return predict_fn
 
+    def _resize_for_explanation(self, image: np.ndarray) -> np.ndarray:
+        """Downscale the perturbation workspace, preserving aspect ratio."""
+        limit = self.explanation_image_size
+        if limit is None or max(image.shape[:2]) <= limit:
+            return image
+        scale = limit / float(max(image.shape[:2]))
+        width = max(1, int(round(image.shape[1] * scale)))
+        height = max(1, int(round(image.shape[0] * scale)))
+        return cv2.resize(image, (width, height), interpolation=cv2.INTER_AREA)
+
+    @staticmethod
+    def _bbox_iou(
+        box_a: list[float],
+        box_b: list[float],
+    ) -> float:
+        ax1, ay1, ax2, ay2 = box_a
+        bx1, by1, bx2, by2 = box_b
+
+        ix1 = max(ax1, bx1)
+        iy1 = max(ay1, by1)
+        ix2 = min(ax2, bx2)
+        iy2 = min(ay2, by2)
+
+        intersection = (
+            max(0.0, ix2 - ix1)
+            * max(0.0, iy2 - iy1)
+        )
+
+        area_a = (
+            max(0.0, ax2 - ax1)
+            * max(0.0, ay2 - ay1)
+        )
+        area_b = (
+            max(0.0, bx2 - bx1)
+            * max(0.0, by2 - by1)
+        )
+
+        union = area_a + area_b - intersection
+        return intersection / union if union > 0.0 else 0.0
+
+    def _build_detection_predict_fn(
+        self,
+        model: Any,
+        target: XAITarget,
+        target_bbox: list[float] | None = None,
+    ) -> Callable[[np.ndarray], np.ndarray]:
+        if not hasattr(model, "predict"):
+            raise TypeError(
+                "Detection LIME requires a model with predict()."
+            )
+
+        if target.bbox is None:
+            raise ValueError(
+                "Detection LIME requires target.bbox."
+            )
+
+        target_bbox = [
+            float(value) for value in (
+                target.bbox if target_bbox is None else target_bbox
+            )
+        ]
+
+        from .yolo_fast_scorer import YoloDetectionScorer
+        scorer = YoloDetectionScorer(
+            model=model,
+            target_bbox=target_bbox,
+            target_class_id=target.class_id,
+            score_mode=self.target_score_mode,
+            iou_threshold=self.target_iou_threshold,
+            confidence_threshold=0.001,
+        )
+        def predict_fn(images: np.ndarray) -> np.ndarray:
+            rgb_images = [self._validate_image(image) for image in images]
+            bgr_images = [image[:, :, ::-1].copy() for image in rgb_images]
+            return scorer(bgr_images)
+
+        predict_fn.scorer = scorer
+        return predict_fn
+
+    def _segment_detection(
+        self,
+        image: np.ndarray,
+    ) -> np.ndarray:
+        """Use spatially compact, reproducible superpixels for YOLO explanations."""
+        return slic(
+            image,
+            n_segments=self.num_segments,
+            compactness=self.compactness,
+            start_label=0,
+            channel_axis=-1,
+        )
+
+    def _explain_detection(
+        self,
+        model: Any,
+        input_data: Any,
+        target: XAITarget,
+    ) -> ExplanationResult:
+        start_time = time.perf_counter()
+        image = self._validate_image(input_data)
+        working_image = self._resize_for_explanation(image)
+        scale_x = working_image.shape[1] / image.shape[1]
+        scale_y = working_image.shape[0] / image.shape[0]
+        target_bbox = [
+            float(target.bbox[0]) * scale_x,
+            float(target.bbox[1]) * scale_y,
+            float(target.bbox[2]) * scale_x,
+            float(target.bbox[3]) * scale_y,
+        ]
+        predict_fn = self._build_detection_predict_fn(
+            model, target, target_bbox=target_bbox
+        )
+        original_scores = predict_fn(np.expand_dims(working_image, axis=0))
+        lime_target = 1
+
+        segmentation_fn = (
+            self._segmentation_fn
+            if self._segmentation_fn is not None
+            else self._segment_detection
+        )
+        segments = np.asarray(segmentation_fn(working_image))
+        if segments.shape != working_image.shape[:2]:
+            raise ValueError(
+                "segmentation_fn must return an array with shape [H, W]."
+            )
+        _, segments = np.unique(segments, return_inverse=True)
+        segments = segments.reshape(working_image.shape[:2]).astype(np.int32, copy=False)
+        n_segments = int(segments.max()) + 1
+
+        if self.hide_color is None:
+            fudged_image = working_image.copy()
+            for segment_id in range(n_segments):
+                selected = segments == segment_id
+                mean_color = working_image[selected].mean(axis=0)
+                fudged_image[selected] = mean_color.astype(working_image.dtype)
+        else:
+            fudged_image = np.broadcast_to(
+                np.asarray(self.hide_color), working_image.shape
+            ).astype(working_image.dtype, copy=True)
+
+        data = self._explainer.random_state.randint(
+            0, 2, self.num_samples * n_segments
+        ).reshape(self.num_samples, n_segments)
+        data[0, :] = 1
+
+        label_batches = []
+        for batch_start in range(0, self.num_samples, self.prediction_batch_size):
+            mask_batch = data[batch_start:batch_start + self.prediction_batch_size]
+            visible_pixels = mask_batch[:, segments] > 0
+            perturbed_batch = np.where(
+                visible_pixels[..., np.newaxis],
+                working_image[np.newaxis, ...],
+                fudged_image[np.newaxis, ...],
+            )
+            label_batches.append(predict_fn(perturbed_batch))
+        labels = np.concatenate(label_batches, axis=0)
+
+        distances = pairwise_distances(
+            data, data[0].reshape(1, -1), metric="cosine"
+        ).ravel()
+        _, local_exp, local_fit_score, local_prediction = (
+            self._explainer.base.explain_instance_with_data(
+                data,
+                labels,
+                distances,
+                lime_target,
+                n_segments,
+                feature_selection=self._explainer.feature_selection,
+            )
+        )
+
+        attribution_work = np.zeros(segments.shape, dtype=np.float32)
+        for segment_id, weight in local_exp:
+            attribution_work[segments == segment_id] = weight
+        if attribution_work.shape != image.shape[:2]:
+            attribution = cv2.resize(
+                attribution_work,
+                (image.shape[1], image.shape[0]),
+                interpolation=cv2.INTER_LINEAR,
+            ).astype(np.float32, copy=False)
+        else:
+            attribution = attribution_work
+
+        confidence = float(original_scores[0, lime_target])
+        runtime_ms = (time.perf_counter() - start_time) * 1000.0
+        return ExplanationResult(
+            method="lime",
+            attribution=attribution,
+            target=target.class_id,
+            confidence=confidence,
+            runtime_ms=runtime_ms,
+            input_type="image",
+            feature_names=None,
+            metadata={
+                "explainer": "lime_image_detection",
+                "num_samples": self.num_samples,
+                "num_segments": n_segments,
+                "prediction_batch_size": self.prediction_batch_size,
+                "local_fit_score": float(local_fit_score),
+                "local_prediction": float(np.asarray(local_prediction).reshape(-1)[0]),
+                "image_shape": list(image.shape),
+                "explanation_image_shape": list(working_image.shape),
+                "explanation_image_size": self.explanation_image_size,
+                "target_task": "detection",
+                "target_class_id": target.class_id,
+                "detection_index": target.detection_index,
+                "bbox": list(target.bbox),
+                "target_iou_threshold": self.target_iou_threshold,
+                "target_score_mode": self.target_score_mode,
+                "prediction_backend": predict_fn.scorer.backend,
+                "fast_path_max_score_difference": predict_fn.scorer.max_score_difference,
+            },
+        )
+
     def explain(
         self,
         model: Any,
         input_data: Any,
         target: int | str | None = None,
     ) -> ExplanationResult:
+
+        if isinstance(target, XAITarget):
+            if target.task != "detection":
+                raise ValueError(
+                    "LIME received an unsupported XAI target."
+                )
+
+            return self._explain_detection(
+                model=model,
+                input_data=input_data,
+                target=target,
+            )
 
         start_time = time.perf_counter()
 

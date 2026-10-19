@@ -1,0 +1,35 @@
+experiment:
+  name: yolo_detection
+
+model:
+  name: yolo26n
+  task: detection
+  weights: yolo26n.pt
+
+image:
+  path: data/images/modern_ship.jpg
+
+xai:
+  input_type: image
+  method: lime
+  num_samples: 400
+  num_segments: 100
+  compactness: 10.0
+  image_size: 640
+
+  detection_iou_threshold: 0.20
+  detection_score_threshold: 0.05
+  detection_top_k: 8
+
+target:
+  type: detection
+  index: 0
+
+metrics:
+  enabled: true
+  steps: 20
+  baseline_value: 0.0
+  iou_threshold: 0.5
+
+output:
+  root: results

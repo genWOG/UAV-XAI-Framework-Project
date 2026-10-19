@@ -18,9 +18,15 @@ class ModelPredictor:
         self,
         model: Any,
         task: str = "classification",
+        confidence_threshold: float | None = None,
     ) -> None:
         self.model = model
         self.task = task.lower()
+        self.confidence_threshold = confidence_threshold
+        if confidence_threshold is not None and not 0.0 <= float(confidence_threshold) <= 1.0:
+            raise ValueError("confidence_threshold must be between 0 and 1.")
+        if confidence_threshold is not None:
+            self.confidence_threshold = float(confidence_threshold)
 
         if hasattr(
             self.model,
@@ -123,10 +129,10 @@ class ModelPredictor:
                 "the Ultralytics predict() API."
             )
 
-        results = self.model.predict(
-            source=input_data,
-            verbose=False,
-        )
+        predict_kwargs = {"source": input_data, "verbose": False}
+        if self.confidence_threshold is not None:
+            predict_kwargs["conf"] = self.confidence_threshold
+        results = self.model.predict(**predict_kwargs)
 
         if not results:
             raise RuntimeError(

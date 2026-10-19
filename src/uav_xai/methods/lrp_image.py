@@ -8,6 +8,37 @@ from zennit.composites import EpsilonGammaBox
 
 from ..core.base import Explainer
 from ..core.result import ExplanationResult
+from ..core.target import XAITarget
+from ..core.target_builder import TargetBuilder
+
+
+class _DetectionTargetModule(torch.nn.Module):
+    """Expose the differentiable YOLO target score as a scalar module output."""
+
+    def __init__(
+        self,
+        model: Any,
+        target: XAITarget,
+        context: dict[str, Any],
+    ) -> None:
+        super().__init__()
+        self.detector = TargetBuilder._get_detection_network(model)
+        # Keep the original Ultralytics wrapper as a non-registered reference;
+        # registering it separately would duplicate the same detector modules.
+        object.__setattr__(self, "_model_ref", model)
+        object.__setattr__(self, "_target_ref", target)
+        object.__setattr__(self, "_context_ref", context)
+
+    def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
+        score = TargetBuilder.build(
+            model=self._model_ref,
+            input_data=input_tensor,
+            target=self._target_ref,
+            context=self._context_ref,
+        )
+        if not isinstance(score, torch.Tensor) or score.numel() != 1:
+            raise ValueError("Detection target must be a single differentiable score.")
+        return score.reshape(1)
 
 
 class LrpImageExplainer(Explainer):
@@ -19,11 +50,12 @@ class LrpImageExplainer(Explainer):
 
     def __init__(
         self,
-        preprocess: Callable[[np.ndarray], torch.Tensor],
+        preprocess: Callable[[np.ndarray], torch.Tensor] | None,
         epsilon: float = 1e-6,
         gamma: float = 0.1,
         low: float = 0.0,
         high: float = 1.0,
+        context: dict[str, Any] | None = None,
     ) -> None:
         if epsilon <= 0:
             raise ValueError(
@@ -35,13 +67,102 @@ class LrpImageExplainer(Explainer):
         self.gamma = gamma
         self.low = low
         self.high = high
+        self.context = context or {}
+
+    def _explain_detection(
+        self,
+        model: Any,
+        target: XAITarget,
+    ) -> ExplanationResult:
+        start_time = time.perf_counter()
+        if target.bbox is None:
+            raise ValueError("Detection LRP requires target.bbox.")
+
+        input_tensor = self.context.get("xai_input")
+        if not isinstance(input_tensor, torch.Tensor):
+            raise TypeError("Detection LRP requires context['xai_input'] as a torch.Tensor.")
+        if input_tensor.ndim != 4 or input_tensor.shape[0] != 1:
+            raise ValueError("Detection LRP input must have shape [1, C, H, W].")
+
+        detector = TargetBuilder._get_detection_network(model)
+        detector.eval()
+        try:
+            device = next(detector.parameters()).device
+        except StopIteration:
+            device = input_tensor.device
+        input_tensor = input_tensor.detach().to(device).clone().requires_grad_(True)
+
+        target_model = _DetectionTargetModule(
+            model=model,
+            target=target,
+            context=self.context,
+        ).to(device)
+        target_model.eval()
+        composite = EpsilonGammaBox(
+            low=self.low,
+            high=self.high,
+            epsilon=self.epsilon,
+            gamma=self.gamma,
+        )
+        target_vector = torch.ones((1,), dtype=input_tensor.dtype, device=device)
+        target_model.zero_grad(set_to_none=True)
+
+        with Gradient(target_model, composite) as attributor:
+            output, relevance = attributor(input_tensor, target_vector)
+
+        if relevance is None:
+            raise RuntimeError("LRP relevance was not produced for the detection target.")
+        if relevance.ndim != 4 or relevance.shape[0] != 1:
+            raise ValueError("Expected detection relevance with shape [1, C, H, W].")
+
+        channel_relevance = relevance[0].detach().cpu().numpy()
+        signed_attribution = channel_relevance.sum(axis=0).astype(np.float32)
+        positive_relevance = np.maximum(channel_relevance, 0.0).sum(axis=0).astype(np.float32)
+        negative_relevance = np.minimum(channel_relevance, 0.0).sum(axis=0).astype(np.float32)
+        # Main map explains evidence supporting the target; signed totals remain
+        # available in metadata so negative evidence is not silently forgotten.
+        attribution = positive_relevance
+        runtime_ms = (time.perf_counter() - start_time) * 1000.0
+        target_score = float(output.detach().reshape(-1)[0].cpu().item())
+        return ExplanationResult(
+            method="lrp",
+            attribution=attribution,
+            target=target.class_id,
+            confidence=float(target.score),
+            runtime_ms=runtime_ms,
+            input_type="image",
+            feature_names=None,
+            metadata={
+                "epsilon": self.epsilon,
+                "gamma": self.gamma,
+                "low": self.low,
+                "high": self.high,
+                "input_shape": list(input_tensor.shape),
+                "attribution_shape": list(attribution.shape),
+                "explainer": "lrp_image",
+                "target_task": "detection",
+                "target_class_id": target.class_id,
+                "detection_index": target.detection_index,
+                "bbox": list(target.bbox),
+                "target_score": target_score,
+                "relevance_view": "positive_support",
+                "signed_relevance_sum": float(signed_attribution.sum()),
+                "positive_relevance_sum": float(positive_relevance.sum()),
+                "negative_relevance_sum": float(negative_relevance.sum()),
+            },
+        )
 
     def explain(
         self,
         model: Any,
         input_data: Any,
-        target: int | str | None = None,
+        target: int | str | XAITarget | None = None,
     ) -> ExplanationResult:
+
+        if isinstance(target, XAITarget):
+            if target.task != "detection":
+                raise ValueError("LRP received an unsupported XAI target.")
+            return self._explain_detection(model=model, target=target)
 
         start_time = time.perf_counter()
 

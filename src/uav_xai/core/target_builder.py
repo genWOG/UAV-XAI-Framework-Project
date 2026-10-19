@@ -328,11 +328,28 @@ class TargetBuilder:
                 .requires_grad_(True)
             )
 
-        with torch.enable_grad():
+        # --------------------------------------------------------
+        # Run differentiable YOLO forward outside inference mode.
+        # `torch.enable_grad()` alone does not disable an enclosing
+        # `torch.inference_mode()`. Ultralytics may cache `anchors` and
+        # `strides` created during its earlier inference-only prediction;
+        # autograd cannot save those inference tensors for backward.
+        # --------------------------------------------------------
+        with torch.inference_mode(False), torch.enable_grad():
 
-            # ----------------------------------------------------
-            # Run the actual DetectionModel.
-            # ----------------------------------------------------
+            # YOLO inference cache normalization: clone cached tensors if
+            # they were created by inference mode. Keep the cache otherwise.
+            if torch.is_inference(input_data):
+                input_data = input_data.clone().detach().requires_grad_(True)
+
+            network_detect = TargetBuilder._get_detect_head(network)
+            for cache_name in ("anchors", "strides"):
+                cached_tensor = getattr(network_detect, cache_name, None)
+                if (
+                    isinstance(cached_tensor, torch.Tensor)
+                    and torch.is_inference(cached_tensor)
+                ):
+                    setattr(network_detect, cache_name, cached_tensor.clone())
 
             raw_output = network(
                 input_data
