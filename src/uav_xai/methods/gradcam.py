@@ -122,6 +122,12 @@ class GradCAMExplainer(Explainer):
             output: Any,
         ) -> None:
 
+            # --- ФИКС ДЛЯ YOLOv8 ---
+            # YOLOv8 возвращает кортеж (tensor, ...) на слоях Detect
+            if isinstance(output, tuple):
+                output = output[0]
+            # ------------------------
+
             if not isinstance(
                 output,
                 torch.Tensor,

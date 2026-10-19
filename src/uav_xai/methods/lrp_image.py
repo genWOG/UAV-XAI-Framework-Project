@@ -157,7 +157,11 @@ class LrpImageExplainer(Explainer):
         model: Any,
         input_data: Any,
         target: int | str | XAITarget | None = None,
+        context: dict[str, Any] | None = None, 
     ) -> ExplanationResult:
+
+        if context is not None:
+            self.context = context
 
         if isinstance(target, XAITarget):
             if target.task != "detection":

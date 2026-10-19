@@ -86,6 +86,32 @@ class XAIEngine:
                 context=context,
             )
         )
+        # --- ФИКС ДЛЯ GRAD-CAM ---
+        if context and "target_layer" in context and context["target_layer"] is not None:
+            constructor_kwargs["target_layer"] = context["target_layer"]
+        # --------------------------
+
+        # --- ФИКС ДЛЯ LIME/SHAP: preprocess ---
+        if context and "preprocess" in context and context["preprocess"] is not None:
+            constructor_kwargs["preprocess"] = context["preprocess"]
+        # ---------------------------------------
+        
+        # --- ФИКС: фильтруем kwargs, которые explainer не принимает ---
+        init_signature = inspect.signature(spec.explainer_cls.__init__)
+        accepts_var_kwargs_init = any(
+            p.kind == inspect.Parameter.VAR_KEYWORD
+            for p in init_signature.parameters.values()
+        )
+        if not accepts_var_kwargs_init:
+            constructor_kwargs = {
+                k: v
+                for k, v in constructor_kwargs.items()
+                if k in init_signature.parameters
+            }
+        # --------------------------
+
+        if not spec.cache_instance:
+            return spec.explainer_cls(**constructor_kwargs)
 
         if not spec.cache_instance:
             return spec.explainer_cls(
@@ -143,9 +169,9 @@ class XAIEngine:
         method: str,
         model: Any,
         input_data: Any,
-        target: int | str | XAITarget | None = None,
+        target: Any,
         context: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs,   # <--- ДОБАВИТЬ ВОТ ЭТО
     ) -> ExplanationResult:
         """
         Generate an explanation using a registered method.
@@ -228,6 +254,9 @@ class XAIEngine:
             "model": model,
             "input_data": resolved_input,
             "target": method_target,
+            "training_data": kwargs.get("training_data"),
+            "feature_names": kwargs.get("feature_names"),
+            "background_data": kwargs.get("background_data"),
         }
 
         signature = inspect.signature(
@@ -238,6 +267,19 @@ class XAIEngine:
             explain_kwargs[
                 "context"
             ] = merged_context
+
+        # --- ФИКС: Отфильтровываем kwargs, которые explainer не принимает ---
+        accepts_var_kwargs = any(
+            p.kind == inspect.Parameter.VAR_KEYWORD
+            for p in signature.parameters.values()
+        )
+        if not accepts_var_kwargs:
+            explain_kwargs = {
+                k: v
+                for k, v in explain_kwargs.items()
+                if k in signature.parameters
+            }
+        # ------------------------------------------------------------------
 
         return explainer.explain(
             **explain_kwargs

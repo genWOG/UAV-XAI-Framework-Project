@@ -783,6 +783,59 @@ class ExperimentRunner:
                     pil_image
                 )
 
+        elif task == "detection":
+            # Для detection: np.ndarray [H, W, 3] -> torch.Tensor [C, H, W]
+            # LIME/SHAP вызывают preprocess на каждом perturbed image,
+            # батч собирают сами через torch.stack.
+            import cv2 as _cv2
+            import numpy as _np
+            import torch as _torch
+            from PIL import Image as _Image
+
+            _size = int(xai_config.get("image_size", 640))
+
+            def preprocess(
+                rgb_image: np.ndarray,
+            ) -> torch.Tensor:
+
+                if not isinstance(rgb_image, _np.ndarray):
+                    rgb_image = _np.asarray(rgb_image)
+
+                if rgb_image.dtype != _np.uint8:
+                    if rgb_image.max() <= 1.0:
+                        rgb_image = (rgb_image * 255).astype(_np.uint8)
+                    else:
+                        rgb_image = rgb_image.astype(_np.uint8)
+
+                pil = _Image.fromarray(rgb_image)
+                image_np = _np.asarray(pil.convert("RGB"))
+                h, w = image_np.shape[:2]
+                scale = min(_size / h, _size / w)
+                nw = int(round(w * scale))
+                nh = int(round(h * scale))
+                resized = _cv2.resize(
+                    image_np,
+                    (nw, nh),
+                    interpolation=_cv2.INTER_LINEAR,
+                )
+                canvas = _np.full(
+                    (_size, _size, 3),
+                    114,
+                    dtype=_np.uint8,
+                )
+                px = (_size - nw) // 2
+                py = (_size - nh) // 2
+                canvas[py:py+nh, px:px+nw] = resized
+
+                tensor = (
+                    _torch.from_numpy(canvas)
+                    .permute(2, 0, 1)
+                    .contiguous()
+                    .float()
+                    / 255.0
+                )
+                return tensor  # [C, H, W]
+
         return {
             "model": model,
             "weights": weights,
