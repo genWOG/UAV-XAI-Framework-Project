@@ -4,7 +4,9 @@
 PX4 использует GPS-координаты (lat/lon/alt).
 Мы пересчитываем их в локальные X/Y/Z (метры).
 
-Совместим по интерфейсу с airsim_adapter.AirSimAdapter.
+Добавлены:
+- Проверка границ карты
+- Приём данных с LiDAR через set_lidar()
 """
 
 import asyncio
@@ -12,11 +14,18 @@ import math
 import time
 import threading
 
+import numpy as np
+
 from mavsdk_grpc import System
 from mavsdk_grpc.offboard import OffboardError, PositionNedYaw
 
-# Константы для пересчёта градусов в метры
 LAT_METERS_PER_DEG = 111320.0
+
+# Границы карты uav_test_world (в метрах от origin)
+MAP_MIN_X = -50.0
+MAP_MAX_X = 50.0
+MAP_MIN_Y = -50.0
+MAP_MAX_Y = 50.0
 
 
 class PX4Adapter:
@@ -31,31 +40,25 @@ class PX4Adapter:
         self.connected = False
         self.armed = False
 
-        # Начальная GPS-точка (нуль системы координат)
         self._origin_lat = None
         self._origin_lon = None
 
-        # Последнее состояние (обновляется фоновым потоком)
         self._last_state = self._empty_state()
+        self._target_ned = None
 
-        # Намерение движения (куда хотим лететь)
-        self._target_ned = None  # (north, east, down, yaw)
-
-        # Asyncio loop в отдельном потоке
         self._loop = None
         self._thread = None
         self._drone = None
         self._stop_flag = False
 
-        # Ограничения
-        self.max_altitude = 10.0
-        self.min_altitude = 3.0
+        self.max_altitude = 8.0
+        self.min_altitude = 2.0
+
+        # LiDAR (передаётся снаружи через set_lidar)
+        self._lidar = None
 
         self._log("🚁 Инициализация PX4Adapter...")
 
-    # ------------------------------------------------------------------ #
-    # Логирование
-    # ------------------------------------------------------------------ #
     def _log(self, msg, level='info'):
         if self.log:
             if level == 'error':
@@ -69,9 +72,6 @@ class PX4Adapter:
         else:
             print(f"[{level.upper()}] {msg}")
 
-    # ------------------------------------------------------------------ #
-    # Пустое состояние
-    # ------------------------------------------------------------------ #
     def _empty_state(self):
         return {
             'position': {'x': 0.0, 'y': 0.0, 'z': 0.0},
@@ -90,23 +90,22 @@ class PX4Adapter:
                 'lidar_points': [],
                 'distance_sensor_distance': 100.0,
                 'distance_sensor_available': False,
+                'lidar_front': 100.0,
+                'lidar_left': 100.0,
+                'lidar_right': 100.0,
+                'lidar_back': 100.0,
             },
         }
 
-    # ------------------------------------------------------------------ #
-    # Подключение
-    # ------------------------------------------------------------------ #
     def connect(self):
         if self._thread is not None:
             return self.connected
-
         self._thread = threading.Thread(target=self._run_loop, daemon=True)
         self._thread.start()
 
         start = time.time()
         while not self.connected and time.time() - start < 15:
             time.sleep(0.2)
-
         if not self.connected:
             self._log("❌ Не удалось подключиться к PX4 за 15 секунд", 'error')
             return False
@@ -115,15 +114,11 @@ class PX4Adapter:
         start = time.time()
         while self._origin_lat is None and time.time() - start < 10:
             time.sleep(0.2)
-
         if self._origin_lat is None:
             self._log("⚠️ Не удалось получить GPS-позицию", 'warn')
         else:
-            self._log(
-                f"✅ Origin зафиксирован: "
-                f"{self._origin_lat:.6f}, {self._origin_lon:.6f}",
-                'system'
-            )
+            self._log(f"✅ Origin зафиксирован: "
+                      f"{self._origin_lat:.6f}, {self._origin_lon:.6f}", 'system')
 
         self._log("✅ Подключение к PX4 установлено!", 'system')
         return True
@@ -155,6 +150,7 @@ class PX4Adapter:
             asyncio.create_task(self._watch_baro()),
             asyncio.create_task(self._watch_mag()),
             asyncio.create_task(self._watch_velocity()),
+            asyncio.create_task(self._watch_lidar()),
         ]
 
         while not self._stop_flag:
@@ -163,9 +159,6 @@ class PX4Adapter:
         for t in tasks:
             t.cancel()
 
-    # ------------------------------------------------------------------ #
-    # Подписки на телеметрию
-    # ------------------------------------------------------------------ #
     async def _watch_position(self):
         async for pos in self._drone.telemetry.position():
             lat = pos.latitude_deg
@@ -242,6 +235,19 @@ class PX4Adapter:
                 ],
             }
 
+    async def _watch_lidar(self):
+        """Обновляет obstacle_distance / lidar_* из LiDAR (если есть)."""
+        while not self._stop_flag:
+            if self._lidar is not None and self._lidar.latest_scan is not None:
+                sensors = self._last_state['sensors']
+                sensors['obstacle_distance'] = self._lidar.get_min_distance()
+                sensors['obstacle_density'] = self._lidar.get_obstacle_density(10.0)
+                sensors['lidar_front'] = self._lidar.get_front_distance()
+                sensors['lidar_left'] = self._lidar.get_left_distance()
+                sensors['lidar_right'] = self._lidar.get_right_distance()
+                sensors['lidar_back'] = self._lidar.get_back_distance()
+            await asyncio.sleep(0.1)
+
     # ------------------------------------------------------------------ #
     # Публичные методы
     # ------------------------------------------------------------------ #
@@ -254,6 +260,11 @@ class PX4Adapter:
         except Exception as e:
             self._log(f"❌ Ошибка вызова: {e}", 'error')
             return None
+
+    def set_lidar(self, lidar_reader):
+        """Передать LidarReader в адаптер."""
+        self._lidar = lidar_reader
+        self._log("📡 LiDAR подключён к PX4Adapter", 'system')
 
     def takeoff(self):
         self._log("🛫 Взлёт...")
@@ -268,7 +279,6 @@ class PX4Adapter:
                 except Exception as e:
                     self._log(f"⚠️ Arm попытка {attempt+1} не удалась: {e}", 'warn')
                     await asyncio.sleep(2)
-
             self.armed = True
             await self._drone.action.takeoff()
             await asyncio.sleep(5)
@@ -292,7 +302,17 @@ class PX4Adapter:
             return False
 
     def move_to(self, x, y, z, speed=5.0, force=False):
-        """Движение к точке в локальных координатах (метры)."""
+        """Движение к точке с проверкой границ карты."""
+        if not force:
+            if x < MAP_MIN_X or x > MAP_MAX_X:
+                self._log(f"⚠️ Цель X={x:.1f} вне карты "
+                          f"({MAP_MIN_X}..{MAP_MAX_X})", 'warn')
+                x = max(MAP_MIN_X, min(MAP_MAX_X, x))
+            if y < MAP_MIN_Y or y > MAP_MAX_Y:
+                self._log(f"⚠️ Цель Y={y:.1f} вне карты "
+                          f"({MAP_MIN_Y}..{MAP_MAX_Y})", 'warn')
+                y = max(MAP_MIN_Y, min(MAP_MAX_Y, y))
+
         alt = -z
         if alt > self.max_altitude:
             alt = self.max_altitude
@@ -306,7 +326,6 @@ class PX4Adapter:
     async def _move_async(self):
         if self._target_ned is None:
             return False
-
         n, e, d, _ = self._target_ned
         try:
             target_yaw_deg = math.degrees(math.atan2(e, n))
@@ -317,7 +336,7 @@ class PX4Adapter:
             cur_d = cur['z']
 
             self._log(
-                f"🧭 Движение (position): цель=({n:.1f}, {e:.1f}, {d:.1f}), "
+                f"🧭 Движение: цель=({n:.1f}, {e:.1f}, {d:.1f}), "
                 f"старт=({cur_n:.1f}, {cur_e:.1f}, {cur_d:.1f}), "
                 f"yaw={target_yaw_deg:.1f}°",
                 'debug'
@@ -339,34 +358,28 @@ class PX4Adapter:
                         'warn'
                     )
                     await asyncio.sleep(0.5)
-
             if not started:
                 self._log("❌ Не удалось запустить offboard", 'error')
                 return False
 
             start_time = time.time()
-            max_wait = 40.0
+            max_wait = 10.0
             min_send_interval = 0.1
             last_send = 0.0
             arrived = False
 
             while time.time() - start_time < max_wait:
                 now = time.time()
-
-                # Проверка коллизии
-                if self._last_state['sensors'].get('collision', False):
-                    self._log("💥 Коллизия! Прерываю движение", 'warn')
-                    try:
-                        await self._drone.offboard.stop()
-                    except OffboardError:
-                        pass
-                    return False
+                if now - last_send >= min_send_interval:
+                    await self._drone.offboard.set_position_ned(
+                        PositionNedYaw(n, e, d, target_yaw_deg)
+                    )
+                    last_send = now
 
                 cur = self._last_state['position']
                 dx = cur['x'] - n
                 dy = cur['y'] - e
                 dz = cur['z'] - d
-
                 if abs(dx) < 2.0 and abs(dy) < 2.0 and abs(dz) < 1.5:
                     arrived = True
                     self._log(
@@ -375,21 +388,14 @@ class PX4Adapter:
                         'system'
                     )
                     break
-
-                if now - last_send >= min_send_interval:
-                    await self._drone.offboard.set_position_ned(
-                        PositionNedYaw(n, e, -4.5, target_yaw_deg)
-                    )
-                    last_send = now
-
                 await asyncio.sleep(0.05)
 
             if not arrived:
                 cur = self._last_state['position']
                 self._log(
                     f"⚠️ Не долетели за {max_wait:.0f} сек. "
-                    f"Текущая: ({cur['x']:.1f}, {cur['y']:.1f}, "
-                    f"{cur['z']:.1f}), Цель: ({n:.1f}, {e:.1f}, {d:.1f})",
+                    f"Текущая: ({cur['x']:.1f}, {cur['y']:.1f}, {cur['z']:.1f}), "
+                    f"Цель: ({n:.1f}, {e:.1f}, {d:.1f})",
                     'warn'
                 )
 
@@ -397,7 +403,6 @@ class PX4Adapter:
                 await self._drone.offboard.stop()
             except OffboardError:
                 pass
-
             return arrived
         except Exception as e:
             self._log(f"❌ Ошибка движения: {e}", 'error')

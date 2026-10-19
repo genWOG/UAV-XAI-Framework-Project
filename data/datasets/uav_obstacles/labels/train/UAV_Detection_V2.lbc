@@ -1,0 +1,24 @@
+{
+  "name": "UAV_Detection_V2",
+  "version": "2.0",
+  "created_at": "2026-10-18T14:50:49.899403",
+  "last_modified": "2026-10-18T17:08:24.783186",
+  "project_dir": "/mnt/d/Projects/UAV-XAI-Framework-Project/data/datasets/uav_obstacles/labels/train",
+  "annotation_dir": "/mnt/d/Projects/UAV-XAI-Framework-Project/data/datasets/uav_obstacles/labels/train/annotations",
+  "labels": [
+    "house",
+    "wall",
+    "tree",
+    "pole"
+  ],
+  "format": "PASCAL_VOC",
+  "last_opened_image": null,
+  "task": "detect",
+  "kpt_shape": [
+    0,
+    3
+  ],
+  "keypoint_names": [],
+  "flip_idx": [],
+  "skeleton": []
+}

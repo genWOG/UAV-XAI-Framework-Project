@@ -1,0 +1,4 @@
+house
+wall
+tree
+pole
