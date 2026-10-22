@@ -259,6 +259,7 @@ class PX4Adapter:
             return fut.result(timeout=timeout)
         except Exception as e:
             self._log(f"❌ Ошибка вызова: {e}", 'error')
+            self.connected = False 
             return None
 
     def set_lidar(self, lidar_reader):
@@ -363,13 +364,18 @@ class PX4Adapter:
                 return False
 
             start_time = time.time()
-            max_wait = 10.0
+            max_wait = 20.0 # Увеличиваем время, но с прерыванием
             min_send_interval = 0.1
             last_send = 0.0
             arrived = False
 
             while time.time() - start_time < max_wait:
                 now = time.time()
+                
+                # НОВОЕ: Если пришла новая цель (обход препятствия) — прерываем цикл
+                if self._target_ned[:3] != (n, e, d):
+                    break
+
                 if now - last_send >= min_send_interval:
                     await self._drone.offboard.set_position_ned(
                         PositionNedYaw(n, e, d, target_yaw_deg)
@@ -398,11 +404,8 @@ class PX4Adapter:
                     f"Цель: ({n:.1f}, {e:.1f}, {d:.1f})",
                     'warn'
                 )
-
-            try:
-                await self._drone.offboard.stop()
-            except OffboardError:
-                pass
+                # УДАЛЕНО: offboard.stop() — больше не вырубаем моторы!
+                
             return arrived
         except Exception as e:
             self._log(f"❌ Ошибка движения: {e}", 'error')

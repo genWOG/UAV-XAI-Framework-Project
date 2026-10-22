@@ -66,6 +66,7 @@ class XAIEngine:
         input_type: str,
         method: str,
         context: dict[str, Any] | None = None,
+        **kwargs,
     ) -> Explainer:
 
         context = (
@@ -96,8 +97,14 @@ class XAIEngine:
             constructor_kwargs["preprocess"] = context["preprocess"]
         # ---------------------------------------
         
-        # --- ФИКС: фильтруем kwargs, которые explainer не принимает ---
+        # --- НОВЫЙ ФИКС: Передаем training_data и feature_names в конструктор ---
         init_signature = inspect.signature(spec.explainer_cls.__init__)
+        for k, v in kwargs.items():
+            if k in init_signature.parameters:
+                constructor_kwargs[k] = v
+        # ------------------------------------------------------------------------
+
+        # --- ФИКС: фильтруем kwargs, которые explainer не принимает ---
         accepts_var_kwargs_init = any(
             p.kind == inspect.Parameter.VAR_KEYWORD
             for p in init_signature.parameters.values()
@@ -113,10 +120,7 @@ class XAIEngine:
         if not spec.cache_instance:
             return spec.explainer_cls(**constructor_kwargs)
 
-        if not spec.cache_instance:
-            return spec.explainer_cls(
-                **constructor_kwargs
-            )
+        # (Убрали дубликат if not spec.cache_instance)
 
         resource_key = id(
             context.get("target_layer")
@@ -216,6 +220,7 @@ class XAIEngine:
             input_type=input_type,
             method=method,
             context=merged_context,
+            **kwargs,
         )
 
         # --------------------------------------------------------

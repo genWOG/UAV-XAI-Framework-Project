@@ -463,6 +463,35 @@ class TabularExperimentRunner:
         print(f"      Runtime: {explanation.runtime_ms:.2f} ms")
         print(f"      Attribution shape: {explanation.attribution.shape}")
 
+ # === РАСЧЕТ МЕТРИК (Deletion / Insertion) ===
+        metrics_cfg = self.config.get("metrics", {})
+        metrics_results = {}
+        
+        if metrics_cfg.get("enabled", False):
+            from ..metrics import compute_tabular_deletion, compute_tabular_insertion
+            # Используем минимальные значения по датасету как "худший случай"
+            baseline = np.min(X, axis=0)
+            steps = int(metrics_cfg.get("steps", 20))
+            
+            del_res = compute_tabular_deletion(
+                model=model, input_data=test_vector, 
+                attribution=explanation.attribution, 
+                target=target, baseline_value=baseline, steps=steps
+            )
+            ins_res = compute_tabular_insertion(
+                model=model, input_data=test_vector, 
+                attribution=explanation.attribution, 
+                target=target, baseline_value=baseline, steps=steps
+            )
+            
+            metrics_results = {
+                "deletion_auc": del_res.auc,
+                "insertion_auc": ins_res.auc
+            }
+            print(f" Deletion AUC: {del_res.auc:.4f} (цель ≤ 0.15)")
+            print(f" Insertion AUC: {ins_res.auc:.4f} (цель ≥ 0.85)")
+
+
         # ----- Visualization -----
         print("\n[4/5] Saving visualization...")
         chart_path = output_dir / "attribution.png"
@@ -505,6 +534,7 @@ class TabularExperimentRunner:
                     if k not in ("values",)
                 },
             },
+            "metrics": metrics_results, 
             "artifacts": {
                 "attribution_chart": chart_path.name,
             },

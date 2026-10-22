@@ -12,7 +12,21 @@ import math
 import random
 import threading
 import numpy as np
+
+import json
+
+def read_lidar_state():
+    try:
+        with open('data/runtime/lidar_state.json', 'r') as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+
 from datetime import datetime
+from modules.frame_queue import request_frame
+
+
 
 if sys.platform == "win32":
     os.system("chcp 65001 > nul")
@@ -29,7 +43,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'xai', 'modules'))
 from modules.log_manager import LogManager
 from modules.px4_adapter import PX4Adapter
 from modules.incident_logger import IncidentLogger
-from modules.lidar_reader import LidarReader
+
+
+
 
 # ========================================
 # Неблокирующий move_to
@@ -118,13 +134,21 @@ def train_torch_model(X, y):
     model.eval()
     return model
 
-def pick_random_target(cx, cy, r_min=10.0, r_max=25.0, avoid_angle=None):
+def pick_random_target(cx, cy, r_min=10.0, r_max=20.0, avoid_angle=None):
     if avoid_angle is not None:
         angle = avoid_angle + math.pi + random.uniform(-0.8, 0.8)
     else:
         angle = random.uniform(0, 2 * math.pi)
     radius = random.uniform(r_min, r_max)
-    return cx + radius * math.cos(angle), cy + radius * math.sin(angle)
+    
+    target_x = cx + radius * math.cos(angle)
+    target_y = cy + radius * math.sin(angle)
+    
+    # Не выпускаем дрона дальше 22 метров от центра
+    target_x = max(-22.0, min(22.0, target_x))
+    target_y = max(-22.0, min(22.0, target_y))
+    
+    return target_x, target_y
 
 # ========================================
 # Параметры
@@ -192,21 +216,23 @@ incident = IncidentLogger(
         "decision_model": "RandomForest(50), обучен на синтетике",
         "action_names": {"0": "Остановка", "1": "Продолжить"},
     },
+    telemetry_interval=1.0,      
+    model_output_interval=1.0    
 )
 log.system(f"📁 Логи инцидентов: {incident.dir}")
 
 # LiDAR
-lidar = LidarReader(log)
-lidar_enabled = lidar.start()
-if lidar_enabled:
-    adapter.set_lidar(lidar)
-    log.system("📡 LiDAR подключён к адаптеру")
-else:
-    log.warn("⚠️ LiDAR не подключён — дрон летает вслепую")
+#lidar = LidarReader(log)
+#lidar_enabled = lidar.start()
+#if lidar_enabled:
+#    adapter.set_lidar(lidar)
+#    log.system("📡 LiDAR подключён к адаптеру")
+#else:
+#    log.warn("⚠️ LiDAR не подключён — дрон летает вслепую")
 
-log.system("Запуск исследователя...")
-log.system(f"Время старта: {datetime.now().strftime('%H:%M:%S')}")
-
+#log.system("Запуск исследователя...")
+#log.system(f"Время старта: {datetime.now().strftime('%H:%M:%S')}")
+log.system("📡 LiDAR работает в отдельном процессе")
 # ========================================
 # Счётчики
 # ========================================
@@ -260,7 +286,20 @@ last_safe_pos = (pos['x'], pos['y'])
 try:
     while (time.time() - session_start) < TOTAL_FLIGHT_SECONDS:
         time.sleep(LOOP_SLEEP_SECONDS)
+        if not adapter.connected:
+            log.error("❌ Потеряна связь с PX4/mavsdk_server! Прерываю полёт.")
+            break        
         state = adapter.get_state()
+        
+        lidar_data = read_lidar_state()
+        if lidar_data:
+            state['sensors']['obstacle_distance'] = lidar_data['min']
+            state['sensors']['obstacle_density'] = lidar_data['density']
+            state['sensors']['lidar_front'] = lidar_data['front']
+            state['sensors']['lidar_left'] = lidar_data['left']
+            state['sensors']['lidar_right'] = lidar_data['right']
+            state['sensors']['lidar_back'] = lidar_data['back']
+        
         if state is None:
             continue
 
@@ -280,6 +319,7 @@ try:
             log.error(f"❌ Дрон перевернулся! roll={roll:.1f}, pitch={pitch:.1f}")
             incident.event("flip", roll=roll, pitch=pitch,
                            position=[pos['x'], pos['y'], pos['z']])
+            request_frame("flip", {"roll": roll, "pitch": pitch})               
             break
 
         # --- Потолок ---
@@ -289,6 +329,7 @@ try:
             incident.event("altitude_ceiling", altitude=cur_altitude,
                            max_altitude=MAX_ALTITUDE,
                            position=[pos['x'], pos['y'], pos['z']])
+            request_frame("altitude_ceiling", {"altitude": cur_altitude})               
             async_move_to(adapter, pos['x'], pos['y'], -MAX_ALTITUDE, FLIGHT_SPEED)
             last_move_time = now
             hover_start = None
@@ -332,6 +373,7 @@ try:
                            front=front, left=left, right=right, back=back,
                            safe_pos=[safe_x, safe_y],
                            position=[pos['x'], pos['y'], pos['z']])
+            request_frame("trap_retreat", {"front": front})               
 
             target_x, target_y = safe_x, safe_y
             async_move_to(adapter, target_x, target_y, FLIGHT_ALTITUDE, FLIGHT_SPEED)
@@ -366,8 +408,8 @@ try:
                 ) - math.radians(60)
 
             radius = 15.0
-            avoid_x = pos['x'] + radius * math.cos(new_angle)
-            avoid_y = pos['y'] + radius * math.sin(new_angle)
+            avoid_x = max(-22.0, min(22.0, pos['x'] + radius * math.cos(new_angle)))
+            avoid_y = max(-22.0, min(22.0, pos['y'] + radius * math.sin(new_angle)))
 
             log.warn(f"⚠️ ПРЕПЯТСТВИЕ ВПЕРЕДИ! {front:.1f} м | "
                      f"Обход {side} → ({avoid_x:.1f}, {avoid_y:.1f})")
@@ -376,7 +418,8 @@ try:
                            back=back, side=side,
                            avoid_x=avoid_x, avoid_y=avoid_y,
                            position=[pos['x'], pos['y'], pos['z']])
-
+            request_frame("obstacle_avoid", {"front": front, "side": side})
+            
             target_x, target_y = avoid_x, avoid_y
             async_move_to(adapter, target_x, target_y,
                           FLIGHT_ALTITUDE, FLIGHT_SPEED)
@@ -497,9 +540,6 @@ log.drone("🛬 Посадка...")
 incident.event("landing")
 adapter.land()
 time.sleep(5)
-
-if lidar is not None:
-    lidar.stop()
 
 # ========================================
 # Отчёт

@@ -19,6 +19,7 @@ import os
 import sys
 import time
 from datetime import datetime
+from modules.frame_queue import get_pending_request, remove_request
 
 import numpy as np
 
@@ -26,6 +27,7 @@ import numpy as np
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
+
 
 
 # Параметры
@@ -60,50 +62,48 @@ class CameraRecorder(Node):
     def callback(self, msg):
         try:
             self.frames_count += 1
-
-            # Сохраняем раз в SAVE_INTERVAL секунд
             now = time.time()
-            if now - self.last_save < SAVE_INTERVAL:
+            
+            # 1. Проверяем, есть ли запрос на кадр от flight_monitor
+            req = get_pending_request()
+            
+            # 2. Если запроса нет, а с последнего сохранения прошло мало времени — выходим
+            if req is None and (now - self.last_save) < 10.0: # Резервное сохранение раз в 10 сек
                 return
-            self.last_save = now
-
-            # Конвертация
+            
+            # 3. Готовим изображение
             height = msg.height
             width = msg.width
             encoding = msg.encoding
-
             if encoding == "rgb8":
-                arr = np.frombuffer(msg.data, dtype=np.uint8).reshape(
-                    (height, width, 3)
-                )
+                arr = np.frombuffer(msg.data, dtype=np.uint8).reshape((height, width, 3))
             elif encoding == "bgr8":
-                arr = np.frombuffer(msg.data, dtype=np.uint8).reshape(
-                    (height, width, 3)
-                )[:, :, ::-1]
+                arr = np.frombuffer(msg.data, dtype=np.uint8).reshape((height, width, 3))[:, :, ::-1]
             else:
-                self.get_logger().warn(f"Неизвестный encoding: {encoding}")
                 return
 
-            # Сохраняем (время берём в момент получения кадра)
-            t_frame = now
-            filename = (
-                f"frame_{datetime.fromtimestamp(t_frame).strftime('%Y%m%d_%H%M%S_%f')}.jpg"
-            )
+            # 4. Формируем имя файла
+            if req is not None:
+                # Сохраняем с меткой события!
+                filename = f"frame_{req['event_kind']}_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.jpg"
+                self.last_save = now # Сбрасываем таймер
+            else:
+                # Обычное резервное сохранение
+                filename = f"frame_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.jpg"
+                self.last_save = now
+
             filepath = os.path.join(SAVE_DIR, filename)
-
             from PIL import Image as PILImage
-            img = PILImage.fromarray(arr).resize(OUT_SIZE, PILImage.BILINEAR)
-            img.save(filepath, format="JPEG", quality=JPEG_QUALITY)
-
-            self.index_file.write(f"{t_frame:.6f},{filename}\n")
-            self.index_file.flush()
-
+            img = PILImage.fromarray(arr)
+            img.save(filepath)
             self.saved_count += 1
-            if self.saved_count % 20 == 1:
-                self.get_logger().info(
-                    f"📷 Кадр #{self.saved_count} сохранён: {filename} "
-                    f"(всего получено: {self.frames_count})"
-                )
+            
+            if req is not None:
+                self.get_logger().info(f"📸 ИНЦИДЕНТ: {req['event_kind']} | Сохранён: {filename}")
+                remove_request(req["filename"])
+            else:
+                self.get_logger().info(f"📷 Фоновый кадр: {filename}")
+
         except Exception as e:
             self.get_logger().error(f"Ошибка: {e}")
 

@@ -226,8 +226,8 @@ class XAIBridge:
         distance_to_target = (dx*dx + dy*dy) ** 0.5
         
         # Вычисляем угол к цели
-        angle_to_target = np.arctan2(dy, dx) - orient.get('yaw', 0)
-        angle_to_target = np.degrees(angle_to_target)
+        angle_to_target = np.degrees(np.arctan2(dy, dx)) - orient.get('yaw', 0)
+        angle_to_target = (angle_to_target + 180.0) % 360.0 - 180.0
         
         return np.array([
             abs(pos.get('z', 0)),                                    # высота

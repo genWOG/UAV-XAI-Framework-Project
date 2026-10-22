@@ -4,15 +4,21 @@ from .detection import (
     compute_detection_insertion,
     match_target_detection,
 )
-
 from .deletion import (
     DeletionResult,
     compute_deletion,
 )
-
 from .insertion import (
     InsertionResult,
     compute_insertion,
+)
+from .tabular_deletion import (
+    TabularDeletionResult,
+    compute_tabular_deletion,
+)
+from .tabular_insertion import (
+    TabularInsertionResult,
+    compute_tabular_insertion,
 )
 
 __all__ = [
@@ -24,4 +30,8 @@ __all__ = [
     "compute_detection_deletion",
     "compute_detection_insertion",
     "match_target_detection",
+    "TabularDeletionResult",
+    "compute_tabular_deletion",
+    "TabularInsertionResult",
+    "compute_tabular_insertion",
 ]
