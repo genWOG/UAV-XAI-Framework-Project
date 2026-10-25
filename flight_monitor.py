@@ -39,10 +39,13 @@ if sys.platform == "win32":
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'modules'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'xai', 'modules'))
+sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 from modules.log_manager import LogManager
 from modules.px4_adapter import PX4Adapter
 from modules.incident_logger import IncidentLogger
+
+from uav_xai.metrics import compute_tabular_deletion, compute_tabular_insertion
 
 
 
@@ -471,12 +474,50 @@ try:
                     confidence=model_conf, method="auto"
                 )
                 if explanation:
+                    # --- РАСЧЕТ МЕТРИК (Deletion / Insertion) ---
+                    try:
+                        # Используем минимальные значения из обучающей выборки как baseline (худший случай)
+                        baseline = np.min(training_data, axis=0)
+                        
+                        # Получаем атрибуции (важность признаков)
+                        attribution = explanation.get('attribution', np.zeros(len(model_features)))
+                        if attribution is None:
+                            attribution = np.zeros(len(model_features))
+
+                        del_res = compute_tabular_deletion(
+                            model=xai_model,
+                            input_data=model_features,
+                            attribution=attribution,
+                            target=model_action,
+                            baseline_value=baseline,
+                            steps=20
+                        )
+                        ins_res = compute_tabular_insertion(
+                            model=xai_model,
+                            input_data=model_features,
+                            attribution=attribution,
+                            target=model_action,
+                            baseline_value=baseline,
+                            steps=20
+                        )
+                        
+                        # Сохраняем метрики прямо в словарь explanation
+                        explanation['metrics'] = {
+                            "deletion_auc": del_res.auc,
+                            "insertion_auc": ins_res.auc
+                        }
+                        
+                        m = explanation.get('method', 'unknown')
+                        log.info(f"📊 Метрики[{m}]: Del AUC={del_res.auc:.3f}, Ins AUC={ins_res.auc:.3f}")
+                        
+                    except Exception as e:
+                        log.error(f"Ошибка расчета метрик: {e}")
+                    # ---------------------------------------------
+
                     total_xai_explanations.append(explanation)
                     m = explanation.get('method', 'unknown')
                     total_xai_method_stats[m] = total_xai_method_stats.get(m, 0) + 1
-                    log.info(f"📊 XAI[{m}]: "
-                             f"conf={explanation.get('confidence', 0):.2f}, "
-                             f"time={explanation.get('runtime_ms', 0):.1f}ms")
+                    log.info(f"XAI[{m}]: conf={explanation.get('confidence', 0):.2f}, time={explanation.get('runtime_ms', 0):.1f} ms")
             except Exception as e:
                 log.error(f"❌ XAI ошибка: {e}")
 
