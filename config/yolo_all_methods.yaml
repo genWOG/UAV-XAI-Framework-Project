@@ -1,0 +1,28 @@
+
+experiment:
+  name: vision_all_methods
+model:
+  name: yolo
+  task: detection
+  weights: runs/detect/uav_obstacles_v2/weights/best.pt
+  prediction_confidence_threshold: 0.05
+image:
+  path: results/frames/frame_obstacle_avoid_20261029_132852_301870.jpg
+xai:
+  input_type: image
+  method: grad_cam
+  image_size: 640
+  target_layer: "21"
+  detection_iou_threshold: 0.2
+  detection_score_threshold: 0.05
+  detection_top_k: 1
+  methods:
+    - grad_cam
+    - lime
+    - shap
+  method_configs:
+    lime:
+      num_samples: 64
+      num_segments: 16
+output:
+  root: results/vision_xai/temp_all_4

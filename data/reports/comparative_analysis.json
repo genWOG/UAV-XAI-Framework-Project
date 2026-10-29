@@ -1,0 +1,49 @@
+{
+  "timestamp": "2026-10-29T13:42:24.708486",
+  "lidar_report_file": "lidar_report_20261027_134303.json",
+  "camera_report_file": "camera_report_20261029_133042.json",
+  "lidar_metrics": {
+    "targets_reached": 12,
+    "stuck_events": 10,
+    "altitude_drop_events": 0,
+    "speed_loss_events": 0,
+    "ceiling_events": 0,
+    "obstacle_events": 24,
+    "trap_events": 1,
+    "xai_explanations": 58,
+    "xai_method_stats": {
+      "lime": 20,
+      "shap": 19,
+      "lrp": 19,
+      "fallback": 0
+    }
+  },
+  "camera_metrics": {
+    "targets_reached": 1,
+    "stuck_events": 1,
+    "altitude_drop_events": 0,
+    "speed_loss_events": 0,
+    "ceiling_events": 0,
+    "obstacle_events": 22,
+    "trap_events": 0,
+    "xai_explanations": 18,
+    "xai_method_stats": {
+      "lime": 6,
+      "shap": 6,
+      "lrp": 6,
+      "fallback": 0
+    }
+  },
+  "lidar_xai_methods": [
+    "lrp",
+    "lime",
+    "shap"
+  ],
+  "camera_xai_methods": [
+    "lrp",
+    "lime",
+    "shap"
+  ],
+  "lidar_cf": "Модель остановилась, так как Расстояние до препятствия (8.93) было критическим. Чтобы лететь, нужно изменить Расстояние до препятствия до 83.27.",
+  "camera_cf": "Модель остановилась, так как Расстояние до препятствия (5.0) было критическим. Чтобы лететь, нужно изменить Расстояние до препятствия до 83.27."
+}

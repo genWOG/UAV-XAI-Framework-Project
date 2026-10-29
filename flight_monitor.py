@@ -15,13 +15,31 @@ import numpy as np
 
 import json
 
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--mode", choices=["lidar", "camera"], default="lidar", help="Режим полета")
+args = parser.parse_args()
+FLIGHT_MODE = args.mode
+print(f"🚀 РЕЖИМ ПОЛЕТА: {FLIGHT_MODE.upper()}")
+
 def read_lidar_state():
     try:
         with open('data/runtime/lidar_state.json', 'r') as f:
-            return json.load(f)
+            data = json.load(f)
+            # Проверяем, насколько свежие данные (watchdog)
+            if time.time() - data.get('timestamp', 0) > 1.5:
+                # Если данные старше 1.5 секунд — считаем, что датчик отказал
+                return None 
+            return data
     except Exception:
         return None
 
+def read_vision_state():
+    try:
+        with open('data/runtime/vision_state.json', 'r') as f:
+            return json.load(f)
+    except Exception:
+        return None
 
 from datetime import datetime
 from modules.frame_queue import request_frame
@@ -294,15 +312,29 @@ try:
             break        
         state = adapter.get_state()
         
-        lidar_data = read_lidar_state()
-        if lidar_data:
-            state['sensors']['obstacle_distance'] = lidar_data['min']
-            state['sensors']['obstacle_density'] = lidar_data['density']
-            state['sensors']['lidar_front'] = lidar_data['front']
-            state['sensors']['lidar_left'] = lidar_data['left']
-            state['sensors']['lidar_right'] = lidar_data['right']
-            state['sensors']['lidar_back'] = lidar_data['back']
+        vision_data = None  # Объявляем заранее, чтобы не было ошибок
         
+        if FLIGHT_MODE == "lidar":
+            lidar_data = read_lidar_state()
+            if lidar_data:
+                state['sensors']['obstacle_distance'] = lidar_data['min']
+                state['sensors']['obstacle_density'] = lidar_data['density']
+                state['sensors']['lidar_front'] = lidar_data['front']
+                state['sensors']['lidar_left'] = lidar_data['left']
+                state['sensors']['lidar_right'] = lidar_data['right']
+                state['sensors']['lidar_back'] = lidar_data['back']
+                
+        elif FLIGHT_MODE == "camera":
+            vision_data = read_vision_state()
+            if vision_data:
+                dist = vision_data.get("front", 100.0)
+                state['sensors']['obstacle_distance'] = dist
+                state['sensors']['lidar_front'] = dist 
+                state['sensors']['lidar_left'] = 100.0
+                state['sensors']['lidar_right'] = 100.0
+                state['sensors']['lidar_back'] = 100.0
+                state['sensors']['obstacle_density'] = 1.0 if dist < 10.0 else 0.0
+
         if state is None:
             continue
 
@@ -314,6 +346,18 @@ try:
         elapsed = now - session_start
         cur_altitude = abs(pos['z'])
         cur_speed = math.sqrt(vel['x']**2 + vel['y']**2 + vel['z']**2)
+
+        # Логируем сенсоры раз в 5 секунд
+        if int(elapsed) % 5 == 0 and (now - last_status_time) >= 4.5:
+            if FLIGHT_MODE == "lidar":
+                log.info(f"📡 LiDAR: вперёд={front:.1f}м, "
+                         f"слева={left:.1f}м, справа={right:.1f}м, "
+                         f"сзади={back:.1f}м, мин={min_dist:.1f}м, плотность={density:.2f}")
+            elif FLIGHT_MODE == "camera":
+                # Для камеры выводим то, что увидела YOLO
+                vis_dist = sensors.get('lidar_front', 100.0)
+                vis_class = vision_data.get('detected_class', 'none') if vision_data else 'none'
+                log.info(f"📷 Vision: впереди={vis_dist:.1f}м, объект={vis_class}")
 
         # --- Проверка ориентации ---
         roll = orient.get('roll', 0)
@@ -355,7 +399,11 @@ try:
             log.info(f"📡 LiDAR: вперёд={front:.1f}м, "
                      f"слева={left:.1f}м, справа={right:.1f}м, "
                      f"сзади={back:.1f}м, мин={min_dist:.1f}м, плотность={density:.2f}")
-
+        elif FLIGHT_MODE == "camera":
+            # Для камеры выводим то, что увидела YOLO
+            vis_dist = sensors.get('lidar_front', 100.0)
+            vis_class = vision_data.get('detected_class', 'none') if vision_data else 'none'
+            log.info(f"📷 Vision: впереди={vis_dist:.1f}м, объект={vis_class}")
         # ============================================================
         # БЛОК 1: Проверка "мешка" (западня со всех сторон)
         # ============================================================

@@ -1,0 +1,22 @@
+
+experiment:
+  name: stability_test
+model:
+  name: yolo
+  task: detection
+  weights: runs/detect/uav_obstacles_v2/weights/best.pt
+  prediction_confidence_threshold: 0.01
+image:
+  path: data/images/stability_bright.jpg
+xai:
+  input_type: image
+  method: grad_cam
+  image_size: 640
+  target_layer: "21"
+  detection_iou_threshold: 0.2
+  detection_score_threshold: 0.01
+  detection_top_k: 1
+  methods:
+    - grad_cam
+output:
+  root: results/stability/bright
