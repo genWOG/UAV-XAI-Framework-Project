@@ -1,49 +1,49 @@
 {
-  "timestamp": "2026-10-29T13:42:24.708486",
-  "lidar_report_file": "lidar_report_20261027_134303.json",
-  "camera_report_file": "camera_report_20261029_133042.json",
+  "timestamp": "2026-10-30T18:59:42.333318",
+  "lidar_report_file": "lidar_report_20261030_183506.json",
+  "camera_report_file": "camera_report_20261030_184014.json",
   "lidar_metrics": {
-    "targets_reached": 12,
-    "stuck_events": 10,
+    "targets_reached": 1,
+    "stuck_events": 6,
     "altitude_drop_events": 0,
     "speed_loss_events": 0,
     "ceiling_events": 0,
-    "obstacle_events": 24,
-    "trap_events": 1,
-    "xai_explanations": 58,
+    "obstacle_events": 12,
+    "trap_events": 0,
+    "xai_explanations": 23,
     "xai_method_stats": {
-      "lime": 20,
-      "shap": 19,
-      "lrp": 19,
+      "lime": 8,
+      "shap": 8,
+      "lrp": 7,
       "fallback": 0
     }
   },
   "camera_metrics": {
-    "targets_reached": 1,
-    "stuck_events": 1,
+    "targets_reached": 2,
+    "stuck_events": 0,
     "altitude_drop_events": 0,
     "speed_loss_events": 0,
     "ceiling_events": 0,
-    "obstacle_events": 22,
+    "obstacle_events": 37,
     "trap_events": 0,
-    "xai_explanations": 18,
+    "xai_explanations": 28,
     "xai_method_stats": {
-      "lime": 6,
-      "shap": 6,
-      "lrp": 6,
+      "lime": 10,
+      "shap": 9,
+      "lrp": 9,
       "fallback": 0
     }
   },
   "lidar_xai_methods": [
+    "shap",
     "lrp",
-    "lime",
-    "shap"
+    "lime"
   ],
   "camera_xai_methods": [
-    "lrp",
     "lime",
+    "lrp",
     "shap"
   ],
   "lidar_cf": "Модель остановилась, так как Расстояние до препятствия (8.93) было критическим. Чтобы лететь, нужно изменить Расстояние до препятствия до 83.27.",
-  "camera_cf": "Модель остановилась, так как Расстояние до препятствия (5.0) было критическим. Чтобы лететь, нужно изменить Расстояние до препятствия до 83.27."
+  "camera_cf": "Модель остановилась, так как Расстояние до препятствия (2.0) было критическим. Чтобы лететь, нужно изменить Расстояние до препятствия до 83.27."
 }

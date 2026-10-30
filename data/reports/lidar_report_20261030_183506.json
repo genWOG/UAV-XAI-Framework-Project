@@ -1,0 +1,40 @@
+{
+  "flight_type": "lidar",
+  "timestamp": "2026-10-30T18:35:06.238611",
+  "session_file": "data/incidents/session_20261030_183223/session.json",
+  "xai_file": "data/logs/xai_session_20261030_183434.json",
+  "summary": {
+    "targets_reached": 1,
+    "stuck_events": 6,
+    "altitude_drop_events": 0,
+    "speed_loss_events": 0,
+    "ceiling_events": 0,
+    "obstacle_events": 12,
+    "trap_events": 0,
+    "xai_explanations": 23,
+    "xai_method_stats": {
+      "lime": 8,
+      "shap": 8,
+      "lrp": 7,
+      "fallback": 0
+    }
+  },
+  "counterfactual": {
+    "changes": [
+      {
+        "ru_name": "Расстояние до препятствия",
+        "old": 8.93,
+        "new": 83.27
+      }
+    ],
+    "conclusion": "Модель остановилась, так как Расстояние до препятствия (8.93) было критическим. Чтобы лететь, нужно изменить Расстояние до препятствия до 83.27."
+  },
+  "xai_data_summary": {
+    "total_explanations": 23,
+    "methods_used": [
+      "shap",
+      "lrp",
+      "lime"
+    ]
+  }
+}

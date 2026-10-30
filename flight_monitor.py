@@ -350,9 +350,10 @@ try:
         # Логируем сенсоры раз в 5 секунд
         if int(elapsed) % 5 == 0 and (now - last_status_time) >= 4.5:
             if FLIGHT_MODE == "lidar":
-                log.info(f"📡 LiDAR: вперёд={front:.1f}м, "
-                         f"слева={left:.1f}м, справа={right:.1f}м, "
-                         f"сзади={back:.1f}м, мин={min_dist:.1f}м, плотность={density:.2f}")
+                log.info(f"📡 LiDAR: вперёд={sensors.get('lidar_front', 100):.1f}м, "
+                         f"слева={sensors.get('lidar_left', 100):.1f}м, справа={sensors.get('lidar_right', 100):.1f}м, "
+                         f"сзади={sensors.get('lidar_back', 100):.1f}м, мин={sensors.get('obstacle_distance', 100):.1f}м")
+            # Для камеры логирование уже работает внутри блока elif FLIGHT_MODE == "camera"
             elif FLIGHT_MODE == "camera":
                 # Для камеры выводим то, что увидела YOLO
                 vis_dist = sensors.get('lidar_front', 100.0)
@@ -396,9 +397,10 @@ try:
 
         # Логируем LiDAR раз в 5 секунд
         if int(elapsed) % 5 == 0 and (now - last_status_time) >= 4.5:
-            log.info(f"📡 LiDAR: вперёд={front:.1f}м, "
-                     f"слева={left:.1f}м, справа={right:.1f}м, "
-                     f"сзади={back:.1f}м, мин={min_dist:.1f}м, плотность={density:.2f}")
+            if FLIGHT_MODE == "lidar":
+                log.info(f"📡 LiDAR: вперёд={sensors.get('lidar_front', 100):.1f}м, "
+                         f"слева={sensors.get('lidar_left', 100):.1f}м, справа={sensors.get('lidar_right', 100):.1f}м, "
+                         f"сзади={sensors.get('lidar_back', 100):.1f}м, мин={sensors.get('obstacle_distance', 100):.1f}м")
         elif FLIGHT_MODE == "camera":
             # Для камеры выводим то, что увидела YOLO
             vis_dist = sensors.get('lidar_front', 100.0)

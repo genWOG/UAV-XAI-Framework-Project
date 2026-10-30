@@ -1,0 +1,40 @@
+{
+  "flight_type": "camera",
+  "timestamp": "2026-10-30T02:20:05.317845",
+  "session_file": "data/incidents/session_20261030_021523/session.json",
+  "xai_file": "data/logs/xai_session_20261030_021853.json",
+  "summary": {
+    "targets_reached": 6,
+    "stuck_events": 3,
+    "altitude_drop_events": 0,
+    "speed_loss_events": 0,
+    "ceiling_events": 7,
+    "obstacle_events": 33,
+    "trap_events": 0,
+    "xai_explanations": 38,
+    "xai_method_stats": {
+      "lime": 13,
+      "shap": 13,
+      "lrp": 12,
+      "fallback": 0
+    }
+  },
+  "counterfactual": {
+    "changes": [
+      {
+        "ru_name": "Расстояние до препятствия",
+        "old": 2.0,
+        "new": 83.27
+      }
+    ],
+    "conclusion": "Модель остановилась, так как Расстояние до препятствия (2.0) было критическим. Чтобы лететь, нужно изменить Расстояние до препятствия до 83.27."
+  },
+  "xai_data_summary": {
+    "total_explanations": 38,
+    "methods_used": [
+      "lime",
+      "shap",
+      "lrp"
+    ]
+  }
+}
